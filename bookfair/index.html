@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>LILIEMA · Helsingin kirjamessut 2026</title>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="assets/fair.js"></script>
+<style>
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.tile {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px; text-decoration: none; color: var(--text); min-height: 120px;
+}
+.tile:hover, .tile:focus-visible { border-color: var(--teal-mid); outline: none; box-shadow: 0 4px 16px rgba(0, 100, 100, .18); }
+.tile-title { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--teal-dark); }
+.tile-text { color: var(--muted); font-size: 15px; }
+</style>
+</head>
+<body data-title="home.title">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span><span class="fair-name" data-t="fair.name">Helsingin kirjamessut 2026</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="app">
+  <section>
+    <h1 class="page-title" data-t="home.title"></h1>
+    <p class="page-intro" data-t="home.intro"></p>
+  </section>
+  <nav class="tiles">
+    <a class="tile" href="liliema.html">
+      <span class="tile-title" data-t="lw.title.tile"></span>
+      <span class="tile-text" data-t="lw.tile"></span>
+    </a>
+  </nav>
+</main>
+
+<footer class="fair-footer">
+  <div class="inner"><p data-t="home.footer"></p></div>
+</footer>
+
+<script>
+Fair.add({
+  fi: {
+    'home.title': 'LILIEMA Helsingin kirjamessuilla',
+    'home.intro': 'Afrikan kirjallisuudet, lukutaito ja tekoäly: LILIEMAn, Helsingin yliopiston AfriStadin ja DIVSOLin sekä Suomen Afrikka-seura ry:n yhteinen osasto.',
+    'lw.title.tile': 'LILIEMA-sanat',
+    'lw.tile': 'Sanoja Senegalin ja Gambian kielistä merkityksineen suomeksi, ruotsiksi, englanniksi ja ranskaksi.',
+    'home.footer': 'LILIEMA on senegalilainen järjestö, joka tukee lukutaitoa monikielisillä alueilla.'
+  },
+  sv: {
+    'home.title': 'LILIEMA på Helsingfors bokmässa',
+    'home.intro': 'Afrikanska litteraturer, läskunnighet och AI: en gemensam monter för LILIEMA, AfriStadi och DIVSOL vid Helsingfors universitet samt Suomen Afrikka-seura ry.',
+    'lw.title.tile': 'LILIEMA-ord',
+    'lw.tile': 'Ord på språk i Senegal och Gambia, med betydelser på finska, svenska, engelska och franska.',
+    'home.footer': 'LILIEMA är en senegalesisk organisation som stöder läs- och skrivkunnighet i flerspråkiga områden.'
+  },
+  en: {
+    'home.title': 'LILIEMA at the Helsinki Book Fair',
+    'home.intro': 'African literatures, literacy and AI: a joint stall of LILIEMA, AfriStadi and DIVSOL (University of Helsinki) and Suomen Afrikka-seura ry.',
+    'lw.title.tile': 'LILIEMA words',
+    'lw.tile': 'Words in languages of Senegal and The Gambia, with Finnish, Swedish, English and French meanings.',
+    'home.footer': 'LILIEMA is a Senegalese NGO that supports literacy in multilingual areas.'
+  },
+  fr: {
+    'home.title': 'LILIEMA au Salon du livre d’Helsinki',
+    'home.intro': 'Littératures africaines, alphabétisation et IA : un stand commun de LILIEMA, d’AfriStadi et de DIVSOL (Université d’Helsinki) et de Suomen Afrikka-seura ry.',
+    'lw.title.tile': 'Mots LILIEMA',
+    'lw.tile': 'Des mots des langues du Sénégal et de la Gambie, avec leur sens en finnois, en suédois, en anglais et en français.',
+    'home.footer': 'LILIEMA est une association sénégalaise qui soutient l’alphabétisation dans les régions multilingues.'
+  }
+});
+Fair.initHeader();
+Fair.apply();
+</script>
+</body>
+</html>

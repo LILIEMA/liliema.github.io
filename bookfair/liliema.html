@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>LILIEMA-sanat · Helsingin kirjamessut 2026</title>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="assets/vendor/xlsx-0.18.5.full.min.js"></script>
+<script src="assets/fair.js"></script>
+<script src="data/liliema_glosses.js"></script>
+<style>
+/* Search */
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%;
+  padding: 14px 52px 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 18px;
+  color: var(--text);
+  background: var(--white);
+  min-height: 56px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.search-input::-webkit-search-cancel-button { display: none; }
+.search-input:focus { outline: none; border-color: var(--teal-mid); box-shadow: 0 0 0 3px rgba(0, 144, 144, .15); }
+.search-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer;
+  width: 44px; height: 44px; border-radius: 50%;
+}
+.search-clear:hover { color: var(--coral); background: var(--bg); }
+
+/* Filters */
+.filter-block + .filter-block { margin-top: 14px; }
+.chips-label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 8px 14px; min-height: 40px;
+  border: 1.5px solid var(--border); border-radius: 20px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  color: var(--teal-dark); background: var(--white);
+}
+.chip .n { font-weight: 400; color: var(--muted); margin-left: 4px; font-size: 12px; }
+.chip:hover { border-color: var(--teal-mid); }
+.chip.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+.chip.active .n { color: rgba(255, 255, 255, .85); }
+.chip.all { background: var(--teal-light); border-color: var(--teal-mid); }
+.chip.all.active { background: var(--teal); color: #fff; }
+
+/* Results */
+.results-count { font-size: 14px; color: var(--muted); }
+.results-count strong { font-size: 22px; color: var(--teal-dark); margin-right: 4px; }
+#resultsGrid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.result-card {
+  background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 16px 20px; box-shadow: 0 1px 6px rgba(0, 100, 100, .07);
+}
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.card-headword { font-size: 28px; font-weight: 700; color: var(--teal-dark); letter-spacing: .02em; line-height: 1.15; overflow-wrap: anywhere; }
+mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3px; padding: 0 2px; }
+.card-badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; flex-shrink: 0; max-width: 55%; }
+.badge { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 10px; white-space: nowrap; }
+.badge-lang { background: var(--teal); color: #fff; }
+.badge-unit { background: var(--gold-light); color: var(--gold-dark); border: 1px solid var(--gold); }
+.badge-domain { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.card-meanings { display: flex; gap: 10px 24px; flex-wrap: wrap; }
+.meaning-block { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.meaning-lang { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.meaning-text { font-size: 17px; overflow-wrap: anywhere; }
+.meaning-block.first .meaning-text { font-weight: 600; }
+.draft-tag { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: none; color: var(--gold-dark); background: var(--gold-light); border: 1px solid var(--gold); border-radius: 8px; padding: 0 6px; margin-left: 6px; }
+.card-extra { font-size: 14px; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; }
+.card-extra em { color: var(--text); }
+.load-more-btn {
+  width: 100%; padding: 14px; margin-top: 12px; min-height: 52px;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
+  color: var(--teal-dark); font-size: 16px; font-weight: 600; cursor: pointer;
+}
+.load-more-btn:hover { border-color: var(--teal-mid); background: var(--teal-light); }
+
+/* Splash and empty states */
+.splash { text-align: center; padding: 40px 20px; color: var(--muted); }
+.splash-title { font-size: 20px; font-weight: 700; color: var(--teal-dark); margin-bottom: 6px; }
+
+/* Staff section */
+.staff { background: var(--white); border-radius: var(--radius); border: 1.5px dashed var(--border); }
+.staff > summary { cursor: pointer; padding: 14px 20px; font-weight: 700; color: var(--teal-dark); min-height: 48px; }
+.staff .staff-body { padding: 0 20px 18px; display: flex; flex-direction: column; gap: 12px; }
+.upload-zone {
+  position: relative; display: block; border: 2px dashed var(--teal-mid); border-radius: var(--radius); background: var(--teal-light);
+  padding: 22px; text-align: center; cursor: pointer;
+}
+.upload-zone input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.uz-label { font-weight: 700; color: var(--teal-dark); font-size: 16px; }
+.staff-info { font-size: 14px; }
+.staff-note { font-size: 13px; color: var(--muted); margin: 0; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  padding: 9px 16px; min-height: 44px; border-radius: 22px; border: 1.5px solid var(--teal-mid);
+  background: var(--white); color: var(--teal-dark); font-weight: 600; cursor: pointer;
+}
+.btn.danger { border-color: var(--coral); color: var(--coral); }
+.error { color: var(--coral); font-weight: 600; font-size: 14px; }
+
+@media (max-width: 1099px) {
+  .chips-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+  .chip { flex: 0 0 auto; }
+}
+.app.wide { max-width: 1240px; }
+.app.wide > section:first-child, .app.wide .search-wrap { max-width: 880px; }
+.layout { display: flex; flex-direction: column; gap: 16px; }
+@media (min-width: 1100px) {
+  .layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 20px; align-items: start; }
+  .filters { position: sticky; top: 76px; max-height: calc(100vh - 92px); overflow-y: auto; border-radius: var(--radius); }
+  .filters .chip { padding: 7px 12px; min-height: 38px; font-size: 13.5px; }
+}
+@media (max-width: 560px) {
+  .card-headword { font-size: 24px; }
+  .card-top { flex-direction: column; }
+  .card-badges { justify-content: flex-start; max-width: none; }
+}
+</style>
+</head>
+<body data-title="lw.title">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span><span class="fair-name" data-t="fair.name">Helsingin kirjamessut 2026</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="app wide">
+  <section>
+    <h1 class="page-title" data-t="lw.title">LILIEMA-sanat</h1>
+    <p class="page-intro" data-t="lw.intro"></p>
+  </section>
+
+  <div class="search-wrap" id="searchWrap" hidden>
+    <input type="search" class="search-input" id="searchInput" data-t-placeholder="lw.search" data-t-aria="lw.search.aria" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+    <button type="button" class="search-clear" id="clearBtn" data-t-aria="lw.clear" hidden>✕</button>
+  </div>
+
+  <div class="layout">
+    <aside class="filters">
+      <section class="card" id="filterCard" hidden>
+        <div class="filter-block">
+          <div class="chips-label" data-t="lw.langs"></div>
+          <div class="chips-row" id="langChips"></div>
+        </div>
+        <div class="filter-block">
+          <div class="chips-label" data-t="lw.domains"></div>
+          <div class="chips-row" id="domainChips"></div>
+        </div>
+      </section>
+    </aside>
+    <div class="results-col">
+      <section id="resultsSection" hidden>
+        <div class="results-count" id="resultsCount" aria-live="polite"></div>
+        <div id="resultsGrid"></div>
+        <button type="button" class="load-more-btn" id="loadMoreBtn" hidden></button>
+      </section>
+      <div class="splash" id="emptyState" hidden>
+        <div class="splash-title" data-t="lw.empty.title"></div>
+        <div data-t="lw.empty.sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="splash" id="splashState">
+    <div class="splash-title" data-t="lw.splash.title"></div>
+    <div data-t="lw.splash.sub"></div>
+  </div>
+
+  <details class="staff" id="staff">
+    <summary data-t="lw.staff"></summary>
+    <div class="staff-body">
+      <label class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls">
+        <span class="uz-label" data-t="lw.open"></span>
+      </label>
+      <div class="staff-info" id="loadedInfo" hidden></div>
+      <div class="error" id="loadError" hidden></div>
+      <div class="btn-row" id="staffButtons" hidden>
+        <button type="button" class="btn danger" id="removeBtn" data-t="lw.remove"></button>
+      </div>
+      <p class="staff-note" data-t="lw.privacy"></p>
+    </div>
+  </details>
+</main>
+
+<footer class="fair-footer">
+  <div class="inner">
+    <p data-t="lw.credit.tools"></p>
+    <p id="glossCredit"></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair;
+
+  // ------------------------------------------------------------ settings
+  var PAGE_SIZE = 30;
+  var IDLE_RESET_MS = 3 * 60 * 1000;   // the stall screen returns to the start after 3 minutes without use
+  // Example phrases: 'matching' shows a phrase only if it is used once in the list and contains the headword.
+  // In the wordlist of 12 May 2026 most phrases sit on the wrong rows, so 'all' is not advised.
+  var EXAMPLES = 'matching';             // 'matching', 'all' or 'none'
+  // Staff section: shown while no wordlist is loaded, or always with liliema.html?staff
+  var STAFF = /[?&]staff\b/.test(window.location.search);
+
+  // ------------------------------------------------------------ strings
+  var DOMAINS = ['People & Family', 'Body & Health', 'Animals', 'Plants & Farming', 'Food & Cooking',
+    'Natural Environment', 'House & Household', 'Tools & Equipment', 'Clothing & Adornment',
+    'Transport & Mobility', 'Trade & Market', 'Numbers & Quantity'];
+
+  F.add({
+    fi: {
+      'lw.title': 'LILIEMA-sanat',
+      'lw.intro': 'Sanoja Senegalin ja Gambian kielistä LILIEMAn työpajoista, kenttätyöstä ja julkaistuista sanakirjoista. LILIEMA opettaa lukemaan ja kirjoittamaan kaikilla oppijan kielillä, Senegalin kansalliskielten yhteisellä aakkostolla.',
+      'lw.search': 'Hae sanaa tai merkitystä millä tahansa kielellä',
+      'lw.search.aria': 'Haku',
+      'lw.clear': 'Tyhjennä haku',
+      'lw.langs': 'Kieli',
+      'lw.domains': 'Aihepiiri',
+      'lw.all.langs': 'Kaikki kielet',
+      'lw.all.domains': 'Kaikki aihepiirit',
+      'lw.count': function (n) { return n === 1 ? '<strong>1</strong> sana' : '<strong>' + F.number(n) + '</strong> sanaa'; },
+      'lw.more': function (k) { return 'Näytä ' + k + ' lisää'; },
+      'lw.empty.title': 'Ei osumia',
+      'lw.empty.sub': 'Kokeile toista kirjoitusasua tai kieltä.',
+      'lw.splash.title': 'Sanalista on osaston tietokoneella',
+      'lw.splash.sub': 'LILIEMA-sanoja voi selata messuosastolla.',
+      'lw.unit': 'Yksikkö',
+      'lw.example': 'Esimerkki:',
+      'lw.pos': 'Sanaluokka:',
+      'lw.draft': 'luonnos',
+      'lw.draft.title': 'Clauden käännös, ei vielä tarkistettu',
+      'lw.m.fi': 'suomi', 'lw.m.sv': 'ruotsi', 'lw.m.en': 'englanti', 'lw.m.fr': 'ranska',
+      'lw.staff': 'Henkilökunnalle',
+      'lw.open': 'Avaa sanalista (Excel)',
+      'lw.reading': 'Luetaan…',
+      'lw.loaded': function (name, n, k) { return name + ': ' + F.number(n) + ' sanaa, ' + k + ' kieltä.'; },
+      'lw.nogloss': function (n) { return n === 0 ? 'Kaikilla sanoilla on suomen- ja ruotsinkielinen merkitys.' : 'Ilman suomen- tai ruotsinkielistä merkitystä: ' + F.number(n) + ' sanaa (näkyvät englanniksi ja ranskaksi).'; },
+      'lw.remove': 'Poista sanalista tältä laitteelta',
+      'lw.remove.confirm': 'Vahvista: poista sanalista',
+      'lw.removed': 'Sanalista poistettiin tältä laitteelta.',
+      'lw.error': 'Tiedostoa ei voitu lukea: ',
+      'lw.nodata': 'Tiedostosta ei löytynyt sanoja (sarakkeet Headword, Language, French, English).',
+      'lw.privacy': 'Sanalistaa ei lähetetä minnekään: selain lukee sen tältä laitteelta ja säilyttää sen vain tällä laitteella.',
+      'lw.credit.tools': 'LILIEMA-työkalut: tekninen kehitys Friederike Lüpke, kehitetty yhdessä vuoden 2026 LILIEMA-työpajojen osallistujien kanssa.',
+      'lw.credit.drafts': function (model, date, pending) {
+        return 'Suomen- ja ruotsinkieliset merkitykset: luonnokset Claude (Anthropic, malli ' + model + '), ' + date +
+          (pending ? '. Luonnos-merkityt on vielä tarkistamatta.' : '.');
+      },
+      'lw.credit.checked': function (fi, sv) {
+        if (fi && fi === sv) return 'Tarkistanut ' + fi + '.';
+        return [fi ? 'Suomen tarkistanut ' + fi : '', sv ? 'ruotsin tarkistanut ' + sv : ''].filter(Boolean).join('; ') + '.';
+      },
+      'lang.names': 'Erisnimet', 'lang.Creole': 'Kreoli', 'lang.Mande (uncertain)': 'Mande (epävarma)',
+      'dom.People & Family': 'Ihmiset ja perhe', 'dom.Body & Health': 'Keho ja terveys', 'dom.Animals': 'Eläimet',
+      'dom.Plants & Farming': 'Kasvit ja viljely', 'dom.Food & Cooking': 'Ruoka ja ruoanlaitto',
+      'dom.Natural Environment': 'Luonto', 'dom.House & Household': 'Koti ja kotitalous',
+      'dom.Tools & Equipment': 'Työkalut ja välineet', 'dom.Clothing & Adornment': 'Vaatteet ja korut',
+      'dom.Transport & Mobility': 'Liikenne ja liikkuminen', 'dom.Trade & Market': 'Kauppa ja tori',
+      'dom.Numbers & Quantity': 'Luvut ja määrät',
+      'pos.Noun': 'substantiivi', 'pos.Verb': 'verbi', 'pos.Causative verb': 'kausatiiviverbi',
+      'pos.Transitive verb': 'transitiiviverbi', 'pos.Intransitive verb': 'intransitiiviverbi',
+      'pos.Reciprocal verb': 'resiprookkiverbi', 'pos.Reflexvie/middle verb': 'refleksiivi- tai mediaaliverbi',
+      'pos.Applicative verb': 'applikatiiviverbi', 'pos.Reversive verb': 'reversiiviverbi',
+      'pos.Pluractional verb': 'pluraktionaalinen verbi', 'pos.Adverb': 'adverbi', 'pos.Gerund': 'gerundi',
+      'pos.Interrogative pro-form': 'kysymyssana', 'pos.Preposition': 'prepositio', 'pos.Demonstrative': 'demonstratiivi',
+      'pos.dem': 'demonstratiivi', 'pos.Relative pronoun': 'relatiivipronomini', 'pos.Connective': 'konnektiivi',
+      'pos.Ideophone': 'ideofoni', 'pos.Interjection': 'interjektio', 'pos.Proper name / place name': 'erisnimi tai paikannimi'
+    },
+    sv: {
+      'lw.title': 'LILIEMA-ord',
+      'lw.intro': 'Ord på språk i Senegal och Gambia, från LILIEMAs workshoppar, fältarbete och publicerade ordböcker. LILIEMA lär ut läsning och skrivning på alla språk som eleven talar, med det gemensamma alfabetet för Senegals nationalspråk.',
+      'lw.search': 'Sök ett ord eller en betydelse på vilket språk som helst',
+      'lw.search.aria': 'Sök',
+      'lw.clear': 'Töm sökningen',
+      'lw.langs': 'Språk',
+      'lw.domains': 'Tema',
+      'lw.all.langs': 'Alla språk',
+      'lw.all.domains': 'Alla teman',
+      'lw.count': function (n) { return '<strong>' + F.number(n) + '</strong> ord'; },
+      'lw.more': function (k) { return 'Visa ' + k + ' till'; },
+      'lw.empty.title': 'Inga träffar',
+      'lw.empty.sub': 'Pröva en annan stavning eller ett annat språk.',
+      'lw.splash.title': 'Ordlistan finns på datorn i montern',
+      'lw.splash.sub': 'Du kan bläddra bland LILIEMAs ord i montern.',
+      'lw.unit': 'Enhet',
+      'lw.example': 'Exempel:',
+      'lw.pos': 'Ordklass:',
+      'lw.draft': 'utkast',
+      'lw.draft.title': 'Översatt av Claude, ännu inte granskat',
+      'lw.m.fi': 'finska', 'lw.m.sv': 'svenska', 'lw.m.en': 'engelska', 'lw.m.fr': 'franska',
+      'lw.staff': 'För personalen',
+      'lw.open': 'Öppna ordlistan (Excel)',
+      'lw.reading': 'Läser…',
+      'lw.loaded': function (name, n, k) { return name + ': ' + F.number(n) + ' ord på ' + k + ' språk.'; },
+      'lw.nogloss': function (n) { return n === 0 ? 'Alla ord har en finsk och en svensk betydelse.' : 'Utan finsk eller svensk betydelse: ' + F.number(n) + ' ord (visas på engelska och franska).'; },
+      'lw.remove': 'Ta bort ordlistan från den här enheten',
+      'lw.remove.confirm': 'Bekräfta: ta bort ordlistan',
+      'lw.removed': 'Ordlistan togs bort från den här enheten.',
+      'lw.error': 'Filen kunde inte läsas: ',
+      'lw.nodata': 'Inga ord hittades i filen (kolumnerna Headword, Language, French, English).',
+      'lw.privacy': 'Ordlistan skickas ingenstans: webbläsaren läser den från den här enheten och sparar den bara här.',
+      'lw.credit.tools': 'LILIEMAs verktyg: teknisk utveckling Friederike Lüpke, utvecklade tillsammans med deltagarna i LILIEMAs workshoppar 2026.',
+      'lw.credit.drafts': function (model, date, pending) {
+        return 'Finska och svenska betydelser: utkast av Claude (Anthropic, modell ' + model + '), ' + date +
+          (pending ? '. De som är märkta utkast har ännu inte granskats.' : '.');
+      },
+      'lw.credit.checked': function (fi, sv) {
+        if (fi && fi === sv) return 'Granskade av ' + fi + '.';
+        return [fi ? 'Finskan granskad av ' + fi : '', sv ? 'svenskan granskad av ' + sv : ''].filter(Boolean).join('; ') + '.';
+      },
+      'lang.names': 'Egennamn', 'lang.Creole': 'Kreol', 'lang.Mande (uncertain)': 'Mande (osäkert)',
+      'dom.People & Family': 'Människor och familj', 'dom.Body & Health': 'Kropp och hälsa', 'dom.Animals': 'Djur',
+      'dom.Plants & Farming': 'Växter och odling', 'dom.Food & Cooking': 'Mat och matlagning',
+      'dom.Natural Environment': 'Natur', 'dom.House & Household': 'Hem och hushåll',
+      'dom.Tools & Equipment': 'Verktyg och redskap', 'dom.Clothing & Adornment': 'Kläder och smycken',
+      'dom.Transport & Mobility': 'Transport och resor', 'dom.Trade & Market': 'Handel och marknad',
+      'dom.Numbers & Quantity': 'Tal och mängder',
+      'pos.Noun': 'substantiv', 'pos.Verb': 'verb', 'pos.Causative verb': 'kausativt verb',
+      'pos.Transitive verb': 'transitivt verb', 'pos.Intransitive verb': 'intransitivt verb',
+      'pos.Reciprocal verb': 'reciprokt verb', 'pos.Reflexvie/middle verb': 'reflexivt eller medialt verb',
+      'pos.Applicative verb': 'applikativt verb', 'pos.Reversive verb': 'reversivt verb',
+      'pos.Pluractional verb': 'pluraktionellt verb', 'pos.Adverb': 'adverb', 'pos.Gerund': 'gerundium',
+      'pos.Interrogative pro-form': 'frågeord', 'pos.Preposition': 'preposition', 'pos.Demonstrative': 'demonstrativ',
+      'pos.dem': 'demonstrativ', 'pos.Relative pronoun': 'relativt pronomen', 'pos.Connective': 'konnektiv',
+      'pos.Ideophone': 'ideofon', 'pos.Interjection': 'interjektion', 'pos.Proper name / place name': 'egennamn eller ortnamn'
+    },
+    en: {
+      'lw.title': 'LILIEMA words',
+      'lw.intro': 'Words in languages of Senegal and The Gambia, from LILIEMA workshops, fieldwork and published dictionaries. LILIEMA teaches reading and writing in all of a learner’s languages, with the shared alphabet of Senegal’s national languages.',
+      'lw.search': 'Search a word or a meaning in any language',
+      'lw.search.aria': 'Search',
+      'lw.clear': 'Clear the search',
+      'lw.langs': 'Language',
+      'lw.domains': 'Theme',
+      'lw.all.langs': 'All languages',
+      'lw.all.domains': 'All themes',
+      'lw.count': function (n) { return '<strong>' + F.number(n) + '</strong> ' + (n === 1 ? 'word' : 'words'); },
+      'lw.more': function (k) { return 'Show ' + k + ' more'; },
+      'lw.empty.title': 'No results',
+      'lw.empty.sub': 'Try a different spelling or another language.',
+      'lw.splash.title': 'The wordlist is on the stall computer',
+      'lw.splash.sub': 'You can browse LILIEMA’s words at the stall.',
+      'lw.unit': 'Unit',
+      'lw.example': 'Example:',
+      'lw.pos': 'Part of speech:',
+      'lw.draft': 'draft',
+      'lw.draft.title': 'Translated by Claude, not yet checked',
+      'lw.m.fi': 'Finnish', 'lw.m.sv': 'Swedish', 'lw.m.en': 'English', 'lw.m.fr': 'French',
+      'lw.staff': 'For staff',
+      'lw.open': 'Open the wordlist (Excel)',
+      'lw.reading': 'Reading…',
+      'lw.loaded': function (name, n, k) { return name + ': ' + F.number(n) + ' words in ' + k + ' languages.'; },
+      'lw.nogloss': function (n) { return n === 0 ? 'All words have Finnish and Swedish meanings.' : 'Without a Finnish or Swedish meaning: ' + F.number(n) + ' words (shown in English and French).'; },
+      'lw.remove': 'Remove the wordlist from this device',
+      'lw.remove.confirm': 'Confirm: remove the wordlist',
+      'lw.removed': 'The wordlist was removed from this device.',
+      'lw.error': 'Could not read the file: ',
+      'lw.nodata': 'No words found in the file (columns Headword, Language, French, English).',
+      'lw.privacy': 'The wordlist is not sent anywhere: the browser reads it from this device and keeps it only on this device.',
+      'lw.credit.tools': 'LILIEMA tools: technical development by Friederike Lüpke, co-developed with the participants in the 2026 LILIEMA workshops.',
+      'lw.credit.drafts': function (model, date, pending) {
+        return 'Finnish and Swedish meanings: drafts by Claude (Anthropic, model ' + model + '), ' + date +
+          (pending ? '. Those marked draft have not yet been checked.' : '.');
+      },
+      'lw.credit.checked': function (fi, sv) {
+        if (fi && fi === sv) return 'Checked by ' + fi + '.';
+        return [fi ? 'Finnish checked by ' + fi : '', sv ? 'Swedish checked by ' + sv : ''].filter(Boolean).join('; ') + '.';
+      },
+      'lang.names': 'Names', 'lang.Creole': 'Creole', 'lang.Mande (uncertain)': 'Mande (uncertain)',
+      'pos.Reflexvie/middle verb': 'Reflexive/middle verb'
+    },
+    fr: {
+      'lw.title': 'Mots LILIEMA',
+      'lw.intro': 'Des mots des langues du Sénégal et de la Gambie, issus des ateliers LILIEMA, du travail de terrain et de dictionnaires publiés. LILIEMA enseigne la lecture et l’écriture dans toutes les langues de l’apprenant, avec l’alphabet commun des langues nationales du Sénégal.',
+      'lw.search': 'Cherchez un mot ou un sens dans n’importe quelle langue',
+      'lw.search.aria': 'Recherche',
+      'lw.clear': 'Effacer la recherche',
+      'lw.langs': 'Langue',
+      'lw.domains': 'Thème',
+      'lw.all.langs': 'Toutes les langues',
+      'lw.all.domains': 'Tous les thèmes',
+      'lw.count': function (n) { return '<strong>' + F.number(n) + '</strong> ' + (n > 1 ? 'mots' : 'mot'); },
+      'lw.more': function (k) { return 'Afficher ' + k + ' de plus'; },
+      'lw.empty.title': 'Aucun résultat',
+      'lw.empty.sub': 'Essayez une autre orthographe ou une autre langue.',
+      'lw.splash.title': 'La liste de mots est sur l’ordinateur du stand',
+      'lw.splash.sub': 'Les mots LILIEMA sont consultables au stand.',
+      'lw.unit': 'Unité',
+      'lw.example': 'Exemple :',
+      'lw.pos': 'Catégorie :',
+      'lw.draft': 'ébauche',
+      'lw.draft.title': 'Traduit par Claude, pas encore vérifié',
+      'lw.m.fi': 'finnois', 'lw.m.sv': 'suédois', 'lw.m.en': 'anglais', 'lw.m.fr': 'français',
+      'lw.staff': 'Pour l’équipe du stand',
+      'lw.open': 'Ouvrir la liste de mots (Excel)',
+      'lw.reading': 'Lecture…',
+      'lw.loaded': function (name, n, k) { return name + ' : ' + F.number(n) + ' mots dans ' + k + ' langues.'; },
+      'lw.nogloss': function (n) { return n === 0 ? 'Tous les mots ont un sens en finnois et en suédois.' : 'Sans sens en finnois ou en suédois : ' + F.number(n) + ' mots (affichés en anglais et en français).'; },
+      'lw.remove': 'Retirer la liste de cet appareil',
+      'lw.remove.confirm': 'Confirmer : retirer la liste',
+      'lw.removed': 'La liste a été retirée de cet appareil.',
+      'lw.error': 'Impossible de lire le fichier : ',
+      'lw.nodata': 'Aucun mot trouvé dans le fichier (colonnes Headword, Language, French, English).',
+      'lw.privacy': 'La liste n’est envoyée nulle part : le navigateur la lit sur cet appareil et la garde uniquement sur cet appareil.',
+      'lw.credit.tools': 'Outils LILIEMA : développement technique par Friederike Lüpke, co-développés avec les participants aux ateliers LILIEMA de 2026.',
+      'lw.credit.drafts': function (model, date, pending) {
+        return 'Sens en finnois et en suédois : ébauches de Claude (Anthropic, modèle ' + model + '), ' + date +
+          (pending ? '. Celles marquées « ébauche » n’ont pas encore été vérifiées.' : '.');
+      },
+      'lw.credit.checked': function (fi, sv) {
+        if (fi && fi === sv) return 'Vérifiées par ' + fi + '.';
+        return [fi ? 'Finnois vérifié par ' + fi : '', sv ? 'suédois vérifié par ' + sv : ''].filter(Boolean).join(' ; ') + '.';
+      },
+      'lang.names': 'Noms propres', 'lang.Creole': 'Créole', 'lang.Mande (uncertain)': 'Mandé (incertain)',
+      'dom.People & Family': 'Personnes & Famille', 'dom.Body & Health': 'Corps & Santé', 'dom.Animals': 'Animaux',
+      'dom.Plants & Farming': 'Plantes & Agriculture', 'dom.Food & Cooking': 'Alimentation & Cuisine',
+      'dom.Natural Environment': 'Environnement naturel', 'dom.House & Household': 'Maison & Ménage',
+      'dom.Tools & Equipment': 'Outils & Équipement', 'dom.Clothing & Adornment': 'Vêtements & Parure',
+      'dom.Transport & Mobility': 'Transport & Mobilité', 'dom.Trade & Market': 'Commerce & Marché',
+      'dom.Numbers & Quantity': 'Nombres & Quantité',
+      'pos.Noun': 'nom', 'pos.Verb': 'verbe', 'pos.Causative verb': 'verbe causatif',
+      'pos.Transitive verb': 'verbe transitif', 'pos.Intransitive verb': 'verbe intransitif',
+      'pos.Reciprocal verb': 'verbe réciproque', 'pos.Reflexvie/middle verb': 'verbe réfléchi ou moyen',
+      'pos.Applicative verb': 'verbe applicatif', 'pos.Reversive verb': 'verbe réversif',
+      'pos.Pluractional verb': 'verbe pluractionnel', 'pos.Adverb': 'adverbe', 'pos.Gerund': 'gérondif',
+      'pos.Interrogative pro-form': 'mot interrogatif', 'pos.Preposition': 'préposition', 'pos.Demonstrative': 'démonstratif',
+      'pos.dem': 'démonstratif', 'pos.Relative pronoun': 'pronom relatif', 'pos.Connective': 'connecteur',
+      'pos.Ideophone': 'idéophone', 'pos.Interjection': 'interjection', 'pos.Proper name / place name': 'nom propre ou nom de lieu'
+    }
+  });
+
+  function tOr(key, fallback) { var v = F.t(key); return v === key ? fallback : v; }
+  function domainName(d) { return tOr('dom.' + d, d); }
+  function langName(l) {
+    var low = l.toLowerCase();
+    if (low === 'names' || low === 'all languages') return F.t('lang.names');
+    return tOr('lang.' + l, l);
+  }
+  function posName(p) { return tOr('pos.' + p, p); }
+
+  // ------------------------------------------------------------ Finnish and Swedish glosses
+  // Each row: [English, French, Finnish, Finnish checked (1/0), Swedish, Swedish checked (1/0)]
+  var G = window.LILIEMA_GLOSSES || { meta: {}, glosses: [] };
+  var SEP = '␟';
+  var byPair = new Map(), byEn = new Map(), pending = false;
+  G.glosses.forEach(function (r) {
+    var rec = { fi: r[2] || '', fiOk: !!r[3], sv: r[4] || '', svOk: !!r[5] };
+    if ((rec.fi && !rec.fiOk) || (rec.sv && !rec.svOk)) pending = true;
+    byPair.set(F.key(r[0]) + SEP + F.key(r[1]), rec);
+    var ke = F.key(r[0]);
+    if (ke) {
+      if (!byEn.has(ke)) byEn.set(ke, rec);
+      else if (byEn.get(ke) && (byEn.get(ke).fi !== rec.fi || byEn.get(ke).sv !== rec.sv)) byEn.set(ke, null); // ambiguous: needs the French too
+    }
+  });
+  function glossFor(en, fr) {
+    return byPair.get(F.key(en) + SEP + F.key(fr)) || (F.key(en) ? byEn.get(F.key(en)) : null) || null;
+  }
+
+  // ------------------------------------------------------------ state
+  var words = [];
+  var fileName = '';
+  var activeLangs = new Set();
+  var activeDomain = '';
+  var query = '';
+  var visible = PAGE_SIZE;
+  var noGloss = 0;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ------------------------------------------------------------ storage on this device (IndexedDB)
+  var Store = {
+    open: function () {
+      return new Promise(function (res, rej) {
+        try {
+          var r = indexedDB.open('liliema-bookfair', 1);
+          r.onupgradeneeded = function () { r.result.createObjectStore('files'); };
+          r.onsuccess = function () { res(r.result); };
+          r.onerror = function () { rej(r.error); };
+        } catch (e) { rej(e); }
+      });
+    },
+    run: function (mode, fn) {
+      return Store.open().then(function (db) {
+        return new Promise(function (res, rej) {
+          var tx = db.transaction('files', mode);
+          var req = fn(tx.objectStore('files'));
+          tx.oncomplete = function () { res(req && req.result); };
+          tx.onerror = function () { rej(tx.error); };
+        });
+      });
+    },
+    get: function () { return Store.run('readonly', function (s) { return s.get('wordlist'); }); },
+    put: function (v) { return Store.run('readwrite', function (s) { return s.put(v, 'wordlist'); }); },
+    del: function () { return Store.run('readwrite', function (s) { return s.delete('wordlist'); }); }
+  };
+
+  // ------------------------------------------------------------ reading the wordlist
+  function cell(r, k) { var v = r[k]; return v == null ? '' : String(v).trim(); }
+
+  function parse(buf) {
+    var wb = XLSX.read(buf, { type: 'array' });
+    var sn = wb.SheetNames.indexOf('All Languages') >= 0 ? 'All Languages' : wb.SheetNames[0];
+    var raw = XLSX.utils.sheet_to_json(wb.Sheets[sn], { defval: '' });
+    var out = [];
+    raw.forEach(function (row) {
+      var r = {};
+      Object.keys(row).forEach(function (k) { r[k.trim()] = row[k]; });
+      var language = cell(r, 'Language');
+      if (!language) {
+        var ls = cell(r, 'Language & Source');
+        language = ls.indexOf(' – ') >= 0 ? ls.split(' – ')[0].trim() : ls;
+      }
+      var headword = cell(r, 'Headword').normalize('NFC');
+      if (!headword || headword === 'None' || headword.indexOf('CHECK') === 0) return;
+      var english = cell(r, 'English'), french = cell(r, 'French');
+      // A Finnish or Swedish column in the file wins over the page's own table
+      var finnish = cell(r, 'Finnish'), swedish = cell(r, 'Swedish');
+      var fiOk = !!finnish, svOk = !!swedish;
+      if (!finnish || !swedish) {
+        var g = glossFor(english, french);
+        if (g) {
+          if (!finnish && g.fi) { finnish = g.fi; fiOk = g.fiOk; }
+          if (!swedish && g.sv) { swedish = g.sv; svOk = g.svOk; }
+        }
+      }
+      var notes = cell(r, 'Notes');
+      var ci = notes.indexOf('CHECK');
+      var pos = (ci >= 0 ? notes.slice(0, ci) : notes).trim();
+      var domain = cell(r, 'Domain');
+      if (domain.indexOf('CHECK') === 0) domain = '';
+      out.push({
+        headword: headword, language: language, domain: domain,
+        english: english, french: french, finnish: finnish, fiOk: fiOk, swedish: swedish, svOk: svOk,
+        unit: parseInt(cell(r, 'Unit'), 10) || 0, pos: pos,
+        example: cell(r, 'Example phrase') || cell(r, 'Example phrase / sentence')
+      });
+    });
+    // Example phrases: keep only those used once that contain the headword
+    var uses = new Map();
+    out.forEach(function (w) { if (w.example) uses.set(w.example, (uses.get(w.example) || 0) + 1); });
+    out.forEach(function (w) {
+      if (!w.example || EXAMPLES === 'all') return;
+      if (EXAMPLES === 'none') { w.example = ''; return; }
+      var hw = F.fold(w.headword).trim(), ex = F.fold(w.example);
+      var ok = uses.get(w.example) === 1 && hw && (' ' + ex.replace(/[^a-z0-9'À-ɏ]+/g, ' ')).indexOf(' ' + hw) >= 0;
+      if (!ok) w.example = '';
+    });
+    out.forEach(function (w) {
+      w.f = [F.fold(w.headword), F.fold(w.finnish), F.fold(w.swedish), F.fold(w.english), F.fold(w.french)];
+    });
+    return out;
+  }
+
+  function useData(buf, name) {
+    var list = parse(buf);
+    if (!list.length) throw new Error(F.t('lw.nodata'));
+    words = list;
+    fileName = name;
+    noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;
+    activeLangs.clear(); activeDomain = ''; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
+    showData();
+  }
+
+  function readFile(file) {
+    $('loadError').hidden = true;
+    $('loadedInfo').hidden = false;
+    $('loadedInfo').textContent = F.t('lw.reading');
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        var buf = e.target.result;
+        useData(buf, file.name);
+        Store.put({ name: file.name, saved: new Date().toISOString(), buf: buf }).catch(function () { /* keeps working without storage */ });
+        $('staff').open = false;
+      } catch (err) {
+        $('loadedInfo').hidden = true;
+        $('loadError').hidden = false;
+        $('loadError').textContent = F.t('lw.error') + (err && err.message ? err.message : err);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function removeData() {
+    Store.del().catch(function () { /* nothing stored */ });
+    words = []; fileName = ''; noGloss = 0;
+    showData();
+    $('loadedInfo').hidden = false;
+    $('loadedInfo').textContent = F.t('lw.removed');
+  }
+
+  // ------------------------------------------------------------ filters
+  function buildChips() {
+    var counts = new Map();
+    words.forEach(function (w) { counts.set(w.language, (counts.get(w.language) || 0) + 1); });
+    var langs = Array.from(counts.keys()).filter(Boolean)
+      .sort(function (a, b) { return langName(a).localeCompare(langName(b), F.lang); });
+    var row = $('langChips');
+    row.innerHTML = '';
+    row.appendChild(chip(F.t('lw.all.langs'), null, activeLangs.size === 0, function () { activeLangs.clear(); refresh(); }, true));
+    langs.forEach(function (l) {
+      row.appendChild(chip(langName(l), counts.get(l), activeLangs.has(l), function () {
+        if (activeLangs.has(l)) activeLangs.delete(l); else activeLangs.add(l);
+        refresh();
+      }));
+    });
+    var present = new Set(words.map(function (w) { return w.domain; }));
+    var drow = $('domainChips');
+    drow.innerHTML = '';
+    drow.appendChild(chip(F.t('lw.all.domains'), null, !activeDomain, function () { activeDomain = ''; refresh(); }, true));
+    DOMAINS.filter(function (d) { return present.has(d); }).forEach(function (d) {
+      drow.appendChild(chip(domainName(d), null, activeDomain === d, function () {
+        activeDomain = activeDomain === d ? '' : d;
+        refresh();
+      }));
+    });
+  }
+
+  function chip(label, n, on, onclick, isAll) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + (isAll ? ' all' : '') + (on ? ' active' : '');
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.innerHTML = F.esc(label) + (n != null ? '<span class="n">' + F.number(n) + '</span>' : '');
+    b.addEventListener('click', onclick);
+    return b;
+  }
+
+  function refresh() { visible = PAGE_SIZE; buildChips(); render(); }
+
+  // ------------------------------------------------------------ search
+  var qre = null;
+  function setQuery(q) {
+    query = q;
+    var fq = F.fold(q).trim();
+    qre = fq ? new RegExp('(^|[\\s;,/()\\-])' + fq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) : null;
+    $('clearBtn').hidden = !q;
+    visible = PAGE_SIZE;
+    render();
+  }
+
+  function score(w, fq) {
+    if (!fq) return 1;
+    var best = 0;
+    w.f.forEach(function (f, i) {
+      if (!f) return;
+      var s = 0;
+      if (f === fq) s = 6;
+      else if (f.indexOf(fq) === 0) s = 5;
+      else if (qre.test(f)) s = 4;
+      else if (f.indexOf(fq) >= 0) s = 2;
+      if (s && i === 0) s += 0.5;   // the headword itself first
+      if (s > best) best = s;
+    });
+    return best;
+  }
+
+  var collator = null, collatorLang = '';
+  function results() {
+    var fq = F.fold(query).trim();
+    if (!collator || collatorLang !== F.lang) { collator = new Intl.Collator(F.locale(), { sensitivity: 'base' }); collatorLang = F.lang; }
+    return words
+      .filter(function (w) { return (activeLangs.size === 0 || activeLangs.has(w.language)) && (!activeDomain || w.domain === activeDomain); })
+      .map(function (w) { return { w: w, s: score(w, fq) }; })
+      .filter(function (x) { return x.s > 0; })
+      .sort(function (a, b) { return b.s - a.s || collator.compare(a.w.headword, b.w.headword); })
+      .map(function (x) { return x.w; });
+  }
+
+  // ------------------------------------------------------------ rendering
+  // The interface language comes first, then the others
+  function order() {
+    return { fi: ['fi', 'sv', 'en', 'fr'], sv: ['sv', 'fi', 'en', 'fr'], en: ['en', 'fi', 'sv', 'fr'], fr: ['fr', 'fi', 'sv', 'en'] }[F.lang];
+  }
+
+  function card(w) {
+    var q = query;
+    var div = document.createElement('div');
+    div.className = 'result-card';
+    var badges = '<span class="badge badge-lang">' + F.esc(langName(w.language)) + '</span>';
+    if (w.unit) badges += '<span class="badge badge-unit">' + F.esc(F.t('lw.unit') + ' ' + w.unit) + '</span>';
+    if (w.domain) badges += '<span class="badge badge-domain">' + F.esc(domainName(w.domain)) + '</span>';
+    var texts = { fi: w.finnish, sv: w.swedish, en: w.english, fr: w.french };
+    var draft = { fi: !w.fiOk, sv: !w.svOk };
+    var meanings = '';
+    var first = true;
+    order().forEach(function (l) {
+      if (!texts[l]) return;
+      var tag = draft[l] ? '<span class="draft-tag" title="' + F.esc(F.t('lw.draft.title')) + '">' + F.esc(F.t('lw.draft')) + '</span>' : '';
+      meanings += '<div class="meaning-block' + (first ? ' first' : '') + '" lang="' + l + '">' +
+        '<span class="meaning-lang" title="' + F.esc(F.t('lw.m.' + l)) + '">' + l.toUpperCase() + tag + '</span>' +
+        '<span class="meaning-text">' + F.highlight(texts[l], q) + '</span></div>';
+      first = false;
+    });
+    var extra = '';
+    if (w.pos) extra += '<div>' + F.esc(F.t('lw.pos')) + ' ' + F.esc(posName(w.pos)) + '</div>';
+    if (w.example) extra += '<div>' + F.esc(F.t('lw.example')) + ' <em>' + F.esc(w.example) + '</em></div>';
+    div.innerHTML =
+      '<div class="card-top"><div class="card-headword">' + F.highlight(w.headword, q) + '</div>' +
+      '<div class="card-badges">' + badges + '</div></div>' +
+      '<div class="card-meanings">' + meanings + '</div>' +
+      (extra ? '<div class="card-extra">' + extra + '</div>' : '');
+    return div;
+  }
+
+  function render() {
+    if (!words.length) return;
+    var list = results();
+    $('resultsCount').innerHTML = F.t('lw.count', list.length);
+    $('emptyState').hidden = list.length > 0;
+    var grid = $('resultsGrid');
+    grid.innerHTML = '';
+    var frag = document.createDocumentFragment();
+    list.slice(0, visible).forEach(function (w) { frag.appendChild(card(w)); });
+    grid.appendChild(frag);
+    var more = list.length - visible;
+    $('loadMoreBtn').hidden = more <= 0;
+    if (more > 0) $('loadMoreBtn').textContent = F.t('lw.more', Math.min(PAGE_SIZE, more));
+  }
+
+  function showData() {
+    var has = words.length > 0;
+    $('splashState').hidden = has;
+    $('searchWrap').hidden = !has;
+    $('filterCard').hidden = !has;
+    $('resultsSection').hidden = !has;
+    $('emptyState').hidden = true;
+    $('staffButtons').hidden = !has;
+    $('staff').hidden = has && !STAFF;
+    if (has) {
+      var langs = new Set(words.map(function (w) { return w.language; })).size;
+      $('loadedInfo').hidden = false;
+      $('loadedInfo').textContent = F.t('lw.loaded', fileName, words.length, langs) + ' ' + F.t('lw.nogloss', noGloss);
+      buildChips();
+      render();
+    } else {
+      $('staff').open = true;
+    }
+  }
+
+  function credit() {
+    var m = G.meta || {};
+    var d = m.drafted_on ? new Date(m.drafted_on + 'T12:00:00') : null;
+    var date = d ? d.toLocaleDateString(F.locale(), { day: 'numeric', month: F.lang === 'fi' ? 'numeric' : 'long', year: 'numeric' }) : '';
+    var s = F.t('lw.credit.drafts', m.model || '', date, pending);
+    if (m.fi_checked_by || m.sv_checked_by) s += ' ' + F.t('lw.credit.checked', m.fi_checked_by || '', m.sv_checked_by || '');
+    $('glossCredit').textContent = s;
+  }
+
+  // ------------------------------------------------------------ the stall screen returns to the start when idle
+  var idleTimer = null;
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () {
+      if (!words.length) return;
+      $('searchInput').value = '';
+      activeLangs.clear(); activeDomain = '';
+      setQuery('');
+      buildChips();
+      window.scrollTo(0, 0);
+    }, IDLE_RESET_MS);
+  }
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
+    window.addEventListener(ev, resetIdle, { passive: true });
+  });
+
+  // ------------------------------------------------------------ start
+  F.initHeader();
+  F.onLang(function () { credit(); if (words.length) { showData(); } });
+  F.apply();
+  credit();
+
+  $('fileInput').addEventListener('change', function () { if (this.files[0]) readFile(this.files[0]); this.value = ''; });
+  var confirmTimer = null;
+  $('removeBtn').addEventListener('click', function () {
+    var b = this;
+    if (b.getAttribute('data-armed') === '1') {
+      clearTimeout(confirmTimer); b.removeAttribute('data-armed'); b.textContent = F.t('lw.remove'); removeData(); return;
+    }
+    b.setAttribute('data-armed', '1'); b.textContent = F.t('lw.remove.confirm');
+    confirmTimer = setTimeout(function () { b.removeAttribute('data-armed'); b.textContent = F.t('lw.remove'); }, 5000);
+  });
+  $('searchInput').addEventListener('input', function () { setQuery(this.value); });
+  $('clearBtn').addEventListener('click', function () { $('searchInput').value = ''; setQuery(''); $('searchInput').focus(); });
+  $('loadMoreBtn').addEventListener('click', function () { visible += PAGE_SIZE; render(); });
+
+  Store.get().then(function (rec) {
+    if (rec && rec.buf) {
+      try { useData(rec.buf, rec.name || ''); } catch (e) { showData(); }
+    } else {
+      showData();
+    }
+  }).catch(function () { showData(); });
+  resetIdle();
+})();
+</script>
+</body>
+</html>
