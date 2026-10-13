@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Lisää sana · Helsingin kirjamessut 2026</title>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="data/fair_data.js"></script>
+<script src="assets/fair.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/keyboard.js"></script>
+<style>
+.steps { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.steps li { padding: 8px 16px; border-radius: 20px; background: var(--white); border: 1.5px solid var(--border); color: var(--muted); font-weight: 600; font-size: 15px; }
+.steps li.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+.steps li.done { border-color: var(--teal-mid); color: var(--teal-dark); }
+.step h2 { font-family: var(--font-display); color: var(--teal-dark); font-size: 24px; margin: 4px 0 14px; }
+
+/* Step 1: pictures */
+.pic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.pic-tile {
+  background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 10px 10px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  box-shadow: 0 1px 6px rgba(0, 100, 100, .07); font: inherit; color: var(--text);
+}
+.pic-tile:hover, .pic-tile:focus-visible { border-color: var(--teal-mid); outline: none; box-shadow: 0 4px 16px rgba(0, 100, 100, .18); }
+.pic-tile img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+.pic-tile span { font-weight: 600; color: var(--teal-dark); font-size: 15px; text-align: center; }
+
+/* Chosen picture and language */
+.chosen { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--white); border-radius: var(--radius); padding: 10px 14px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.chosen img { width: 84px; height: 84px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+.chosen .what { display: flex; flex-direction: column; gap: 2px; margin-right: auto; }
+.chosen .what strong { font-size: 20px; color: var(--teal-dark); }
+.chosen .what em { font-style: normal; color: var(--muted); }
+.link-btn { background: none; border: none; color: var(--teal); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 8px 6px; min-height: 40px; font-size: 15px; }
+
+/* Step 2: languages */
+.text-input {
+  width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: var(--radius);
+  font-size: 20px; background: var(--white); color: var(--text); min-height: 58px;
+}
+.text-input:focus { outline: none; border-color: var(--teal-mid); box-shadow: 0 0 0 3px rgba(0, 144, 144, .15); }
+.text-input.big { font-size: 30px; font-weight: 600; letter-spacing: .02em; min-height: 70px; }
+.suggest { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 18px; min-height: 8px; }
+.suggest button, .lang-chip {
+  padding: 10px 16px; min-height: 48px; border-radius: 24px; border: 1.5px solid var(--teal-mid);
+  background: var(--teal-light); color: var(--teal-dark); font-weight: 600; font-size: 16px; cursor: pointer; text-align: left;
+}
+.suggest button.other { background: var(--white); border-style: dashed; }
+.lang-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.lang-chip { background: var(--white); border-color: var(--border); border-radius: var(--radius); display: flex; flex-direction: column; gap: 2px; }
+.lang-chip small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.lang-chip:hover { border-color: var(--teal-mid); }
+
+/* Step 3: word */
+.field-label { display: block; font-weight: 700; color: var(--teal-dark); font-size: 18px; margin: 6px 0 8px; }
+.example-toggle { margin: 10px 0 0; }
+#exampleWrap { margin-top: 8px; }
+.keyboard { margin: 16px 0; padding: 12px; background: #e9eff0; border-radius: var(--radius); user-select: none; -webkit-user-select: none; }
+.kb-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; flex-wrap: wrap; }
+.kb-row:last-child { margin-bottom: 0; }
+.kb-key {
+  flex: 1 1 0; min-width: 40px; max-width: 66px; height: 54px; font-size: 22px; font-family: var(--font);
+  border-radius: 8px; border: 1px solid #c9d6d8; background: #fff; color: var(--text); cursor: pointer; padding: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .12);
+}
+.kb-key:active { background: var(--teal-light); }
+.kb-row-special .kb-key { background: var(--gold-light); border-color: #e3cf86; }
+.kb-mark { font-size: 24px; }
+.kb-toggle { flex: 0 0 auto; min-width: 70px; max-width: none; padding: 0 12px; font-size: 14px; font-weight: 700; color: var(--teal-dark); }
+.kb-wide { max-width: 100px; flex: 1.6 1 0; font-size: 22px; }
+.kb-shift.active { background: var(--teal); color: #fff; }
+.kb-space { max-width: 520px; flex: 8 1 0; font-size: 15px; color: var(--muted); }
+.kb-compact .kb-key { height: 46px; min-width: 36px; font-size: 19px; }
+.consent { border-left: 5px solid var(--gold); }
+.consent h3 { margin: 0 0 6px; color: var(--teal-dark); font-size: 17px; }
+.consent p { margin: 0 0 10px; font-size: 15px; }
+.check { display: flex; gap: 12px; align-items: flex-start; font-weight: 600; font-size: 16px; cursor: pointer; }
+.check input { width: 28px; height: 28px; flex: 0 0 auto; accent-color: var(--teal); margin: 0; }
+.consent-done { font-size: 15px; color: var(--muted); }
+.notice { font-size: 14px; color: var(--muted); margin: 12px 0; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.btn {
+  padding: 12px 22px; min-height: 54px; border-radius: 28px; border: 2px solid var(--teal);
+  background: var(--white); color: var(--teal-dark); font-weight: 700; font-size: 18px; cursor: pointer;
+}
+.btn.primary { background: var(--teal); color: #fff; }
+.btn.primary:disabled { background: #9bbcbc; border-color: #9bbcbc; cursor: default; }
+.error { color: var(--coral); font-weight: 700; margin: 8px 0; }
+
+/* Done */
+.thanks { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; text-align: center; }
+.thanks h2 { font-size: 34px !important; }
+.thanks img { width: 160px; height: 160px; object-fit: contain; }
+.thanks .word { font-size: 34px; font-weight: 700; color: var(--teal-dark); margin: 6px 0; }
+.thanks .actions { justify-content: center; margin-top: 18px; }
+.queue-info { font-size: 13px; color: var(--muted); }
+.app.wide > section:first-child, .steps { max-width: 880px; }
+@media (min-width: 1100px) {
+  .word-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 22px; align-items: start; }
+  .word-side { position: sticky; top: 76px; }
+  .word-side .actions .btn { flex: 1 1 auto; }
+}
+@media (max-width: 560px) {
+  .pic-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+  .text-input.big { font-size: 26px; }
+}
+</style>
+</head>
+<body data-title="add.title">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span><span class="fair-name" data-t="fair.name">Helsingin kirjamessut 2026</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="app wide">
+  <section>
+    <h1 class="page-title" data-t="add.title"></h1>
+    <p class="page-intro" data-t="add.intro"></p>
+  </section>
+
+  <ol class="steps" aria-hidden="true">
+    <li data-step="1"><span data-t="add.step1"></span></li>
+    <li data-step="2"><span data-t="add.step2"></span></li>
+    <li data-step="3"><span data-t="add.step3"></span></li>
+  </ol>
+
+  <section class="step" id="step1">
+    <h2 data-t="add.pick"></h2>
+    <div class="pic-grid" id="picGrid"></div>
+    <p id="noPics" class="notice" data-t="add.nopics" hidden></p>
+  </section>
+
+  <section class="step" id="step2" hidden>
+    <div class="chosen" id="chosen2"></div>
+    <h2 data-t="add.lang.q"></h2>
+    <input type="text" class="text-input" id="langInput" data-t-placeholder="add.lang.ph" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="60">
+    <div class="suggest" id="langSuggest"></div>
+    <div class="lang-grid" id="langGrid"></div>
+  </section>
+
+  <section class="step" id="step3" hidden>
+   <div class="word-layout">
+    <div class="word-main">
+    <div class="chosen" id="chosen3"></div>
+    <label class="field-label" for="wordInput" data-t="add.word.q"></label>
+    <input type="text" class="text-input big" id="wordInput" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-t-aria="add.word.q">
+    <div class="example-toggle">
+      <button type="button" class="link-btn" id="exampleToggle" data-t="add.example"></button>
+    </div>
+    <div id="exampleWrap" hidden>
+      <input type="text" class="text-input" id="exampleInput" maxlength="200" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-t-placeholder="add.example.ph" data-t-aria="add.example">
+    </div>
+    <div class="keyboard" id="keyboard"></div>
+    </div>
+    <div class="word-side">
+    <div class="card consent" id="consentBox">
+      <h3 data-t="consent.title"></h3>
+      <p data-t="consent.text"></p>
+      <label class="check"><input type="checkbox" id="consentCheck"> <span data-t="consent.box"></span></label>
+    </div>
+    <div class="consent-done" id="consentDone" hidden></div>
+    <p class="notice" data-t="notice.entry"></p>
+    <div class="error" id="formError" role="alert" hidden></div>
+    <div class="actions">
+      <button type="button" class="btn" id="backBtn" data-t="add.back"></button>
+      <button type="button" class="btn primary" id="sendBtn" data-t="add.send"></button>
+    </div>
+    </div>
+   </div>
+  </section>
+
+  <section class="step" id="done" hidden>
+    <div class="thanks">
+      <h2 data-t="add.thanks.title"></h2>
+      <div id="doneWhat"></div>
+      <p data-t="add.thanks.text"></p>
+      <p class="notice" id="queuedNote" data-t="add.thanks.queued" hidden></p>
+      <div class="actions">
+        <button type="button" class="btn primary" id="anotherBtn" data-t="add.another"></button>
+        <button type="button" class="btn" id="nextBtn" data-t="add.next"></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fair-footer">
+  <div class="inner">
+    <p id="picCredit" hidden></p>
+    <p class="queue-info" id="queueInfo" hidden></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair, D = window.FAIR_DATA;
+
+  // ------------------------------------------------------------ settings
+  var IDLE_RESET_MS = 2 * 60 * 1000;     // after 2 minutes without use the page starts again for the next visitor
+
+  F.add({
+    fi: {
+      'add.title': 'Lisää sana',
+      'add.intro': 'Valitse kuva ja kerro, mitä se on sinun kielelläsi.',
+      'add.step1': '1 Kuva', 'add.step2': '2 Kieli', 'add.step3': '3 Sana',
+      'add.pick': 'Valitse kuva',
+      'add.nopics': 'Kuvia ei ole vielä.',
+      'add.lang.q': 'Millä kielellä kirjoitat?',
+      'add.lang.ph': 'Kirjoita kielen nimi tai valitse alta',
+      'add.lang.other': function (n) { return 'Käytä nimeä ”' + n + '”'; },
+      'add.word.q': 'Kirjoita sana kielelläsi',
+      'add.example': '+ Esimerkkilause (vapaaehtoinen)',
+      'add.example.ph': 'Esimerkiksi lyhyt lause, jossa sana esiintyy',
+      'add.change.pic': 'Vaihda kuva', 'add.change.lang': 'Vaihda kieli',
+      'add.back': 'Takaisin',
+      'add.send': 'Lähetä',
+      'add.err.word': 'Kirjoita sana.',
+      'add.err.send': 'Sanaa ei voitu tallentaa. Pyydä apua osaston henkilökunnalta.',
+      'add.consent.yes': 'Olet antanut suostumuksesi tutkimus- ja opetuskäyttöön.',
+      'add.consent.no': 'Et ole antanut suostumusta tutkimus- ja opetuskäyttöön.',
+      'add.consent.change': 'Muuta',
+      'add.thanks.title': 'Kiitos!',
+      'add.thanks.text': 'Sanasi näkyy sanaseinällä, kun olemme tarkistaneet sen.',
+      'add.thanks.queued': 'Yhteys on poikki: sana lähetetään heti, kun yhteys palaa.',
+      'add.another': 'Lisää toinen sana',
+      'add.next': 'Seuraava kävijä',
+      'add.queue': function (n) { return n === 1 ? '1 sana odottaa lähetystä.' : n + ' sanaa odottaa lähetystä.'; }
+    },
+    sv: {
+      'add.title': 'Lägg till ett ord',
+      'add.intro': 'Välj en bild och berätta vad den heter på ditt språk.',
+      'add.step1': '1 Bild', 'add.step2': '2 Språk', 'add.step3': '3 Ord',
+      'add.pick': 'Välj en bild',
+      'add.nopics': 'Inga bilder ännu.',
+      'add.lang.q': 'På vilket språk skriver du?',
+      'add.lang.ph': 'Skriv språkets namn eller välj nedan',
+      'add.lang.other': function (n) { return 'Använd namnet ”' + n + '”'; },
+      'add.word.q': 'Skriv ordet på ditt språk',
+      'add.example': '+ Exempelmening (frivillig)',
+      'add.example.ph': 'Till exempel en kort mening där ordet förekommer',
+      'add.change.pic': 'Byt bild', 'add.change.lang': 'Byt språk',
+      'add.back': 'Tillbaka',
+      'add.send': 'Skicka',
+      'add.err.word': 'Skriv ett ord.',
+      'add.err.send': 'Ordet kunde inte sparas. Be personalen i montern om hjälp.',
+      'add.consent.yes': 'Du har gett ditt samtycke till användning i forskning och undervisning.',
+      'add.consent.no': 'Du har inte gett ditt samtycke till användning i forskning och undervisning.',
+      'add.consent.change': 'Ändra',
+      'add.thanks.title': 'Tack!',
+      'add.thanks.text': 'Ditt ord visas på ordväggen när vi har granskat det.',
+      'add.thanks.queued': 'Ingen anslutning just nu: ordet skickas så snart anslutningen är tillbaka.',
+      'add.another': 'Lägg till ett ord till',
+      'add.next': 'Nästa besökare',
+      'add.queue': function (n) { return n + ' ord väntar på att skickas.'; }
+    },
+    en: {
+      'add.title': 'Add a word',
+      'add.intro': 'Choose a picture and tell us what it is called in your language.',
+      'add.step1': '1 Picture', 'add.step2': '2 Language', 'add.step3': '3 Word',
+      'add.pick': 'Choose a picture',
+      'add.nopics': 'No pictures yet.',
+      'add.lang.q': 'Which language are you writing in?',
+      'add.lang.ph': 'Type the name of the language or choose below',
+      'add.lang.other': function (n) { return 'Use the name “' + n + '”'; },
+      'add.word.q': 'Write the word in your language',
+      'add.example': '+ Example sentence (optional)',
+      'add.example.ph': 'For example a short sentence with the word',
+      'add.change.pic': 'Change picture', 'add.change.lang': 'Change language',
+      'add.back': 'Back',
+      'add.send': 'Send',
+      'add.err.word': 'Please write a word.',
+      'add.err.send': 'The word could not be saved. Please ask the stall staff for help.',
+      'add.consent.yes': 'You have agreed to use in research and teaching.',
+      'add.consent.no': 'You have not agreed to use in research and teaching.',
+      'add.consent.change': 'Change',
+      'add.thanks.title': 'Thank you!',
+      'add.thanks.text': 'Your word appears on the word wall once we have checked it.',
+      'add.thanks.queued': 'No connection at the moment: your word will be sent as soon as the connection is back.',
+      'add.another': 'Add another word',
+      'add.next': 'Next visitor',
+      'add.queue': function (n) { return n + (n === 1 ? ' word is' : ' words are') + ' waiting to be sent.'; }
+    },
+    fr: {
+      'add.title': 'Ajoutez un mot',
+      'add.intro': 'Choisissez une image et dites-nous comment elle s’appelle dans votre langue.',
+      'add.step1': '1 Image', 'add.step2': '2 Langue', 'add.step3': '3 Mot',
+      'add.pick': 'Choisissez une image',
+      'add.nopics': 'Pas encore d’images.',
+      'add.lang.q': 'Dans quelle langue écrivez-vous ?',
+      'add.lang.ph': 'Tapez le nom de la langue ou choisissez ci-dessous',
+      'add.lang.other': function (n) { return 'Utiliser le nom « ' + n + ' »'; },
+      'add.word.q': 'Écrivez le mot dans votre langue',
+      'add.example': '+ Phrase d’exemple (facultatif)',
+      'add.example.ph': 'Par exemple une courte phrase avec le mot',
+      'add.change.pic': 'Changer d’image', 'add.change.lang': 'Changer de langue',
+      'add.back': 'Retour',
+      'add.send': 'Envoyer',
+      'add.err.word': 'Écrivez un mot, s’il vous plaît.',
+      'add.err.send': 'Le mot n’a pas pu être enregistré. Demandez de l’aide à l’équipe du stand.',
+      'add.consent.yes': 'Vous avez accepté l’utilisation dans la recherche et l’enseignement.',
+      'add.consent.no': 'Vous n’avez pas accepté l’utilisation dans la recherche et l’enseignement.',
+      'add.consent.change': 'Modifier',
+      'add.thanks.title': 'Merci !',
+      'add.thanks.text': 'Votre mot apparaîtra sur le mur de mots une fois vérifié.',
+      'add.thanks.queued': 'Pas de connexion pour le moment : votre mot sera envoyé dès le retour de la connexion.',
+      'add.another': 'Ajouter un autre mot',
+      'add.next': 'Visiteur suivant',
+      'add.queue': function (n) { return n + (n > 1 ? ' mots attendent' : ' mot attend') + ' d’être envoyé' + (n > 1 ? 's.' : '.'); }
+    }
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var concepts = D.concepts.filter(function (c) { return c.picture; });
+  var bySlug = {};
+  D.concepts.forEach(function (c) { bySlug[c.slug] = c; });
+  function label(c) { return c[F.lang] || c.en; }
+  function countryNames(l) {
+    return l.countries.map(function (k) { var c = D.countries[k]; return c ? c[F.lang] : k; }).join(', ');
+  }
+
+  // ------------------------------------------------------------ visitor session
+  // consent is asked once per visitor; the language is kept for the next word
+  var visitor = { consent: null, langSlug: null, langLabel: '' };
+  var current = { concept: null };
+
+  function showStep(n) {
+    ['step1', 'step2', 'step3', 'done'].forEach(function (id, i) { $(id).hidden = (i + 1) !== n; });
+    document.querySelectorAll('.steps li').forEach(function (li) {
+      var s = +li.getAttribute('data-step');
+      li.classList.toggle('active', s === n);
+      li.classList.toggle('done', s < n);
+    });
+    $('formError').hidden = true;
+    window.scrollTo(0, 0);
+  }
+
+  // ------------------------------------------------------------ step 1: pictures
+  function renderPictures() {
+    var grid = $('picGrid');
+    grid.innerHTML = '';
+    $('noPics').hidden = concepts.length > 0;
+    concepts.forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pic-tile';
+      b.innerHTML = '<img src="' + F.esc(c.picture) + '" alt="" loading="lazy"><span>' + F.esc(label(c)) + '</span>';
+      b.addEventListener('click', function () { choosePicture(c); });
+      grid.appendChild(b);
+    });
+  }
+
+  function choosePicture(c) {
+    current.concept = c;
+    if (visitor.langLabel) { goWord(); } else { goLanguage(); }
+  }
+
+  function chosenBox(where, withLanguage) {
+    var c = current.concept;
+    var html = '<img src="' + F.esc(c.picture) + '" alt=""><div class="what"><strong>' + F.esc(label(c)) + '</strong>';
+    if (withLanguage) html += '<em>' + F.esc(visitor.langLabel) + '</em>';
+    html += '</div><button type="button" class="link-btn" data-act="pic">' + F.esc(F.t('add.change.pic')) + '</button>';
+    if (withLanguage) html += '<button type="button" class="link-btn" data-act="lang">' + F.esc(F.t('add.change.lang')) + '</button>';
+    where.innerHTML = html;
+    where.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.getAttribute('data-act') === 'pic') showStep(1); else goLanguage();
+      });
+    });
+  }
+
+  // ------------------------------------------------------------ step 2: language
+  var langIndex = D.languages.map(function (l) {
+    return { lang: l, names: [l.name].concat(l.aliases).map(function (n) { return { text: n, f: F.fold(n).trim() }; }) };
+  });
+
+  function goLanguage() {
+    chosenBox($('chosen2'), false);
+    $('langInput').value = '';
+    renderSuggestions();
+    renderLanguages();
+    showStep(2);
+    $('langInput').focus({ preventScroll: true });
+  }
+
+  function renderLanguages() {
+    var grid = $('langGrid');
+    grid.innerHTML = '';
+    D.languages.slice().sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); }).forEach(function (l) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lang-chip';
+      b.innerHTML = F.esc(l.name) + '<small>' + F.esc(countryNames(l)) + '</small>';
+      b.addEventListener('click', function () { setLanguage(l.slug, l.name); });
+      grid.appendChild(b);
+    });
+  }
+
+  function renderSuggestions() {
+    var box = $('langSuggest');
+    box.innerHTML = '';
+    var typed = $('langInput').value.trim();
+    var q = F.fold(typed).trim();
+    if (!q) return;
+    var hits = [], exact = false;
+    langIndex.forEach(function (li) {
+      var best = null;
+      li.names.forEach(function (n) {
+        if (n.f === q) { best = n; exact = true; }
+        else if (!best && (n.f.indexOf(q) === 0 || (q.length >= 3 && n.f.indexOf(q) >= 0))) best = n;
+      });
+      if (best) hits.push({ lang: li.lang, name: best.text });
+    });
+    hits.slice(0, 6).forEach(function (h) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = h.name === h.lang.name ? h.lang.name : h.name + ' (' + h.lang.name + ')';
+      b.addEventListener('click', function () { setLanguage(h.lang.slug, h.name); });
+      box.appendChild(b);
+    });
+    if (!exact) {
+      var o = document.createElement('button');
+      o.type = 'button';
+      o.className = 'other';
+      o.textContent = F.t('add.lang.other', typed);
+      o.addEventListener('click', function () { setLanguage(null, typed); });
+      box.appendChild(o);
+    }
+  }
+
+  function setLanguage(slug, labelText) {
+    visitor.langSlug = slug;
+    visitor.langLabel = labelText.normalize('NFC').trim().slice(0, 60);
+    goWord();
+  }
+
+  // ------------------------------------------------------------ step 3: word
+  var kb = new window.LiliemaKeyboard($('keyboard'), {});
+  kb.attach($('wordInput'));
+  kb.attach($('exampleInput'));
+
+  function keyboardLabels() {
+    kb.opts.labels = { space: F.t('kb.space'), all: F.t('kb.all'), lang: F.t('kb.lang'), shift: F.t('kb.shift'), backspace: F.t('kb.backspace') };
+  }
+
+  function goWord() {
+    chosenBox($('chosen3'), true);
+    var l = D.languages.filter(function (x) { return x.slug === visitor.langSlug; })[0];
+    keyboardLabels();
+    kb.setLetters(l ? l.letters : []);
+    $('wordInput').value = '';
+    $('exampleInput').value = '';
+    $('exampleWrap').hidden = true;
+    renderConsent();
+    showStep(3);
+    kb.target = $('wordInput');
+    $('wordInput').focus({ preventScroll: true });
+  }
+
+  function renderConsent() {
+    var asked = visitor.consent !== null;
+    $('consentBox').hidden = asked;
+    $('consentDone').hidden = !asked;
+    if (!asked) { $('consentCheck').checked = false; return; }
+    $('consentDone').innerHTML = F.esc(F.t(visitor.consent ? 'add.consent.yes' : 'add.consent.no')) +
+      ' <button type="button" class="link-btn" id="consentChange">' + F.esc(F.t('add.consent.change')) + '</button>';
+    $('consentChange').addEventListener('click', function () {
+      var previous = !!visitor.consent;
+      visitor.consent = null;
+      renderConsent();
+      $('consentCheck').checked = previous;
+    });
+  }
+
+  var sending = false;
+  function send() {
+    if (sending) return;
+    var word = $('wordInput').value.normalize('NFC').trim().replace(/\s+/g, ' ');
+    var example = $('exampleInput').value.normalize('NFC').trim().replace(/\s+/g, ' ');
+    if (!word) { showError(F.t('add.err.word')); $('wordInput').focus(); return; }
+    if (visitor.consent === null) visitor.consent = $('consentCheck').checked;
+    var row = {
+      concept_slug: current.concept.slug,
+      language_slug: visitor.langSlug,
+      language_label: visitor.langLabel,
+      headword: word,
+      example_phrase: example || null,
+      source: 'visitor',
+      research_consent: visitor.consent === true
+    };
+    sending = true;
+    $('sendBtn').disabled = true;
+    window.FairDB.add('entries', row).then(function (status) {
+      showDone(word, status === 'queued');
+    }, function (err) {
+      if (window.console) console.error('[LILIEMA] entry refused:', err && err.message);
+      showError(F.t('add.err.send'));
+    }).then(function () { sending = false; $('sendBtn').disabled = false; updateQueue(); });
+  }
+
+  function showError(msg) { $('formError').textContent = msg; $('formError').hidden = false; }
+
+  function showDone(word, queued) {
+    var c = current.concept;
+    $('doneWhat').innerHTML = '<img src="' + F.esc(c.picture) + '" alt=""><div class="word" lang="">' + F.esc(word) +
+      '</div><div class="notice">' + F.esc(visitor.langLabel) + ' · ' + F.esc(label(c)) + '</div>';
+    $('queuedNote').hidden = !queued;
+    showStep(4);
+  }
+
+  function resetVisitor() {
+    visitor = { consent: null, langSlug: null, langLabel: '' };
+    current = { concept: null };
+    showStep(1);
+  }
+
+  // ------------------------------------------------------------ queue info for the staff
+  function updateQueue() {
+    var n = window.FairDB.queued();
+    $('queueInfo').hidden = n === 0;
+    if (n) $('queueInfo').textContent = F.t('add.queue', n);
+  }
+  window.FairDB.onQueue(updateQueue);
+
+  // ------------------------------------------------------------ idle reset for the next visitor
+  var idleTimer = null;
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () {
+      if (visitor.consent !== null || visitor.langLabel || current.concept) resetVisitor();
+    }, IDLE_RESET_MS);
+  }
+  ['pointerdown', 'keydown', 'touchstart', 'input'].forEach(function (ev) {
+    window.addEventListener(ev, resetIdle, { passive: true });
+  });
+
+  // the credit line for the pictures, once the licence is agreed (set in the app data)
+  function showPictureCredit() {
+    var credit = F.pictureCredit();
+    $('picCredit').textContent = credit;
+    $('picCredit').hidden = !credit;
+  }
+
+  // ------------------------------------------------------------ start
+  F.initHeader();
+  F.onLang(function () {
+    renderPictures();
+    if (!$('step2').hidden) { chosenBox($('chosen2'), false); renderSuggestions(); renderLanguages(); }
+    if (!$('step3').hidden) { chosenBox($('chosen3'), true); keyboardLabels(); kb.render(); renderConsent(); }
+    updateQueue();
+    showPictureCredit();
+  });
+  F.apply();
+  renderPictures();
+  showPictureCredit();
+  updateQueue();
+
+  $('langInput').addEventListener('input', renderSuggestions);
+  $('langInput').addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var first = $('langSuggest').querySelector('button');
+    if (first) first.click();
+  });
+  $('exampleToggle').addEventListener('click', function () {
+    $('exampleWrap').hidden = !$('exampleWrap').hidden;
+    if (!$('exampleWrap').hidden) { kb.target = $('exampleInput'); $('exampleInput').focus({ preventScroll: true }); }
+  });
+  $('backBtn').addEventListener('click', function () { goLanguage(); });
+  $('sendBtn').addEventListener('click', send);
+  $('wordInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
+  $('anotherBtn').addEventListener('click', function () { current.concept = null; showStep(1); });
+  $('nextBtn').addEventListener('click', resetVisitor);
+  showStep(1);
+  resetIdle();
+})();
+</script>
+</body>
+</html>

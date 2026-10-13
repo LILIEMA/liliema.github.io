@@ -140,16 +140,62 @@
 
     locale: function () { return LOCALES[lang]; },
 
+    /* Credit line for the pictures in the interface language; empty until the name is set in the app data */
+    pictureCredit: function () {
+      var p = (window.FAIR_DATA || {}).picture_credit;
+      return p && p.name ? Fair.t('credit.pictures', p.name, p.licence || '') : '';
+    },
+
     number: function (n) {
       try { return Number(n).toLocaleString(LOCALES[lang]); } catch (e) { return String(n); }
     }
   };
 
   Fair.add({
-    fi: { 'fair.name': 'Helsingin kirjamessut 2026', 'fair.langs': 'Kieli' },
-    sv: { 'fair.name': 'Helsingfors bokmässa 2026', 'fair.langs': 'Språk' },
-    en: { 'fair.name': 'Helsinki Book Fair 2026', 'fair.langs': 'Language' },
-    fr: { 'fair.name': 'Salon du livre d’Helsinki 2026', 'fair.langs': 'Langue' }
+    fi: { 'fair.name': 'Helsingin kirjamessut 2026', 'fair.langs': 'Kieli',
+      'credit.tools': 'LILIEMA-työkalut: tekninen kehitys Friederike Lüpke, kehitetty yhdessä vuoden 2026 LILIEMA-työpajojen osallistujien kanssa.',
+      'credit.pictures': function (name, licence) { return 'Kuvat: ' + name + ' (LILIEMA)' + (licence ? ', ' + licence + ' (muokattu verkkoon)' : '') + '.'; } },
+    sv: { 'fair.name': 'Helsingfors bokmässa 2026', 'fair.langs': 'Språk',
+      'credit.tools': 'LILIEMAs verktyg: teknisk utveckling Friederike Lüpke, utvecklade tillsammans med deltagarna i LILIEMAs workshoppar 2026.',
+      'credit.pictures': function (name, licence) { return 'Bilder: ' + name + ' (LILIEMA)' + (licence ? ', ' + licence + ' (bearbetade för webben)' : '') + '.'; } },
+    en: { 'fair.name': 'Helsinki Book Fair 2026', 'fair.langs': 'Language',
+      'credit.tools': 'LILIEMA tools: technical development by Friederike Lüpke, co-developed with the participants in the 2026 LILIEMA workshops.',
+      'credit.pictures': function (name, licence) { return 'Pictures: ' + name + ' for LILIEMA' + (licence ? ', ' + licence + ' (adapted for the web)' : '') + '.'; } },
+    fr: { 'fair.name': 'Salon du livre d’Helsinki 2026', 'fair.langs': 'Langue',
+      'credit.tools': 'Outils LILIEMA : développement technique par Friederike Lüpke, co-développés avec les participants aux ateliers LILIEMA de 2026.',
+      'credit.pictures': function (name, licence) { return 'Images : ' + name + ' pour LILIEMA' + (licence ? ', ' + licence + ' (adaptées pour le web)' : '') + '.'; } }
+  });
+
+  // Texts shared by the pages where visitors send words or answers (consent asked once per visitor)
+  Fair.add({
+    fi: {
+      'consent.title': 'Tutkimus ja opetus',
+      'consent.text': 'Sanasi ja vastauksesi tallennetaan ilman nimeäsi. Suostumuksellasi LILIEMA ja Helsingin yliopisto voivat käyttää niitä myös tutkimuksessa ja opetuksessa. Ilman suostumusta niitä käytetään vain messuilla. Koska niissä ei ole nimeä, niitä ei voi jälkikäteen yhdistää sinuun eikä poistaa.',
+      'consent.box': 'Olen vähintään 15-vuotias ja annan suostumukseni.',
+      'notice.entry': 'Sanasi tallennetaan messujen sanakokoelmaan (LILIEMA ja Helsingin yliopiston AfriStadi). Älä kirjoita nimiä tai muita henkilötietoja. Sanat näkyvät näytöllä, kun olemme tarkistaneet ne.',
+      'kb.space': 'välilyönti', 'kb.all': 'kaikki', 'kb.lang': 'kielen', 'kb.shift': 'isot kirjaimet', 'kb.backspace': 'poista'
+    },
+    sv: {
+      'consent.title': 'Forskning och undervisning',
+      'consent.text': 'Dina ord och svar sparas utan ditt namn. Med ditt samtycke kan LILIEMA och Helsingfors universitet också använda dem i forskning och undervisning. Utan samtycke används de bara under mässan. Eftersom de inte har något namn kan de inte senare kopplas till dig eller tas bort.',
+      'consent.box': 'Jag är 15 år eller äldre och ger mitt samtycke.',
+      'notice.entry': 'Ditt ord sparas i mässans ordsamling (LILIEMA och AfriStadi, Helsingfors universitet). Skriv inga namn eller andra personuppgifter. Orden visas på skärmen när vi har granskat dem.',
+      'kb.space': 'mellanslag', 'kb.all': 'alla', 'kb.lang': 'språkets', 'kb.shift': 'versaler', 'kb.backspace': 'radera'
+    },
+    en: {
+      'consent.title': 'Research and teaching',
+      'consent.text': 'Your words and answers are stored without your name. With your agreement, LILIEMA and the University of Helsinki may also use them in research and teaching. Without it, they are used only at the fair. As they carry no name, they cannot be traced back to you or withdrawn later.',
+      'consent.box': 'I am 15 or older and I agree.',
+      'notice.entry': 'Your word goes into the fair’s word collection (LILIEMA and AfriStadi, University of Helsinki). Please do not write names or other personal information. Words appear on the screen once we have checked them.',
+      'kb.space': 'space', 'kb.all': 'all', 'kb.lang': 'language', 'kb.shift': 'capitals', 'kb.backspace': 'delete'
+    },
+    fr: {
+      'consent.title': 'Recherche et enseignement',
+      'consent.text': 'Vos mots et vos réponses sont enregistrés sans votre nom. Avec votre accord, LILIEMA et l’Université d’Helsinki peuvent aussi les utiliser dans la recherche et l’enseignement. Sans votre accord, ils ne servent que pendant le salon. Comme ils ne portent pas de nom, ils ne peuvent ni vous être rattachés ni être retirés par la suite.',
+      'consent.box': 'J’ai 15 ans ou plus et je donne mon accord.',
+      'notice.entry': 'Votre mot entre dans la collection de mots du salon (LILIEMA et AfriStadi, Université d’Helsinki). Merci de ne pas écrire de noms ni d’autres informations personnelles. Les mots apparaissent à l’écran une fois vérifiés.',
+      'kb.space': 'espace', 'kb.all': 'toutes', 'kb.lang': 'langue', 'kb.shift': 'majuscules', 'kb.backspace': 'effacer'
+    }
   });
 
   window.Fair = Fair;
