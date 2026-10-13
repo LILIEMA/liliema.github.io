@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Sanaseinä · Helsingin kirjamessut 2026</title>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="data/fair_data.js"></script>
+<script src="assets/fair.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/checkai.js"></script>
+<style>
+/* The word wall is made for a large landscape screen. The panels share the screen; the picture, the words
+   and the QR code then take their sizes from the panel they are in (container units cqh, cqw),
+   so nothing overflows on any screen size. */
+body.wall-page { height: 100vh; overflow: hidden; }
+.wall {
+  flex: 1; min-height: 0; width: 100%;
+  display: grid; grid-template-columns: minmax(0, 1fr) clamp(200px, 20vw, 440px); grid-template-rows: minmax(0, 1fr) auto;
+  gap: 1.6vh 1.2vw; padding: 1.6vh 1.2vw;
+}
+.panel { background: var(--white); border-radius: 14px; box-shadow: var(--shadow); min-height: 0; min-width: 0; }
+
+/* Stage: one picture with its words */
+.stage { position: relative; overflow: hidden; display: flex; flex-direction: column; container-type: size; }
+.slide {
+  flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 3cqw; padding: 4cqh 3cqw; align-items: center; transition: opacity .4s ease;
+}
+.slide.fading { opacity: 0; }
+.pic { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2cqh; min-width: 0; }
+.pic img { width: min(100%, 62cqh); aspect-ratio: 1; object-fit: contain; }
+.pic .no-pic {
+  width: min(100%, 62cqh); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; text-align: center;
+  border: 3px dashed var(--border); border-radius: 14px; color: var(--teal-dark);
+  font-family: var(--font-display); font-size: clamp(20px, 8cqh, 110px); padding: 4cqh;
+}
+.pic figcaption { text-align: center; }
+.pic figcaption strong { display: block; font-family: var(--font-display); color: var(--teal-dark); font-size: clamp(20px, 7.5cqh, 100px); line-height: 1.1; }
+.pic figcaption span { display: block; color: var(--muted); font-size: clamp(13px, 3.5cqh, 46px); margin-top: .6cqh; }
+.words { align-self: stretch; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.words-count { margin: 0 0 2.2cqh; color: var(--muted); font-weight: 700; font-size: clamp(12px, 2.8cqh, 36px); letter-spacing: .06em; text-transform: uppercase; }
+.word-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2cqh 2.4cqw; align-content: start; }
+.word-list li { border-left: max(3px, .7cqh) solid var(--gold); padding-left: 1.4cqw; min-width: 0; }
+.word-list .ws { display: block; }
+.word-list .ws { font-size: var(--wsize); line-height: 1.15; }
+.word-list .w { font-weight: 700; white-space: nowrap; }
+.word-list.wrap .w { white-space: normal; overflow-wrap: anywhere; }
+.word-list .sep { color: var(--muted); }
+.word-list .w.new::after {
+  content: ''; display: inline-block; width: .32em; height: .32em; border-radius: 50%;
+  background: var(--gold); margin-left: .18em; vertical-align: .55em;
+}
+.word-list .ln { display: block; color: var(--teal-dark); font-weight: 600; font-size: calc(var(--wsize) * .48); margin-top: .3cqh; }
+.word-list.s-xl { --wsize: clamp(24px, 10cqh, 140px); }
+.word-list.s-l  { --wsize: clamp(20px, 7.4cqh, 104px); }
+.word-list.s-m  { --wsize: clamp(17px, 5.6cqh, 80px); grid-template-columns: 1fr 1fr; }
+.word-list.s-s  { --wsize: clamp(15px, 4.3cqh, 60px); grid-template-columns: 1fr 1fr; }
+.word-list.s-xs { --wsize: clamp(13px, 3.3cqh, 46px); grid-template-columns: 1fr 1fr 1fr; }
+.more { margin: 2cqh 0 0; color: var(--muted); font-size: clamp(12px, 2.8cqh, 36px); }
+.empty-cta { margin: 0; font-family: var(--font-display); color: var(--teal-dark); font-size: clamp(20px, 7cqh, 96px); line-height: 1.2; }
+.empty-cta::after { content: ' →'; color: var(--gold); }
+.no-slides { margin: auto; padding: 4cqh; font-size: clamp(18px, 6cqh, 80px); color: var(--muted); text-align: center; }
+.progress { flex: 0 0 auto; height: max(4px, .8cqh); background: var(--teal-light); }
+.progress span { display: block; height: 100%; width: 0; background: var(--gold); }
+
+/* QR code and invitation */
+.qr-card {
+  container-type: size; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6vh; padding: 2.4vh 1.2vw; text-align: center;
+}
+.qr-card .qr { width: min(100%, 48cqh); height: auto; display: block; }
+.qr-url { font-weight: 700; color: var(--teal-dark); font-size: clamp(12px, min(4.2cqh, 7.5cqw), 36px); }
+.cta { list-style: none; margin: 0; padding: 0; font-size: clamp(11px, min(3.4cqh, 6.2cqw), 30px); color: var(--muted); }
+.cta li { margin: .4cqh 0; }
+.cta li:first-child { color: var(--text); font-weight: 700; font-size: 1.2em; margin-bottom: 1cqh; }
+
+/* Check the AI scores: one row of languages, shown a page at a time */
+.ai-strip { grid-column: 1 / -1; display: grid; grid-template-columns: clamp(200px, 20vw, 440px) minmax(0, 1fr); gap: 1.2vw; padding: 1.4vh 1.2vw; align-items: center; }
+.ai-head h2 { margin: 0; font-family: var(--font-display); color: var(--teal-dark); font-size: clamp(18px, 3vh, 48px); line-height: 1.1; }
+.ai-head p { margin: .5vh 0 0; color: var(--muted); font-size: clamp(11px, 1.45vh, 22px); }
+.legend { display: flex; gap: .9vw; flex-wrap: wrap; margin-top: .7vh; font-size: clamp(11px, 1.45vh, 22px); color: var(--muted); }
+.legend span::before { content: ''; display: inline-block; width: .8em; height: .8em; border-radius: 2px; margin-right: .3em; vertical-align: -.05em; }
+.legend .r::before, .bar .r { background: var(--teal); }
+.legend .p::before, .bar .p { background: var(--gold); }
+.legend .x::before, .bar .x { background: #e39a7d; }
+.scores { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--per, 8), minmax(0, 1fr)); gap: 1vh 1.1vw; }
+.score { min-width: 0; }
+.sc-name { font-weight: 700; font-size: clamp(12px, 1.9vh, 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar { display: flex; height: 1.2vh; min-height: 7px; margin: .5vh 0; background: #eef3f3; border-radius: 99px; overflow: hidden; }
+.sc-num { color: var(--muted); font-size: clamp(11px, 1.5vh, 22px); font-variant-numeric: tabular-nums; }
+.sc-num strong { color: var(--teal-dark); font-weight: 700; }
+.ai-soon { margin: 0; font-size: clamp(15px, 2.4vh, 40px); color: var(--teal-dark); font-weight: 600; }
+.ai-total { margin: .9vh 0 0; color: var(--muted); font-size: clamp(11px, 1.45vh, 22px); }
+
+/* Footer: credits and connection */
+.wall-footer { padding: .7vh 1.2vw; font-size: clamp(11px, 1.35vh, 20px); }
+.wall-footer .inner { max-width: none; flex-direction: row; justify-content: space-between; align-items: center; gap: 2vw; }
+.wall-footer .credits { flex: 1; min-width: 0; }
+.wall-footer .status { white-space: nowrap; }
+.wall-footer .status .off { color: var(--coral); font-weight: 700; }
+.link-btn { background: none; border: none; color: var(--teal); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 4px 6px; font-size: inherit; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+
+/* Phones, portrait screens and small windows: one column with normal scrolling */
+@media (max-width: 900px), (max-aspect-ratio: 1/1) {
+  body.wall-page { height: auto; overflow: auto; }
+  .wall { grid-template-columns: 1fr; grid-template-rows: none; }
+  .stage, .qr-card { container-type: normal; }
+  .slide { grid-template-columns: 1fr; gap: 16px; padding: 18px; }
+  .pic { gap: 8px; }
+  .pic img, .pic .no-pic { width: min(100%, 300px); }
+  .pic .no-pic { font-size: 30px; padding: 20px; }
+  .pic figcaption strong { font-size: 28px; }
+  .pic figcaption span { font-size: 16px; margin-top: 4px; }
+  .words-count, .more { font-size: 13px; margin-bottom: 8px; }
+  .word-list { gap: 10px 16px; }
+  .word-list li { border-left-width: 4px; padding-left: 10px; }
+  .word-list[class] { --wsize: 24px; grid-template-columns: 1fr; }
+  .empty-cta { font-size: 24px; }
+  .empty-cta::after { content: ''; }
+  .progress { height: 4px; }
+  .qr-card { padding: 16px; gap: 10px; }
+  .qr-card .qr { width: 160px; }
+  .qr-url { font-size: 16px; }
+  .cta { font-size: 14px; }
+  .ai-strip { grid-template-columns: 1fr; padding: 14px 16px; }
+  .scores { grid-template-columns: 1fr 1fr; }
+  .wall-footer .inner { flex-direction: column; align-items: flex-start; }
+  .wall-footer .status { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: none; }
+}
+</style>
+</head>
+<body data-title="wall.title" class="wall-page">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span><span class="fair-name" data-t="fair.name">Helsingin kirjamessut 2026</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="wall">
+  <h1 class="visually-hidden" data-t="wall.title"></h1>
+  <section class="panel stage">
+    <div class="slide" id="slide"></div>
+    <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  </section>
+
+  <aside class="panel qr-card">
+    <img class="qr" src="assets/qr-bookfair.svg" alt="QR: https://liliema.github.io/bookfair/">
+    <div class="qr-url">liliema.github.io/<wbr>bookfair</div>
+    <ul class="cta" id="cta"></ul>
+  </aside>
+
+  <section class="panel ai-strip">
+    <div class="ai-head">
+      <h2 data-t="ai.name"></h2>
+      <p data-t="ai.text"></p>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div>
+      <ul class="scores" id="scores"></ul>
+      <p class="ai-soon" id="aiSoon" data-t="wall.ai.soon" hidden></p>
+      <p class="ai-total" id="aiTotal"></p>
+    </div>
+  </section>
+</main>
+
+<footer class="fair-footer wall-footer">
+  <div class="inner">
+    <p class="credits"><span data-t="credit.tools"></span> <span id="aiCredit"></span> <span id="picCredit"></span></p>
+    <p class="status"><span id="status"></span> <button type="button" class="link-btn" id="fsBtn" data-t="wall.fullscreen"></button></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair, D = window.FAIR_DATA, S = window.FairScores;
+
+  // ------------------------------------------------------------ settings
+  var SLIDE_MS = 9000;          // time per picture ...
+  var SLIDE_MS_PER_WORD = 350;  // ... plus a little more for each word ...
+  var SLIDE_MS_MAX = 16000;     // ... up to this
+  var REFRESH_MS = 60 * 1000;   // new words and scores are fetched every minute
+  var NEW_MS = 30 * 60 * 1000;  // words approved in the last 30 minutes get a gold dot
+  var EMPTY_EVERY = 3;          // after every third picture with words, one picture still waiting for words
+  var PAGE_GROUPS = 18;         // languages per screen at most; a picture with more continues on the next screen
+  var CACHE_KEY = 'liliema-bookfair-wall';
+
+  F.add({
+    fi: {
+      'wall.title': 'Sanaseinä',
+      'wall.count': function (w, l) { return (w === 1 ? '1 sana' : w + ' sanaa') + ', ' + (l === 1 ? '1 kieli' : l + ' kieltä'); },
+      'wall.nowords': 'Tälle kuvalle ei ole vielä sanoja. Lisää omasi!',
+      'wall.nopics': 'Kuvia ei ole vielä.',
+      'wall.cta': 'Lisää sana omalla kielelläsi',
+      'wall.ai.soon': 'Peli alkaa pian.',
+      'wall.ai.frac': function (r, n) { return r + '/' + n + ' oikein'; },
+      'wall.ai.answers': function (n) { return n === 1 ? '1 vastaus' : n + ' vastausta'; },
+      'wall.ai.total': function (n, min) { return 'Vastauksia yhteensä ' + n + '. Sana on oikein tai väärin, kun vähintään ' + min + ' puhujaa on vastannut ja useimmat ovat samaa mieltä; siihen asti ratkaisee LILIEMAn tarkistus.'; },
+      'wall.legend.right': 'oikein', 'wall.legend.partly': 'osittain', 'wall.legend.wrong': 'väärin',
+      'wall.loading': 'Haetaan sanoja…',
+      'wall.updated': function (t) { return 'Päivitetty ' + t; },
+      'wall.offline': function (t) { return t ? 'Ei yhteyttä. Viimeksi päivitetty ' + t + '.' : 'Ei yhteyttä.'; },
+      'wall.paused': 'Pysäytetty (välilyönti jatkaa)',
+      'wall.fullscreen': 'Koko näyttö'
+    },
+    sv: {
+      'wall.title': 'Ordväggen',
+      'wall.count': function (w, l) { return w + ' ord på ' + l + ' språk'; },
+      'wall.nowords': 'Inga ord för den här bilden ännu. Lägg till ditt!',
+      'wall.nopics': 'Inga bilder ännu.',
+      'wall.cta': 'Lägg till ett ord på ditt språk',
+      'wall.ai.soon': 'Spelet börjar snart.',
+      'wall.ai.frac': function (r, n) { return r + '/' + n + ' rätt'; },
+      'wall.ai.answers': function (n) { return n + ' svar'; },
+      'wall.ai.total': function (n, min) { return 'Svar totalt: ' + n + '. Ett ord räknas som rätt eller fel när minst ' + min + ' talare har svarat och de flesta är överens; till dess gäller LILIEMAs granskning.'; },
+      'wall.legend.right': 'rätt', 'wall.legend.partly': 'delvis', 'wall.legend.wrong': 'fel',
+      'wall.loading': 'Hämtar ord…',
+      'wall.updated': function (t) { return 'Uppdaterad ' + t; },
+      'wall.offline': function (t) { return t ? 'Ingen anslutning. Senast uppdaterad ' + t + '.' : 'Ingen anslutning.'; },
+      'wall.paused': 'Pausad (mellanslag fortsätter)',
+      'wall.fullscreen': 'Helskärm'
+    },
+    en: {
+      'wall.title': 'Word wall',
+      'wall.count': function (w, l) { return w + (w === 1 ? ' word' : ' words') + ' in ' + l + (l === 1 ? ' language' : ' languages'); },
+      'wall.nowords': 'No words for this picture yet. Add yours!',
+      'wall.nopics': 'No pictures yet.',
+      'wall.cta': 'Add a word in your language',
+      'wall.ai.soon': 'The game starts soon.',
+      'wall.ai.frac': function (r, n) { return r + '/' + n + ' right'; },
+      'wall.ai.answers': function (n) { return n === 1 ? '1 answer' : n + ' answers'; },
+      'wall.ai.total': function (n, min) { return 'Answers so far: ' + n + '. A word counts as right or wrong once at least ' + min + ' speakers have answered and most agree; until then LILIEMA’s check stands.'; },
+      'wall.legend.right': 'right', 'wall.legend.partly': 'partly', 'wall.legend.wrong': 'wrong',
+      'wall.loading': 'Fetching words…',
+      'wall.updated': function (t) { return 'Updated ' + t; },
+      'wall.offline': function (t) { return t ? 'No connection. Last updated ' + t + '.' : 'No connection.'; },
+      'wall.paused': 'Paused (space bar to continue)',
+      'wall.fullscreen': 'Full screen'
+    },
+    fr: {
+      'wall.title': 'Mur de mots',
+      'wall.count': function (w, l) { return w + (w > 1 ? ' mots' : ' mot') + ' en ' + l + (l > 1 ? ' langues' : ' langue'); },
+      'wall.nowords': 'Pas encore de mots pour cette image. Ajoutez le vôtre !',
+      'wall.nopics': 'Pas encore d’images.',
+      'wall.cta': 'Ajoutez un mot dans votre langue',
+      'wall.ai.soon': 'Le jeu commence bientôt.',
+      'wall.ai.frac': function (r, n) { return r + '/' + n + ' justes'; },
+      'wall.ai.answers': function (n) { return n > 1 ? n + ' réponses' : n + ' réponse'; },
+      'wall.ai.total': function (n, min) { return 'Réponses jusqu’ici : ' + n + '. Un mot compte comme juste ou faux dès qu’au moins ' + min + ' locuteurs ont répondu et que la majorité est d’accord ; jusque-là, la vérification de LILIEMA s’applique.'; },
+      'wall.legend.right': 'juste', 'wall.legend.partly': 'en partie', 'wall.legend.wrong': 'faux',
+      'wall.loading': 'Chargement des mots…',
+      'wall.updated': function (t) { return 'Mis à jour à ' + t; },
+      'wall.offline': function (t) { return t ? 'Pas de connexion. Dernière mise à jour à ' + t + '.' : 'Pas de connexion.'; },
+      'wall.paused': 'En pause (barre d’espace pour reprendre)',
+      'wall.fullscreen': 'Plein écran'
+    }
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var narrowQuery = window.matchMedia('(max-width: 900px), (max-aspect-ratio: 1/1)');
+  var langBySlug = {}, conceptBySlug = {};
+  D.languages.forEach(function (l) { langBySlug[l.slug] = l; });
+  D.concepts.forEach(function (c) { conceptBySlug[c.slug] = c; });
+  function label(c, l) { return c[l || F.lang] || c.en; }
+  function inGame(slug) { var c = conceptBySlug[slug]; return !!(c && c.picture); }
+
+  // ------------------------------------------------------------ data: approved words and scores
+  var entries = [], scores = [];
+  var lastOk = null, online = true, loaded = false;
+
+  function saveCache() {
+    try { window.localStorage.setItem(CACHE_KEY, JSON.stringify({ at: lastOk.toISOString(), entries: entries, scores: scores })); }
+    catch (e) { /* storage full or unavailable: the wall still works */ }
+  }
+  function loadCache() {
+    try {
+      var c = JSON.parse(window.localStorage.getItem(CACHE_KEY) || 'null');
+      if (c) { entries = c.entries || []; scores = c.scores || []; lastOk = c.at ? new Date(c.at) : null; }
+    } catch (e) { /* ignore */ }
+  }
+
+  function refresh() {
+    return Promise.all([
+      window.FairDB.selectAll('entries', 'select=id,concept_slug,language_slug,language_label,headword,created_at,reviewed_at&status=eq.approved&order=id'),
+      S.fetch()
+    ]).then(function (r) {
+      entries = r[0]; scores = r[1];
+      lastOk = new Date(); online = true; loaded = true;
+      saveCache();
+      rebuild();
+      if (started && slides[pos] && slides[pos].entries.length !== shownCount) redraw();
+      renderScores();
+      renderStatus();
+    }, function (err) {
+      online = false; loaded = true;
+      renderStatus();
+      if (window.console) console.warn('[LILIEMA] word wall: could not fetch new data:', err && err.message);
+    });
+  }
+
+  // ------------------------------------------------------------ slides
+  var slides = [], pos = -1, currentSlug = null, currentPage = 0, emptyTurn = 0, timer = null, paused = false;
+  var started = false, shownCount = -1;
+
+  function isNew(e) {
+    var t = Date.parse(e.reviewed_at || e.created_at || '');
+    return !isNaN(t) && Date.now() - t < NEW_MS;
+  }
+
+  function rebuild() {
+    var byConcept = {};
+    entries.forEach(function (e) {
+      if (conceptBySlug[e.concept_slug]) (byConcept[e.concept_slug] = byConcept[e.concept_slug] || []).push(e);
+    });
+    var full = [], empty = [];
+    D.concepts.forEach(function (c) {
+      var list = byConcept[c.slug];
+      if (list && list.length) {
+        var groups = groupsOf(list), nWords = 0;
+        groups.forEach(function (g) { nWords += g.words.length; });
+        var pages = Math.ceil(groups.length / PAGE_GROUPS), per = Math.ceil(groups.length / pages), screens = [];
+        for (var p = 0; p < pages; p++) {
+          screens.push({ concept: c, entries: list, groups: groups.slice(p * per, p * per + per), page: p, pages: pages, nWords: nWords, nGroups: groups.length });
+        }
+        full.push(screens);
+      } else if (c.picture) {
+        empty.push([{ concept: c, entries: [], groups: [], page: 0, pages: 1 }]);
+      }
+    });
+    var seq = [];
+    if (!full.length) { empty.forEach(function (screens) { seq = seq.concat(screens); }); }
+    else {
+      full.forEach(function (screens, i) {
+        seq = seq.concat(screens);
+        if (empty.length && (i + 1) % EMPTY_EVERY === 0) seq = seq.concat(empty[(emptyTurn++) % empty.length]);
+      });
+    }
+    slides = seq;
+    var keep = -1;
+    slides.forEach(function (s, i) {
+      if (s.concept.slug === currentSlug && (keep < 0 || s.page === currentPage)) keep = i;
+    });
+    if (keep >= 0) pos = keep;
+    else if (pos >= slides.length) pos = slides.length - 1;
+  }
+
+  function groupsOf(list) {
+    var map = {}, out = [];
+    list.forEach(function (e) {
+      var lang = e.language_slug ? langBySlug[e.language_slug] : null;
+      var key = lang ? 's:' + lang.slug : 'o:' + F.fold(e.language_label).trim();
+      var g = map[key];
+      if (!g) { g = map[key] = { name: lang ? lang.name : e.language_label, labels: [], labelSeen: {}, words: [], seen: {} }; out.push(g); }
+      var lk = F.fold(e.language_label).trim();
+      if (lang && lk && lk !== F.fold(lang.name).trim() && !g.labelSeen[lk]) { g.labelSeen[lk] = 1; g.labels.push(e.language_label); }
+      var wk = String(e.headword).normalize('NFC').toLowerCase();
+      var fresh = isNew(e);
+      if (!g.seen[wk]) { g.seen[wk] = { text: e.headword, fresh: fresh }; g.words.push(g.seen[wk]); }
+      else if (fresh) g.seen[wk].fresh = true;
+    });
+    out.sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); });
+    return out;
+  }
+
+  // the more words, the smaller the type: one column up to 5 languages, then two, then three
+  function sizeClass(groups) {
+    var words = 0;
+    groups.forEach(function (g) { words += g.words.length; });
+    var load = Math.max(groups.length, Math.ceil(words * 0.6));
+    if (load <= 3) return 's-xl';
+    if (load <= 5) return 's-l';
+    if (load <= 12) return 's-m';
+    if (load <= 16) return 's-s';
+    return 's-xs';
+  }
+
+  function slideHtml(s) {
+    var c = s.concept;
+    var others = F.LANGS.filter(function (l) { return l !== F.lang; }).map(function (l) { return label(c, l); });
+    var html = '<figure class="pic">' +
+      (c.picture ? '<img src="' + F.esc(c.picture) + '" alt="">' : '<div class="no-pic">' + F.esc(label(c)) + '</div>') +
+      '<figcaption><strong>' + F.esc(label(c)) + '</strong><span>' + F.esc(others.join(' · ')) + '</span></figcaption></figure>';
+    html += '<div class="words">';
+    if (!s.groups.length) {
+      html += '<p class="empty-cta">' + F.esc(F.t('wall.nowords')) + '</p>';
+    } else {
+      html += '<p class="words-count">' + F.esc(F.t('wall.count', s.nWords, s.nGroups)) +
+        (s.pages > 1 ? ' (' + (s.page + 1) + '/' + s.pages + ')' : '') + '</p>';
+      html += '<ul class="word-list ' + sizeClass(s.groups) + '">';
+      s.groups.forEach(function (g) {
+        html += '<li><span class="ws" lang="">' + g.words.map(function (w) {
+          return '<span class="w' + (w.fresh ? ' new' : '') + '">' + F.esc(w.text) + '</span>';
+        }).join('<span class="sep">\u00a0· </span>') + '</span><span class="ln">' + F.esc(g.name + (g.labels.length ? ' (' + g.labels.slice(0, 3).join(', ') + ')' : '')) + '</span></li>';
+      });
+      html += '</ul>';
+    }
+    return html + '</div>';
+  }
+
+  // if the words still do not fit (long words, many variants), the type is made smaller until they do
+  function fit() {
+    var el = $('slide'), list = el.querySelector('.word-list');
+    if (!list) return;
+    var over = function () { return el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1; };
+    var first = list.querySelector('.ws');
+    var size = first ? parseFloat(window.getComputedStyle(first).fontSize) : 0, guard = 0;
+    while (size > 12 && over() && guard++ < 40) {
+      size = Math.max(12, size * 0.92);
+      list.style.setProperty('--wsize', size.toFixed(1) + 'px');
+    }
+    if (over()) list.classList.add('wrap');   // a very long word may then break
+  }
+
+  function duration(s) {
+    var words = 0;
+    s.groups.forEach(function (g) { words += g.words.length; });
+    return Math.min(SLIDE_MS_MAX, SLIDE_MS + SLIDE_MS_PER_WORD * words);
+  }
+
+  function startProgress(ms) {
+    var bar = $('progress');
+    bar.style.transition = 'none';
+    bar.style.width = '0';
+    void bar.offsetWidth;   // restart the animation
+    if (paused) return;
+    bar.style.transition = 'width ' + ms + 'ms linear';
+    bar.style.width = '100%';
+  }
+
+  // the current picture again, with its new words (the timer keeps running)
+  function redraw() {
+    var s = slides[pos];
+    if (!s) return;
+    $('slide').innerHTML = slideHtml(s);
+    shownCount = s.entries.length;
+    fit();
+  }
+
+  function show(i) {
+    clearTimeout(timer);
+    started = true;
+    var el = $('slide');
+    if (!slides.length) {
+      el.innerHTML = '<p class="no-slides">' + F.esc(F.t(loaded ? 'wall.nopics' : 'wall.loading')) + '</p>';
+      shownCount = -1;
+      return;
+    }
+    if (i >= slides.length) { currentSlug = null; rebuild(); i = 0; }   // a new round, with other pictures waiting for words
+    pos = ((i % slides.length) + slides.length) % slides.length;
+    var s = slides[pos];
+    currentSlug = s.concept.slug;
+    currentPage = s.page;
+    var ms = duration(s);
+    scorePage++;
+    showScorePage();
+    var put = function () {
+      el.innerHTML = slideHtml(s);
+      shownCount = s.entries.length;
+      el.classList.remove('fading');
+      fit();
+      startProgress(ms);
+      if (!paused) timer = setTimeout(function () { show(pos + 1); }, ms);
+    };
+    if (reduceMotion || !el.firstChild) { put(); return; }
+    el.classList.add('fading');
+    setTimeout(put, 400);
+  }
+
+  function togglePause() {
+    paused = !paused;
+    if (paused) { clearTimeout(timer); startProgress(0); }
+    else { show(pos + 1); }
+    renderStatus();
+  }
+
+  // ------------------------------------------------------------ Check the AI scores (words in the game: those with a picture)
+  var scoreItems = [], scorePage = 0, judgements = 0;
+
+  function renderScores() {
+    var rows = scores.filter(function (r) { return inGame(r.concept_slug); });
+    var by = S.byLanguage(rows), slugs = Object.keys(by);
+    var name = function (slug) { return langBySlug[slug] ? langBySlug[slug].name : slug; };
+    slugs.sort(function (a, b) { return name(a).localeCompare(name(b), F.locale()); });
+    judgements = 0;
+    scoreItems = slugs.map(function (slug) {
+      var o = by[slug];
+      judgements += o.judgements;
+      var pct = function (x) { return (100 * x / o.words).toFixed(2) + '%'; };
+      return '<li class="score"><div class="sc-name">' + F.esc(name(slug)) + '</div><div class="bar" aria-hidden="true"><span class="r" style="width:' +
+        pct(o.right) + '"></span><span class="p" style="width:' + pct(o.partly) + '"></span><span class="x" style="width:' +
+        pct(o.wrong) + '"></span></div><div class="sc-num"><strong>' + F.esc(F.t('wall.ai.frac', o.right, o.words)) + '</strong> · ' +
+        F.esc(F.t('wall.ai.answers', o.judgements)) + '</div></li>';
+    });
+    $('aiSoon').hidden = scoreItems.length > 0;
+    $('legend').hidden = !scoreItems.length;
+    $('legend').innerHTML = '<span class="r">' + F.esc(F.t('wall.legend.right')) + '</span><span class="p">' +
+      F.esc(F.t('wall.legend.partly')) + '</span><span class="x">' + F.esc(F.t('wall.legend.wrong')) + '</span>';
+    showScorePage();
+  }
+
+  // as many languages as fit in one row; the next ones with the next picture
+  function perPage() {
+    if (narrowQuery.matches) return Math.max(1, scoreItems.length);
+    var box = $('scores'), width = box.clientWidth || box.parentNode.clientWidth;
+    var vw = window.innerWidth / 100;
+    var card = Math.min(250, Math.max(150, 10.5 * vw)), gap = 1.1 * vw;
+    return Math.max(1, Math.floor((width + gap) / (card + gap)));
+  }
+
+  function showScorePage() {
+    var most = perPage(), pages = Math.max(1, Math.ceil(scoreItems.length / most));
+    var per = Math.max(1, Math.ceil(scoreItems.length / pages));   // pages of even length: 5 + 5 + 4 rather than 6 + 6 + 2
+    if (scorePage >= pages) scorePage = 0;
+    var box = $('scores');
+    box.style.setProperty('--per', most);
+    box.innerHTML = scoreItems.slice(scorePage * per, scorePage * per + per).join('');
+    $('aiTotal').textContent = scoreItems.length ?
+      F.t('wall.ai.total', judgements, S.MIN) + (pages > 1 ? ' (' + (scorePage + 1) + '/' + pages + ')' : '') : '';
+  }
+
+  // ------------------------------------------------------------ the rest of the screen
+  function renderCta() {
+    var order = [F.lang].concat(F.LANGS.filter(function (l) { return l !== F.lang; }));
+    $('cta').innerHTML = order.map(function (l) {
+      return '<li lang="' + l + '">' + F.esc(F.strings[l]['wall.cta']) + '</li>';
+    }).join('');
+  }
+
+  function renderStatus() {
+    var t = lastOk ? lastOk.toLocaleTimeString(F.locale(), { hour: '2-digit', minute: '2-digit' }) : '';
+    var s = !loaded ? F.t('wall.loading') : online ? F.t('wall.updated', t) : F.t('wall.offline', t);
+    if (paused) s += ' · ' + F.t('wall.paused');
+    $('status').textContent = s;
+    $('status').className = online ? '' : 'off';
+  }
+
+  function renderCredits() {
+    $('aiCredit').textContent = F.t('credit.ai', S.MODEL, S.date(S.DRAFTED_ON));
+    $('picCredit').textContent = F.pictureCredit();
+  }
+
+  // ------------------------------------------------------------ start
+  F.initHeader();
+  F.onLang(function () {
+    renderCta(); renderScores(); renderStatus(); renderCredits();
+    if (started) redraw();
+  });
+  F.apply();
+  loadCache();
+  rebuild();
+  renderCta(); renderScores(); renderStatus(); renderCredits();
+  if (lastOk) show(0);                       // what this device saw last, while new data is fetched
+  refresh().then(function () { if (!started || !slides[pos]) show(0); });
+  setInterval(refresh, REFRESH_MS);
+  window.addEventListener('resize', function () { showScorePage(); if (started) redraw(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { show(pos + 1); }
+    else if (e.key === 'ArrowLeft') { show(pos - 1); }
+    else if (e.key === ' ') { e.preventDefault(); togglePause(); }
+  });
+  $('fsBtn').addEventListener('click', function () {
+    var d = document.documentElement;
+    if (d.requestFullscreen) d.requestFullscreen().catch(function () { /* not allowed */ });
+  });
+  document.addEventListener('fullscreenchange', function () { $('fsBtn').hidden = !!document.fullscreenElement; });
+})();
+</script>
+</body>
+</html>

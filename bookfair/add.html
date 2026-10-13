@@ -553,9 +553,11 @@
   // ------------------------------------------------------------ start
   F.initHeader();
   F.onLang(function () {
+    var ticked = $('consentCheck').checked;   // a box ticked before switching the language stays ticked
     renderPictures();
     if (!$('step2').hidden) { chosenBox($('chosen2'), false); renderSuggestions(); renderLanguages(); }
     if (!$('step3').hidden) { chosenBox($('chosen3'), true); keyboardLabels(); kb.render(); renderConsent(); }
+    if (visitor.consent === null) $('consentCheck').checked = ticked;
     updateQueue();
     showPictureCredit();
   });
