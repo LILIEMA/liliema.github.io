@@ -1,6 +1,7 @@
 /* LILIEMA at the Helsinki Book Fair 2026: Check the AI, parts shared by the game and the word wall.
-   Scores: a word counts as right or wrong when most of at least MIN judgements say so;
-   until then the screening verdict stands (rule proposed in the plan, section 6.3, to be confirmed by LILIEMA). */
+   The AI's words are not screened before the fair: the visitors check them (decided 13 October 2026).
+   Scores: a word counts as right or wrong when most of at least MIN judgements say so; until then it is
+   undecided (rule proposed in the plan, section 6.3). A screening verdict, if one is ever entered, fills the gap. */
 (function () {
   'use strict';
   var MIN = 3;
@@ -8,21 +9,21 @@
   function n(x) { return Number(x) || 0; }
   function total(r) { return n(r.n_right) + n(r.n_wrong) + n(r.n_not_sure); }
 
-  /* 'right', 'wrong', or the screening verdict ('right', 'partly', 'wrong') */
+  /* 'right' or 'wrong' by the visitors' majority; otherwise a screening verdict if any, or 'open' (undecided) */
   function status(r) {
     var t = total(r);
     if (t >= MIN) {
       if (n(r.n_right) * 2 > t) return 'right';
       if (n(r.n_wrong) * 2 > t) return 'wrong';
     }
-    return r.checker_verdict || 'partly';
+    return r.checker_verdict || 'open';
   }
 
-  /* Per language: words in the game, right / partly / wrong, and the number of judgements */
+  /* Per language: words in the game, right / partly / wrong / open, and the number of judgements */
   function byLanguage(rows) {
     var out = {};
     (rows || []).forEach(function (r) {
-      var o = out[r.language_slug] || (out[r.language_slug] = { words: 0, right: 0, partly: 0, wrong: 0, judgements: 0 });
+      var o = out[r.language_slug] || (out[r.language_slug] = { words: 0, right: 0, partly: 0, wrong: 0, open: 0, judgements: 0 });
       o.words++;
       o[status(r)]++;
       o.judgements += total(r);
@@ -45,28 +46,28 @@
       'ai.name': 'Tarkista tekoäly',
       'ai.text': 'Nämä sanat on kirjoittanut tekoäly (Anthropicin Claude). Kaltaisesi puhujat kertovat meille, ovatko ne oikein.',
       'credit.ai': function (model, date) {
-        return 'Tekoälyn sanat: Claude (Anthropic, malli ' + model + '), ' + date + ', mallin omasta tietämyksestä ilman sanakirjoja; LILIEMA kävi ne läpi ennen messuja.';
+        return 'Tekoälyn sanat: Claude (Anthropic, malli ' + model + '), ' + date + ', mallin omasta tietämyksestä ilman sanakirjoja. Niitä ei ole tarkistettu ennen messuja: messuvieraat tarkistavat ne.';
       }
     },
     sv: {
       'ai.name': 'Granska AI:n',
       'ai.text': 'De här orden har skrivits av en AI (Claude, från Anthropic). Talare som du berättar för oss om de stämmer.',
       'credit.ai': function (model, date) {
-        return 'AI:ns ord: Claude (Anthropic, modell ' + model + '), ' + date + ', ur modellens egen kunskap utan ordböcker; LILIEMA gick igenom dem före mässan.';
+        return 'AI:ns ord: Claude (Anthropic, modell ' + model + '), ' + date + ', ur modellens egen kunskap utan ordböcker. De har inte granskats före mässan: mässans besökare granskar dem.';
       }
     },
     en: {
       'ai.name': 'Check the AI',
       'ai.text': 'These words were written by an AI (Claude, made by Anthropic). Speakers like you tell us whether they are right.',
       'credit.ai': function (model, date) {
-        return 'The AI’s words: Claude (Anthropic, model ' + model + '), ' + date + ', from the model’s own knowledge without dictionaries; screened by LILIEMA before the fair.';
+        return 'The AI’s words: Claude (Anthropic, model ' + model + '), ' + date + ', from the model’s own knowledge without dictionaries. They were not checked before the fair: the visitors check them.';
       }
     },
     fr: {
       'ai.name': 'Vérifiez l’IA',
       'ai.text': 'Ces mots ont été écrits par une IA (Claude, créée par Anthropic). Des locuteurs comme vous nous disent s’ils sont justes.',
       'credit.ai': function (model, date) {
-        return 'Les mots de l’IA : Claude (Anthropic, modèle ' + model + '), ' + date + ', d’après les connaissances propres du modèle, sans dictionnaire ; vérifiés par LILIEMA avant le salon.';
+        return 'Les mots de l’IA : Claude (Anthropic, modèle ' + model + '), ' + date + ', d’après les connaissances propres du modèle, sans dictionnaire. Ils n’ont pas été vérifiés avant le salon : ce sont les visiteurs qui les vérifient.';
       }
     }
   });

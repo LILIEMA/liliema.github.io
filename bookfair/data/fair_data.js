@@ -622,7 +622,13 @@ window.FAIR_DATA = {
     "ɛ",
     "ɔ",
     "ʼ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly kirjoitti asante-twiä.",
+    "sv": "AI:n skrev asante-twi.",
+    "en": "The AI wrote Asante Twi.",
+    "fr": "L’IA a écrit en twi asante."
+   }
   },
   {
    "slug": "ewe",
@@ -647,7 +653,13 @@ window.FAIR_DATA = {
     "ŋ",
     "ɔ",
     "ʋ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti ewen vakiokirjoitusasua ilman toonimerkkejä.",
+    "sv": "AI:n använde standardstavning för ewe, utan tonmarkeringar.",
+    "en": "The AI used standard Ewe spelling, without tone marks.",
+    "fr": "L’IA a utilisé l’orthographe standard de l’éwé, sans les tons."
+   }
   },
   {
    "slug": "ga",
@@ -664,7 +676,8 @@ window.FAIR_DATA = {
     "ɛ",
     "ŋ",
     "ɔ"
-   ]
+   ],
+   "ai_note": null
   },
   {
    "slug": "dagbani",
@@ -685,7 +698,8 @@ window.FAIR_DATA = {
     "ɔ",
     "ʒ",
     "ʼ"
-   ]
+   ],
+   "ai_note": null
   },
   {
    "slug": "hausa",
@@ -705,7 +719,13 @@ window.FAIR_DATA = {
     "ƙ",
     "ƴ",
     "ʼ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti hausan vakiokirjoitusasua ilman toonin ja vokaalinpituuden merkintää.",
+    "sv": "AI:n använde standardstavning för hausa, utan markering av ton och vokallängd.",
+    "en": "The AI used standard Hausa spelling, without marking tone or vowel length.",
+    "fr": "L’IA a utilisé l’orthographe standard du haoussa, sans noter les tons ni la longueur des voyelles."
+   }
   },
   {
    "slug": "yoruba",
@@ -724,7 +744,13 @@ window.FAIR_DATA = {
     "ẹ",
     "ọ",
     "ṣ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly kirjoitti jorubaa ja merkitsi kaikki toonit.",
+    "sv": "AI:n skrev yoruba och markerade alla toner.",
+    "en": "The AI wrote Yoruba with all tones marked.",
+    "fr": "L’IA a écrit le yoruba en notant tous les tons."
+   }
   },
   {
    "slug": "igbo",
@@ -743,7 +769,13 @@ window.FAIR_DATA = {
     "ụ",
     "ṅ",
     "ʼ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti pisteellisiä kirjaimia ị ọ ụ ṅ mutta ei toonimerkkejä, kuten arkikirjoituksessa.",
+    "sv": "AI:n använde bokstäverna med punkt, ị ọ ụ ṅ, men inga tonmarkeringar, som i vardaglig skrift.",
+    "en": "The AI used the dotted letters ị ọ ụ ṅ but no tone marks, as in everyday writing.",
+    "fr": "L’IA a utilisé les lettres pointées ị ọ ụ ṅ mais pas les tons, comme dans l’écriture courante."
+   }
   },
   {
    "slug": "naija",
@@ -761,7 +793,13 @@ window.FAIR_DATA = {
     "Broken",
     "Pidgin nigérian"
    ],
-   "letters": []
+   "letters": [],
+   "ai_note": {
+    "fi": "Tekoäly käytti yleistä englantiin pohjautuvaa kirjoitustapaa, kuten BBC News Pidginissä.",
+    "sv": "AI:n använde den vanliga engelskbaserade stavningen, som i BBC News Pidgin.",
+    "en": "The AI used the common English-based spelling, as in BBC News Pidgin.",
+    "fr": "L’IA a utilisé l’orthographe courante, proche de l’anglais, comme sur BBC News Pidgin."
+   }
   },
   {
    "slug": "swahili",
@@ -777,7 +815,13 @@ window.FAIR_DATA = {
    ],
    "letters": [
     "ʼ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly kirjoitti yleiskielistä swahilia.",
+    "sv": "AI:n skrev standardswahili.",
+    "en": "The AI wrote Standard Swahili.",
+    "fr": "L’IA a écrit en swahili standard."
+   }
   },
   {
    "slug": "gikuyu",
@@ -796,7 +840,13 @@ window.FAIR_DATA = {
     "ĩ",
     "ũ",
     "ʼ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti kirjaimia ĩ ja ũ.",
+    "sv": "AI:n använde bokstäverna ĩ och ũ.",
+    "en": "The AI used the letters ĩ and ũ.",
+    "fr": "L’IA a utilisé les lettres ĩ et ũ."
+   }
   },
   {
    "slug": "kamba",
@@ -814,7 +864,8 @@ window.FAIR_DATA = {
     "ĩ",
     "ũ",
     "ʼ"
-   ]
+   ],
+   "ai_note": null
   },
   {
    "slug": "dholuo",
@@ -830,7 +881,13 @@ window.FAIR_DATA = {
    ],
    "letters": [
     "ʼ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti Raamatun ja koulujen tavallista kirjoitustapaa.",
+    "sv": "AI:n använde den vanliga stavningen från Bibeln och skolan.",
+    "en": "The AI used the common spelling of the Bible and schools.",
+    "fr": "L’IA a utilisé l’orthographe courante de la Bible et de l’école."
+   }
   },
   {
    "slug": "somali",
@@ -848,7 +905,13 @@ window.FAIR_DATA = {
    ],
    "letters": [
     "ʼ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti virallista latinalaista kirjoitusasua, jossa pitkät vokaalit kirjoitetaan kahdesti.",
+    "sv": "AI:n använde den officiella latinska stavningen, med långa vokaler skrivna dubbelt.",
+    "en": "The AI used the official Latin spelling, with long vowels written double.",
+    "fr": "L’IA a utilisé l’orthographe latine officielle, avec les voyelles longues redoublées."
+   }
   },
   {
    "slug": "lingala",
@@ -865,7 +928,13 @@ window.FAIR_DATA = {
    "letters": [
     "ɛ",
     "ɔ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti sanakirjojen kirjoitusasua, jossa on ɛ ja ɔ, ilman toonimerkkejä.",
+    "sv": "AI:n använde ordböckernas stavning med ɛ och ɔ, utan tonmarkeringar.",
+    "en": "The AI used the dictionary spelling with ɛ and ɔ, without tone marks.",
+    "fr": "L’IA a utilisé l’orthographe des dictionnaires, avec ɛ et ɔ, sans les tons."
+   }
   },
   {
    "slug": "wolof",
@@ -890,7 +959,13 @@ window.FAIR_DATA = {
     "ó",
     "ñ",
     "ŋ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly käytti Senegalin virallista kirjoitusasua.",
+    "sv": "AI:n använde Senegals officiella stavning.",
+    "en": "The AI used the official spelling of Senegal.",
+    "fr": "L’IA a utilisé l’orthographe officielle du Sénégal."
+   }
   },
   {
    "slug": "mandinka",
@@ -914,7 +989,13 @@ window.FAIR_DATA = {
    "letters": [
     "ñ",
     "ŋ"
-   ]
+   ],
+   "ai_note": {
+    "fi": "Tekoäly noudatti Gambian kirjoitustapaa ja antoi sanat -o-päätteisinä, kuten ne yleensä mainitaan.",
+    "sv": "AI:n följde gambisk stavning och gav orden med ändelsen -o, som de brukar anges.",
+    "en": "The AI followed Gambian spelling and gave the forms ending in -o, as words are usually cited.",
+    "fr": "L’IA a suivi l’orthographe gambienne et donné les formes en -o, comme on cite habituellement les mots."
+   }
   }
  ],
  "countries": {

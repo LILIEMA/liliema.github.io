@@ -50,6 +50,7 @@ a.link-btn { display: inline-flex; align-items: center; }
 .ai-tag { display: inline-block; background: var(--teal-light); color: var(--teal-dark); font-weight: 700; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; border-radius: 6px; padding: 4px 8px; }
 .ai-word .word { font-size: 46px; font-weight: 700; line-height: 1.15; margin: 10px 0 4px; overflow-wrap: anywhere; }
 .question { font-size: 20px; font-weight: 600; color: var(--teal-dark); margin: 16px 0 10px; }
+.ai-norm { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
 .answers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .answer {
   min-height: 64px; border-radius: 14px; border: 2px solid; font-weight: 700; font-size: 19px; cursor: pointer;
@@ -189,6 +190,7 @@ a.link-btn { display: inline-flex; align-items: center; }
         <div class="ai-word">
           <span class="ai-tag" data-t="chk.ai.tag"></span>
           <div class="word" id="aiWord" lang=""></div>
+          <p class="ai-norm" id="aiNorm" hidden></p>
           <p class="question" id="question"></p>
           <div class="answers">
             <button type="button" class="answer right" data-j="right"><span class="mark" aria-hidden="true">✓</span><span data-t="chk.right"></span></button>
@@ -299,7 +301,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.lang.notin': function (name) { return 'Kieli ”' + name + '” ei ole vielä mukana pelissä. Voit lisätä sanoja omalla kielelläsi sivulla Lisää sana.'; },
       'chk.change.lang': 'Vaihda kieli',
       'chk.progress': function (i, n) { return 'Sana ' + i + '/' + n; },
-      'chk.ai.tag': 'Tekoälyn sana',
+      'chk.ai.tag': 'Tekoälyn sana · tarkistamaton',
       'chk.q': function (name) { return 'Onko tämä oikea sana kielellä ' + name + '?'; },
       'chk.right': 'Oikein', 'chk.wrong': 'Väärin', 'chk.notsure': 'En ole varma',
       'chk.fix.q': function (name) { return 'Miten se sanotaan kielellä ' + name + '? (vapaaehtoinen)'; },
@@ -334,7 +336,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.lang.notin': function (name) { return 'Språket ”' + name + '” är inte med i spelet ännu. Du kan lägga till ord på ditt språk på sidan Lägg till ett ord.'; },
       'chk.change.lang': 'Byt språk',
       'chk.progress': function (i, n) { return 'Ord ' + i + ' av ' + n; },
-      'chk.ai.tag': 'AI:ns ord',
+      'chk.ai.tag': 'AI:ns ord · ogranskat',
       'chk.q': function (name) { return 'Är det här rätt ord på ' + name + '?'; },
       'chk.right': 'Rätt', 'chk.wrong': 'Fel', 'chk.notsure': 'Vet inte',
       'chk.fix.q': function (name) { return 'Hur säger man det på ' + name + '? (frivilligt)'; },
@@ -369,7 +371,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.lang.notin': function (name) { return 'The language “' + name + '” is not in the game yet. You can add words in your language on the Add a word page.'; },
       'chk.change.lang': 'Change language',
       'chk.progress': function (i, n) { return 'Word ' + i + ' of ' + n; },
-      'chk.ai.tag': 'The AI’s word',
+      'chk.ai.tag': 'The AI’s word · unchecked',
       'chk.q': function (name) { return 'Is this the right word in ' + name + '?'; },
       'chk.right': 'Right', 'chk.wrong': 'Wrong', 'chk.notsure': 'Not sure',
       'chk.fix.q': function (name) { return 'How do you say it in ' + name + '? (optional)'; },
@@ -404,7 +406,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.lang.notin': function (name) { return 'La langue « ' + name + ' » n’est pas encore dans le jeu. Vous pouvez ajouter des mots dans votre langue sur la page Ajoutez un mot.'; },
       'chk.change.lang': 'Changer de langue',
       'chk.progress': function (i, n) { return 'Mot ' + i + ' sur ' + n; },
-      'chk.ai.tag': 'Le mot de l’IA',
+      'chk.ai.tag': 'Le mot de l’IA · non vérifié',
       'chk.q': function (name) { return 'Est-ce le bon mot en ' + name + ' ?'; },
       'chk.right': 'Juste', 'chk.wrong': 'Faux', 'chk.notsure': 'Je ne sais pas',
       'chk.fix.q': function (name) { return 'Comment le dit-on en ' + name + ' ? (facultatif)'; },
@@ -603,6 +605,9 @@ a.link-btn { display: inline-flex; align-items: center; }
     $('gamePic').src = c.picture;
     $('gameConcept').textContent = label(c);
     $('aiWord').textContent = d.draft;
+    var l = langBySlug[visitor.langSlug], norm = l && l.ai_note ? l.ai_note[F.lang] : '';
+    $('aiNorm').textContent = norm || '';
+    $('aiNorm').hidden = !norm;
     $('question').textContent = F.t('chk.q', langName());
     $('fixLabel').textContent = F.t('chk.fix.q', langName());
   }

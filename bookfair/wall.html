@@ -86,6 +86,7 @@ body.wall-page { height: 100vh; overflow: hidden; }
 .legend .r::before, .bar .r { background: var(--teal); }
 .legend .p::before, .bar .p { background: var(--gold); }
 .legend .x::before, .bar .x { background: #e39a7d; }
+.legend .o::before, .bar .o { background: #c9d3d6; }
 .scores { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--per, 8), minmax(0, 1fr)); gap: 1vh 1.1vw; }
 .score { min-width: 0; }
 .sc-name { font-weight: 700; font-size: clamp(12px, 1.9vh, 30px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -207,8 +208,8 @@ body.wall-page { height: 100vh; overflow: hidden; }
       'wall.ai.soon': 'Peli alkaa pian.',
       'wall.ai.frac': function (r, n) { return r + '/' + n + ' oikein'; },
       'wall.ai.answers': function (n) { return n === 1 ? '1 vastaus' : n + ' vastausta'; },
-      'wall.ai.total': function (n, min) { return 'Vastauksia yhteensä ' + n + '. Sana on oikein tai väärin, kun vähintään ' + min + ' puhujaa on vastannut ja useimmat ovat samaa mieltä; siihen asti ratkaisee LILIEMAn tarkistus.'; },
-      'wall.legend.right': 'oikein', 'wall.legend.partly': 'osittain', 'wall.legend.wrong': 'väärin',
+      'wall.ai.total': function (n, min) { return 'Vastauksia yhteensä ' + n + '. Sana on oikein tai väärin, kun vähintään ' + min + ' puhujaa on vastannut ja useimmat ovat samaa mieltä.'; },
+      'wall.legend.right': 'oikein', 'wall.legend.partly': 'osittain', 'wall.legend.wrong': 'väärin', 'wall.legend.open': 'ratkaisematta',
       'wall.loading': 'Haetaan sanoja…',
       'wall.updated': function (t) { return 'Päivitetty ' + t; },
       'wall.offline': function (t) { return t ? 'Ei yhteyttä. Viimeksi päivitetty ' + t + '.' : 'Ei yhteyttä.'; },
@@ -224,8 +225,8 @@ body.wall-page { height: 100vh; overflow: hidden; }
       'wall.ai.soon': 'Spelet börjar snart.',
       'wall.ai.frac': function (r, n) { return r + '/' + n + ' rätt'; },
       'wall.ai.answers': function (n) { return n + ' svar'; },
-      'wall.ai.total': function (n, min) { return 'Svar totalt: ' + n + '. Ett ord räknas som rätt eller fel när minst ' + min + ' talare har svarat och de flesta är överens; till dess gäller LILIEMAs granskning.'; },
-      'wall.legend.right': 'rätt', 'wall.legend.partly': 'delvis', 'wall.legend.wrong': 'fel',
+      'wall.ai.total': function (n, min) { return 'Svar totalt: ' + n + '. Ett ord räknas som rätt eller fel när minst ' + min + ' talare har svarat och de flesta är överens.'; },
+      'wall.legend.right': 'rätt', 'wall.legend.partly': 'delvis', 'wall.legend.wrong': 'fel', 'wall.legend.open': 'oavgjort',
       'wall.loading': 'Hämtar ord…',
       'wall.updated': function (t) { return 'Uppdaterad ' + t; },
       'wall.offline': function (t) { return t ? 'Ingen anslutning. Senast uppdaterad ' + t + '.' : 'Ingen anslutning.'; },
@@ -241,8 +242,8 @@ body.wall-page { height: 100vh; overflow: hidden; }
       'wall.ai.soon': 'The game starts soon.',
       'wall.ai.frac': function (r, n) { return r + '/' + n + ' right'; },
       'wall.ai.answers': function (n) { return n === 1 ? '1 answer' : n + ' answers'; },
-      'wall.ai.total': function (n, min) { return 'Answers so far: ' + n + '. A word counts as right or wrong once at least ' + min + ' speakers have answered and most agree; until then LILIEMA’s check stands.'; },
-      'wall.legend.right': 'right', 'wall.legend.partly': 'partly', 'wall.legend.wrong': 'wrong',
+      'wall.ai.total': function (n, min) { return 'Answers so far: ' + n + '. A word counts as right or wrong once at least ' + min + ' speakers have answered and most agree.'; },
+      'wall.legend.right': 'right', 'wall.legend.partly': 'partly', 'wall.legend.wrong': 'wrong', 'wall.legend.open': 'undecided',
       'wall.loading': 'Fetching words…',
       'wall.updated': function (t) { return 'Updated ' + t; },
       'wall.offline': function (t) { return t ? 'No connection. Last updated ' + t + '.' : 'No connection.'; },
@@ -258,8 +259,8 @@ body.wall-page { height: 100vh; overflow: hidden; }
       'wall.ai.soon': 'Le jeu commence bientôt.',
       'wall.ai.frac': function (r, n) { return r + '/' + n + ' justes'; },
       'wall.ai.answers': function (n) { return n > 1 ? n + ' réponses' : n + ' réponse'; },
-      'wall.ai.total': function (n, min) { return 'Réponses jusqu’ici : ' + n + '. Un mot compte comme juste ou faux dès qu’au moins ' + min + ' locuteurs ont répondu et que la majorité est d’accord ; jusque-là, la vérification de LILIEMA s’applique.'; },
-      'wall.legend.right': 'juste', 'wall.legend.partly': 'en partie', 'wall.legend.wrong': 'faux',
+      'wall.ai.total': function (n, min) { return 'Réponses jusqu’ici : ' + n + '. Un mot compte comme juste ou faux dès qu’au moins ' + min + ' locuteurs ont répondu et que la majorité est d’accord.'; },
+      'wall.legend.right': 'juste', 'wall.legend.partly': 'en partie', 'wall.legend.wrong': 'faux', 'wall.legend.open': 'indécis',
       'wall.loading': 'Chargement des mots…',
       'wall.updated': function (t) { return 'Mis à jour à ' + t; },
       'wall.offline': function (t) { return t ? 'Pas de connexion. Dernière mise à jour à ' + t + '.' : 'Pas de connexion.'; },
@@ -491,23 +492,25 @@ body.wall-page { height: 100vh; overflow: hidden; }
 
   function renderScores() {
     var rows = scores.filter(function (r) { return inGame(r.concept_slug); });
-    var by = S.byLanguage(rows), slugs = Object.keys(by);
+    var by = S.byLanguage(rows), slugs = Object.keys(by), anyPartly = false;
     var name = function (slug) { return langBySlug[slug] ? langBySlug[slug].name : slug; };
     slugs.sort(function (a, b) { return name(a).localeCompare(name(b), F.locale()); });
     judgements = 0;
     scoreItems = slugs.map(function (slug) {
       var o = by[slug];
       judgements += o.judgements;
+      if (o.partly) anyPartly = true;
       var pct = function (x) { return (100 * x / o.words).toFixed(2) + '%'; };
       return '<li class="score"><div class="sc-name">' + F.esc(name(slug)) + '</div><div class="bar" aria-hidden="true"><span class="r" style="width:' +
         pct(o.right) + '"></span><span class="p" style="width:' + pct(o.partly) + '"></span><span class="x" style="width:' +
-        pct(o.wrong) + '"></span></div><div class="sc-num"><strong>' + F.esc(F.t('wall.ai.frac', o.right, o.words)) + '</strong> · ' +
-        F.esc(F.t('wall.ai.answers', o.judgements)) + '</div></li>';
+        pct(o.wrong) + '"></span><span class="o" style="width:' + pct(o.open) + '"></span></div><div class="sc-num"><strong>' +
+        F.esc(F.t('wall.ai.frac', o.right, o.words)) + '</strong> · ' + F.esc(F.t('wall.ai.answers', o.judgements)) + '</div></li>';
     });
     $('aiSoon').hidden = scoreItems.length > 0;
     $('legend').hidden = !scoreItems.length;
-    $('legend').innerHTML = '<span class="r">' + F.esc(F.t('wall.legend.right')) + '</span><span class="p">' +
-      F.esc(F.t('wall.legend.partly')) + '</span><span class="x">' + F.esc(F.t('wall.legend.wrong')) + '</span>';
+    $('legend').innerHTML = '<span class="r">' + F.esc(F.t('wall.legend.right')) + '</span>' +
+      (anyPartly ? '<span class="p">' + F.esc(F.t('wall.legend.partly')) + '</span>' : '') +
+      '<span class="x">' + F.esc(F.t('wall.legend.wrong')) + '</span><span class="o">' + F.esc(F.t('wall.legend.open')) + '</span>';
     showScorePage();
   }
 
