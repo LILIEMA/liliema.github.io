@@ -15,7 +15,8 @@
   background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
   box-shadow: var(--shadow); padding: 20px; text-decoration: none; color: var(--text); min-height: 120px;
 }
-.tile:hover, .tile:focus-visible { border-color: var(--teal-mid); outline: none; box-shadow: 0 4px 16px rgba(0, 100, 100, .18); }
+.tile:hover { border-color: var(--teal-mid); box-shadow: 0 4px 16px rgba(0, 100, 100, .18); }
+.tile:focus-visible { border-color: var(--teal-mid); outline: none; box-shadow: 0 4px 16px rgba(0, 100, 100, .18); }
 .tile-title { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--teal-dark); }
 .tile-text { color: var(--muted); font-size: 15px; }
 </style>
@@ -46,6 +47,14 @@
       <span class="tile-title" data-t="chk.title.tile"></span>
       <span class="tile-text" data-t="chk.tile"></span>
     </a>
+    <a class="tile" href="lookup.html">
+      <span class="tile-title" data-t="lu.title.tile"></span>
+      <span class="tile-text" data-t="lu.tile"></span>
+    </a>
+    <a class="tile" href="detective.html">
+      <span class="tile-title" data-t="det.title.tile"></span>
+      <span class="tile-text" data-t="det.tile"></span>
+    </a>
     <a class="tile" href="liliema.html">
       <span class="tile-title" data-t="lw.title.tile"></span>
       <span class="tile-text" data-t="lw.tile"></span>
@@ -73,6 +82,10 @@ Fair.add({
     'chk.tile': 'Tekoäly on kirjoittanut sanoja afrikkalaisilla kielillä. Ovatko ne oikein?',
     'wall.title.tile': 'Sanaseinä',
     'wall.tile': 'Isolle näytölle: kuvat ja niiden sanat kaikilla osastolla kirjoitetuilla kielillä.',
+    'lu.title.tile': 'Etsi sana',
+    'lu.tile': 'Kirjoita sana suomeksi, ruotsiksi, englanniksi, ranskaksi tai jollakin afrikkalaisella kielellä, niin näet sen kaikilla osaston kielillä.',
+    'det.title.tile': 'Kielietsivä',
+    'det.tile': 'Millä kielellä sana on? Kirjaimet ovat vihjeitä.',
     'lw.title.tile': 'LILIEMA-sanat',
     'lw.tile': 'Sanoja Senegalin ja Gambian kielistä merkityksineen suomeksi, ruotsiksi, englanniksi ja ranskaksi.',
     'home.footer': 'LILIEMA on senegalilainen järjestö, joka tukee lukutaitoa monikielisillä alueilla.'
@@ -87,6 +100,10 @@ Fair.add({
     'chk.tile': 'En AI har skrivit ord på afrikanska språk. Stämmer de?',
     'wall.title.tile': 'Ordväggen',
     'wall.tile': 'För den stora skärmen: bilderna och deras ord på alla språk som skrivits i montern.',
+    'lu.title.tile': 'Slå upp ett ord',
+    'lu.tile': 'Skriv ett ord på finska, svenska, engelska, franska eller ett afrikanskt språk och se det på alla monterns språk.',
+    'det.title.tile': 'Språkdetektiven',
+    'det.tile': 'Vilket språk är ordet på? Bokstäverna är ledtrådarna.',
     'lw.title.tile': 'LILIEMA-ord',
     'lw.tile': 'Ord på språk i Senegal och Gambia, med betydelser på finska, svenska, engelska och franska.',
     'home.footer': 'LILIEMA är en senegalesisk organisation som stöder läs- och skrivkunnighet i flerspråkiga områden.'
@@ -101,6 +118,10 @@ Fair.add({
     'chk.tile': 'An AI has written words in African languages. Are they right?',
     'wall.title.tile': 'Word wall',
     'wall.tile': 'For the big screen: the pictures with their words in every language written at the stall.',
+    'lu.title.tile': 'Look up a word',
+    'lu.tile': 'Type a word in Finnish, Swedish, English, French or an African language and see it in all the stall’s languages.',
+    'det.title.tile': 'Language Detective',
+    'det.tile': 'Which language is this word in? Its letters are the clues.',
     'lw.title.tile': 'LILIEMA words',
     'lw.tile': 'Words in languages of Senegal and The Gambia, with Finnish, Swedish, English and French meanings.',
     'home.footer': 'LILIEMA is a Senegalese NGO that supports literacy in multilingual areas.'
@@ -115,6 +136,10 @@ Fair.add({
     'chk.tile': 'Une IA a écrit des mots dans des langues africaines. Sont-ils justes ?',
     'wall.title.tile': 'Mur de mots',
     'wall.tile': 'Pour le grand écran : les images et leurs mots dans toutes les langues écrites au stand.',
+    'lu.title.tile': 'Cherchez un mot',
+    'lu.tile': 'Tapez un mot en finnois, en suédois, en anglais, en français ou dans une langue africaine, et voyez-le dans toutes les langues du stand.',
+    'det.title.tile': 'Détective des langues',
+    'det.tile': 'Dans quelle langue est ce mot ? Ses lettres sont les indices.',
     'lw.title.tile': 'Mots LILIEMA',
     'lw.tile': 'Des mots des langues du Sénégal et de la Gambie, avec leur sens en finnois, en suédois, en anglais et en français.',
     'home.footer': 'LILIEMA est une association sénégalaise qui soutient l’alphabétisation dans les régions multilingues.'

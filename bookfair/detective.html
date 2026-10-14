@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Kielietsivä · Helsingin kirjamessut 2026</title>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="data/fair_data.js"></script>
+<script src="assets/fair.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/checkai.js"></script>
+<script src="assets/words.js"></script>
+<style>
+.btn {
+  padding: 12px 24px; min-height: 56px; border-radius: 28px; border: 2px solid var(--teal);
+  background: var(--white); color: var(--teal-dark); font-weight: 700; font-size: 18px; cursor: pointer;
+}
+.btn.primary { background: var(--teal); color: #fff; }
+.btn.primary:disabled { background: #9bbcbc; border-color: #9bbcbc; cursor: default; }
+.btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.link-btn { background: none; border: none; color: var(--teal); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 8px 6px; min-height: 44px; font-size: 15px; }
+.notice { font-size: 14px; color: var(--muted); margin: 0; }
+
+/* Start */
+.start { display: grid; gap: 18px; align-items: center; max-width: 880px; }
+.start .how { font-size: 18px; margin: 0; max-width: 62ch; }
+.start .examples { display: flex; flex-wrap: wrap; gap: 10px; }
+.start .examples span { font-size: 26px; font-weight: 700; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 6px 14px; }
+.start .examples mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 4px; padding: 0 2px; }
+.start .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+/* Game */
+.game-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; background: var(--white); border-radius: var(--radius); padding: 8px 14px; box-shadow: var(--shadow); }
+.game-bar .progress { font-weight: 700; color: var(--teal-dark); font-size: 18px; margin-right: auto; }
+.game-bar .score { color: var(--muted); font-weight: 600; }
+.game { display: grid; gap: 18px; margin-top: 16px; }
+.word-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 22px; }
+.tag { display: inline-block; font-weight: 700; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; border-radius: 6px; padding: 4px 8px; }
+.tag.ai { background: var(--teal-light); color: var(--teal-dark); }
+.tag.visitor { background: var(--gold-light); color: var(--gold-dark); }
+.the-word { font-size: 64px; font-weight: 700; line-height: 1.15; margin: 14px 0 6px; overflow-wrap: anywhere; letter-spacing: .01em; }
+.the-word mark.clue { background: var(--gold-light); color: var(--gold-dark); border-radius: 6px; box-shadow: inset 0 -4px 0 var(--gold); padding: 0 2px; }
+.question { font-size: 20px; font-weight: 600; color: var(--teal-dark); margin: 10px 0 12px; }
+.options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.option {
+  min-height: 64px; border-radius: 14px; border: 2px solid var(--teal-mid); background: var(--white); color: var(--teal-dark);
+  font-weight: 700; font-size: 20px; cursor: pointer; padding: 8px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+}
+.option .name { display: inline-flex; align-items: center; gap: 8px; }
+.option small { font-size: 14px; font-weight: 600; opacity: .85; line-height: 1.25; }
+.option:hover:not([disabled]) { background: var(--teal-light); }
+.option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.option[disabled] { cursor: default; opacity: .55; }
+.option.correct { background: var(--teal); border-color: var(--teal); color: #fff; opacity: 1; }
+.option.chosen-wrong { background: var(--coral); border-color: var(--coral); color: #fff; opacity: 1; }
+.side { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; }
+.side h2 { font-family: var(--font-display); color: var(--teal-dark); font-size: 24px; margin: 0 0 10px; }
+.clues { display: flex; flex-direction: column; gap: 10px; margin: 0 0 14px; padding: 0; list-style: none; }
+.clues li { border-left: 5px solid var(--gold); background: var(--gold-light); border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 17px; }
+.clues b { font-size: 22px; color: var(--gold-dark); }
+.clue-btn { display: inline-flex; align-items: center; gap: 8px; }
+.result-head { font-size: 26px; font-weight: 700; margin: 0; }
+.result-head.right { color: var(--teal); } .result-head.wrong { color: var(--coral); }
+.result-lang { font-size: 19px; margin: 4px 0 14px; }
+.meaning { display: flex; gap: 16px; align-items: center; margin: 0 0 14px; }
+.meaning img { width: 120px; height: 120px; flex: 0 0 auto; object-fit: contain; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.meaning .label { font-family: var(--font-display); color: var(--teal-dark); font-size: 28px; line-height: 1.15; }
+.meaning .others { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 15px; margin-top: 4px; }
+.meaning .others b { font-size: 11px; letter-spacing: .1em; color: var(--muted); margin-right: 4px; }
+.facts { margin: 0 0 14px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 16px; }
+.facts b { color: var(--gold-dark); font-size: 19px; }
+.facts .src { color: var(--muted); font-size: 15px; }
+.end { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 30px; text-align: center; }
+.end .big { font-size: 30px; font-weight: 700; color: var(--teal-dark); margin: 0 0 8px; }
+.end p { font-size: 20px; margin: 0 0 20px; }
+.end .actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+@media (min-width: 900px) {
+  .game { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); align-items: start; }
+}
+@media (max-width: 560px) {
+  .the-word { font-size: 46px; }
+  .option { font-size: 18px; min-height: 58px; }
+  .meaning img { width: 88px; height: 88px; }
+  .meaning .label { font-size: 24px; }
+}
+</style>
+</head>
+<body data-title="det.title">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span><span class="fair-name" data-t="fair.name">Helsingin kirjamessut 2026</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="app wide">
+  <section>
+    <h1 class="page-title" data-t="det.title"></h1>
+    <p class="page-intro" data-t="det.intro"></p>
+  </section>
+
+  <!-- start -->
+  <section class="card start" id="stepStart">
+    <p class="how" id="how"></p>
+    <div class="examples" id="examples" aria-hidden="true"></div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="startBtn" data-t="det.start" disabled></button>
+      <p class="notice" id="startNote" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- a word -->
+  <section id="stepGame" hidden>
+    <div class="game-bar">
+      <span class="progress" id="progress"></span>
+      <span class="score" id="score"></span>
+      <button type="button" class="link-btn" id="restartBtn" data-t="det.restart"></button>
+    </div>
+    <div class="game">
+      <div class="word-card">
+        <span class="tag" id="tag"></span>
+        <div class="the-word" id="word"></div>
+        <p class="question" data-t="det.q"></p>
+        <div class="options" id="options"></div>
+      </div>
+      <div class="side" id="cluePanel">
+        <h2 data-t="det.clues"></h2>
+        <ul class="clues" id="clues"></ul>
+        <button type="button" class="btn clue-btn" id="clueBtn"></button>
+      </div>
+      <div class="side" id="resultPanel" hidden aria-live="polite">
+        <p class="result-head" id="resultHead"></p>
+        <p class="result-lang" id="resultLang"></p>
+        <div class="meaning" id="meaning"></div>
+        <ul class="facts" id="facts"></ul>
+        <button type="button" class="btn primary" id="nextBtn"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- the end of a game -->
+  <section id="stepEnd" hidden>
+    <div class="end">
+      <p class="big" id="endScore"></p>
+      <p id="endText"></p>
+      <div class="actions">
+        <button type="button" class="btn primary" id="againBtn" data-t="det.again"></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fair-footer">
+  <div class="inner">
+    <p id="aiCredit"></p>
+    <p id="picCredit" hidden></p>
+    <p data-t="credit.tools"></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair, D = window.FAIR_DATA, S = window.FairScores, W = window.FairWords;
+
+  // ------------------------------------------------------------ settings
+  var ROUNDS = 10;                       // words per game, each in a different language
+  var IDLE_RESET_MS = 2 * 60 * 1000;     // after 2 minutes without use the page starts again for the next visitor
+  var MAX_SPACES = 2;                    // longer entries (phrases, sentences) are not used
+  var SHARE_CHANCE = 0.7;                // how often one wrong option shares the word's letters (but not its country)
+
+  F.add({
+    fi: {
+      'det.title': 'Kielietsivä',
+      'det.intro': 'Millä kielellä sana on? Katso kirjaimia tarkasti: joitakin kirjaimia käytetään vain muutamassa kielessä.',
+      'det.how': function (n) { return 'Näet sanan jollakin osaston ' + n + ' afrikkalaisesta kielestä. Valitse oikea kieli neljästä vaihtoehdosta. Jos et tiedä, pyydä vihjettä: ensin kirjaimista, sitten maista. Pelissä on kymmenen sanaa.'; },
+      'det.start': 'Aloita',
+      'det.soon': 'Peli alkaa pian.',
+      'det.progress': function (i, n) { return 'Sana ' + i + '/' + n; },
+      'det.score': function (n) { return 'Oikein: ' + n; },
+      'det.restart': 'Uusi peli',
+      'det.q': 'Millä kielellä sana on?',
+      'det.clues': 'Vihjeet',
+      'det.clue': 'Vihje',
+      'det.clue.more': 'Toinen vihje',
+      'det.clue.letters': function (letters, langs, only, apostrophe) {
+        var what = apostrophe ? 'heittomerkkiä ' : letters.length === 1 ? 'kirjainta ' : 'kirjaimia ';
+        return 'Pelin kielistä ' + what + W.list(letters) + ' käytetään ' + (only ? 'vain kielessä ' + langs[0] : 'kielissä ' + W.list(langs)) + '.';
+      },
+      'det.clue.country': function (countries) { return (countries.length === 1 ? 'Maa, jossa kieltä puhutaan: ' : 'Maat, joissa kieltä puhutaan: ') + W.list(countries) + '.'; },
+      'det.right': 'Oikein!',
+      'det.wrong': 'Ei aivan.',
+      'det.is': function (name) { return 'Sanan kieli on ' + name + '.'; },
+      'det.next': 'Seuraava sana',
+      'det.last': 'Katso tuloksesi',
+      'det.end.score': function (n, total) { return 'Oikein ' + n + '/' + total + '.'; },
+      'det.end.perfect': 'Täydellistä! Olet todellinen kielietsivä.',
+      'det.end.good': 'Erinomaista etsivätyötä!',
+      'det.end.ok': 'Hyvää työtä. Kirjaimet ovat parhaat vihjeesi.',
+      'det.end.low': 'Jokainen etsivä aloittaa jostain. Katso kirjaimia ja yritä uudelleen!',
+      'det.again': 'Pelaa uudelleen'
+    },
+    sv: {
+      'det.title': 'Språkdetektiven',
+      'det.intro': 'Vilket språk är ordet på? Titta noga på bokstäverna: vissa bokstäver finns bara i några få språk.',
+      'det.how': function (n) { return 'Du ser ett ord på ett av monterns ' + n + ' afrikanska språk. Välj rätt språk bland fyra alternativ. Kör du fast? Be om en ledtråd: först bokstäverna, sedan länderna. Varje spel har tio ord.'; },
+      'det.start': 'Börja',
+      'det.soon': 'Spelet börjar snart.',
+      'det.progress': function (i, n) { return 'Ord ' + i + ' av ' + n; },
+      'det.score': function (n) { return 'Rätt: ' + n; },
+      'det.restart': 'Nytt spel',
+      'det.q': 'Vilket språk är ordet på?',
+      'det.clues': 'Ledtrådar',
+      'det.clue': 'Ledtråd',
+      'det.clue.more': 'En ledtråd till',
+      'det.clue.letters': function (letters, langs, only, apostrophe) {
+        var what = apostrophe ? 'apostrofen ' : letters.length === 1 ? 'bokstaven ' : 'bokstäverna ';
+        return 'Bland spelets språk finns ' + what + W.list(letters) + (only ? ' bara i ' + langs[0] : ' i ' + W.list(langs)) + '.';
+      },
+      'det.clue.country': function (countries) { return 'Språket talas i ' + W.list(countries) + '.'; },
+      'det.right': 'Rätt!',
+      'det.wrong': 'Inte riktigt.',
+      'det.is': function (name) { return 'Ordet är på ' + name + '.'; },
+      'det.next': 'Nästa ord',
+      'det.last': 'Se ditt resultat',
+      'det.end.score': function (n, total) { return 'Du hittade ' + n + ' av ' + total + ' språk.'; },
+      'det.end.perfect': 'Perfekt! Du är en riktig språkdetektiv.',
+      'det.end.good': 'Utmärkt detektivarbete!',
+      'det.end.ok': 'Bra jobbat. Bokstäverna är dina bästa ledtrådar.',
+      'det.end.low': 'Alla detektiver börjar någonstans. Titta på bokstäverna och försök igen!',
+      'det.again': 'Spela igen'
+    },
+    en: {
+      'det.title': 'Language Detective',
+      'det.intro': 'Which language is the word in? Look closely at the letters: some letters are written in only a few languages.',
+      'det.how': function (n) { return 'You see a word in one of the stall’s ' + n + ' African languages. Pick the right language from four options. Stuck? Ask for a clue: first the letters, then the countries. Each game has ten words.'; },
+      'det.start': 'Start',
+      'det.soon': 'The game starts soon.',
+      'det.progress': function (i, n) { return 'Word ' + i + ' of ' + n; },
+      'det.score': function (n) { return 'Right: ' + n; },
+      'det.restart': 'New game',
+      'det.q': 'Which language is the word in?',
+      'det.clues': 'Clues',
+      'det.clue': 'Clue',
+      'det.clue.more': 'Another clue',
+      'det.clue.letters': function (letters, langs, only, apostrophe) {
+        var what = (apostrophe ? 'the apostrophe ' : letters.length === 1 ? 'the letter ' : 'the letters ') + W.list(letters);
+        var verb = letters.length === 1 ? ' is written ' : ' are written ';
+        return 'Among the languages in this game, ' + what + verb + (only ? 'only in ' + langs[0] : 'in ' + W.list(langs)) + '.';
+      },
+      'det.clue.country': function (countries) {
+        return 'This language is spoken in ' + W.list(countries.map(function (c) { return c === 'Republic of the Congo' ? 'the ' + c : c; })) + '.';
+      },
+      'det.right': 'Right!',
+      'det.wrong': 'Not quite.',
+      'det.is': function (name) { return 'The word is in ' + name + '.'; },
+      'det.next': 'Next word',
+      'det.last': 'See your score',
+      'det.end.score': function (n, total) { return 'You found ' + n + ' of ' + total + ' languages.'; },
+      'det.end.perfect': 'Perfect! You are a true language detective.',
+      'det.end.good': 'Excellent detective work!',
+      'det.end.ok': 'Good work. The letters are your best clues.',
+      'det.end.low': 'Every detective starts somewhere. Look at the letters and try again!',
+      'det.again': 'Play again'
+    },
+    fr: {
+      'det.title': 'Détective des langues',
+      'det.intro': 'Dans quelle langue est ce mot ? Regardez bien les lettres : certaines ne s’écrivent que dans quelques langues.',
+      'det.how': function (n) { return 'Vous voyez un mot dans l’une des ' + n + ' langues africaines du stand. Choisissez la bonne langue parmi quatre. Vous séchez ? Demandez un indice : d’abord les lettres, puis les pays. Une partie compte dix mots.'; },
+      'det.start': 'Commencer',
+      'det.soon': 'Le jeu commence bientôt.',
+      'det.progress': function (i, n) { return 'Mot ' + i + ' sur ' + n; },
+      'det.score': function (n) { return 'Bonnes réponses : ' + n; },
+      'det.restart': 'Nouvelle partie',
+      'det.q': 'Dans quelle langue est ce mot ?',
+      'det.clues': 'Indices',
+      'det.clue': 'Indice',
+      'det.clue.more': 'Un autre indice',
+      'det.clue.letters': function (letters, langs, only, apostrophe) {
+        var what = apostrophe ? 'l’apostrophe ' : letters.length === 1 ? 'la lettre ' : 'les lettres ';
+        var verb = letters.length === 1 ? ' s’écrit ' : ' s’écrivent ';
+        return 'Parmi les langues du jeu, ' + what + W.list(letters) + verb + (only ? 'seulement en ' + langs[0] : 'en ' + W.list(langs)) + '.';
+      },
+      'det.clue.country': function (countries) { return 'Pays où cette langue est parlée : ' + W.list(countries) + '.'; },
+      'det.right': 'Bravo !',
+      'det.wrong': 'Pas tout à fait.',
+      'det.is': function (name) { return 'Le mot est en ' + name + '.'; },
+      'det.next': 'Mot suivant',
+      'det.last': 'Voir votre score',
+      'det.end.score': function (n, total) { return 'Vous avez trouvé ' + n + ' langue' + (n > 1 ? 's' : '') + ' sur ' + total + '.'; },
+      'det.end.perfect': 'Parfait ! Quel flair de détective !',
+      'det.end.good': 'Excellent travail de détective !',
+      'det.end.ok': 'Beau travail. Les lettres sont vos meilleurs indices.',
+      'det.end.low': 'Tout détective commence quelque part. Regardez les lettres et réessayez !',
+      'det.again': 'Rejouer'
+    }
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ------------------------------------------------------------ words for the game
+  // Visitors' words in the fair's languages and the AI's words that speakers have not judged wrong
+  function usable(w) { w = String(w || '').trim(); return w && (w.match(/\s+/g) || []).length <= MAX_SPACES && W.graphemes(w).length <= 30; }
+
+  function candidates() {
+    var byLang = {}, seen = {};
+    function add(c) {
+      var k = c.lang + '|' + W.exact(c.word);
+      if (seen[k]) return;
+      seen[k] = true;
+      (byLang[c.lang] = byLang[c.lang] || []).push(c);
+    }
+    W.entries.forEach(function (e) {
+      if (!e.language_slug || !W.language(e.language_slug) || !W.concept(e.concept_slug) || !usable(e.headword)) return;
+      add({ word: String(e.headword).normalize('NFC'), lang: e.language_slug, concept: e.concept_slug, source: 'visitor' });
+    });
+    W.drafts.forEach(function (d) {
+      if (!W.language(d.language_slug) || !W.concept(d.concept_slug) || W.status(d) === 'wrong' || !usable(d.draft)) return;
+      add({ word: String(d.draft).normalize('NFC'), lang: d.language_slug, concept: d.concept_slug, source: 'ai', draft: d });
+    });
+    return byLang;
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  // Words with letter clues, visitors' words and words with a picture come up more often
+  function pick(list) {
+    var w = list.map(function (c) {
+      return (W.clues(c.word, c.lang).length ? 3 : 1) * (c.source === 'visitor' ? 2 : 1) * (W.concept(c.concept).picture ? 2 : 1);
+    });
+    var r = Math.random() * w.reduce(function (a, b) { return a + b; }, 0);
+    for (var i = 0; i < list.length; i++) { r -= w[i]; if (r < 0) return list[i]; }
+    return list[list.length - 1];
+  }
+
+  // Every language in which the same word occurs (ido is Hausa 'eye' and Somali 'sheep'): none of them may be
+  // offered as a wrong option
+  function sameWordLangs() {
+    var m = {};
+    var add = function (w, slug) { var x = W.exact(w); (m[x] = m[x] || {})[slug] = true; };
+    W.entries.forEach(function (e) { if (e.language_slug) add(e.headword, e.language_slug); });
+    W.drafts.forEach(function (d) { add(d.draft, d.language_slug); });
+    return m;
+  }
+
+  // Four languages to choose from. Wrong options come from other countries, so that the country clue settles it;
+  // often one of them writes the same special letters, so that the letter clue alone narrows it to two.
+  function options(c, same) {
+    var a = W.language(c.lang);
+    var apart = function (l) { return !l.countries.some(function (k) { return a.countries.indexOf(k) >= 0; }); };
+    var sharesLetters = {};
+    W.clues(c.word, c.lang).forEach(function (x) { x.langs.forEach(function (s) { sharesLetters[s] = true; }); });
+    var also = same[W.exact(c.word)] || {};
+    var others = D.languages.filter(function (l) { return l.slug !== c.lang && !also[l.slug]; });
+    var sharing = shuffle(others.filter(function (l) { return sharesLetters[l.slug] && apart(l); }));
+    var rest = shuffle(others.filter(function (l) { return !sharesLetters[l.slug]; }));
+    var picked = [];
+    if (sharing.length && Math.random() < SHARE_CHANCE) picked.push(sharing[0]);
+    rest.filter(apart).concat(rest.filter(function (l) { return !apart(l); }), sharing).forEach(function (l) {
+      if (picked.length < 3 && picked.indexOf(l) < 0) picked.push(l);
+    });
+    return shuffle([a].concat(picked)).map(function (l) { return l.slug; });
+  }
+
+  // ------------------------------------------------------------ the game
+  var game = null;
+
+  function newGame() {
+    var byLang = candidates(), same = sameWordLangs();
+    var langs = shuffle(Object.keys(byLang));
+    var rounds = langs.slice(0, ROUNDS).map(function (slug) {
+      var c = pick(byLang[slug]);
+      return { c: c, options: options(c, same), clues: 0, answer: null };
+    });
+    game = { rounds: rounds, pos: 0, right: 0 };
+  }
+
+  function round() { return game.rounds[game.pos]; }
+
+  function showStep(id) {
+    ['stepStart', 'stepGame', 'stepEnd'].forEach(function (s) { $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+
+  function start() {
+    newGame();
+    if (!game.rounds.length) { toStart(); return; }
+    showStep('stepGame');
+    renderRound();
+    var first = $('options').querySelector('.option');
+    if (first) first.focus({ preventScroll: true });
+  }
+
+  // the clues of a word: its special letters (if any), then the countries where its language is spoken
+  function clueList(c) {
+    var out = [];
+    var groups = W.clueGroups(c.word, c.lang);
+    if (groups.length) out.push({ kind: 'letters', groups: groups });
+    out.push({ kind: 'country' });
+    return out;
+  }
+
+  function lettersHtml(groups) {
+    return groups.map(function (g) {
+      var letters = g.letters.map(function (l) { return '<b>' + F.esc(l) + '</b>'; });
+      var names = g.langs.map(function (s) { return F.esc(W.language(s).name); });
+      return F.t('det.clue.letters', letters, names, names.length === 1, g.letters.length === 1 && g.letters[0] === 'ʼ');
+    });
+  }
+
+  function countryHtml(c) {
+    return F.t('det.clue.country', W.countryNames(W.language(c.lang)).map(F.esc));
+  }
+
+  function renderRound() {
+    var r = round(), c = r.c, done = r.answer !== null;
+    var countries = done || r.clues >= clueList(c).length;
+    $('progress').textContent = F.t('det.progress', game.pos + 1, game.rounds.length);
+    $('score').textContent = F.t('det.score', game.right);
+    $('tag').className = 'tag ' + c.source;
+    $('tag').textContent = c.source === 'ai' ? W.aiLabel(c.draft) : F.t('w.visitor');
+    var showLetters = done || r.clues > 0;
+    $('word').innerHTML = showLetters ? W.markClues(c.word, c.lang) : F.esc(c.word);
+    if (done) $('word').setAttribute('lang', W.bcp47(c.lang)); else $('word').removeAttribute('lang');
+    // options
+    $('options').innerHTML = r.options.map(function (slug) {
+      var cls = 'option';
+      if (done && slug === c.lang) cls += ' correct';
+      if (done && slug === r.answer && slug !== c.lang) cls += ' chosen-wrong';
+      var mark = done && slug === c.lang ? '<span aria-hidden="true">✓</span>' : done && slug === r.answer ? '<span aria-hidden="true">✗</span>' : '';
+      var where = countries ? '<small>' + F.esc(W.countryNames(W.language(slug)).join(', ')) + '</small>' : '';
+      return '<button type="button" class="' + cls + '" data-lang="' + slug + '"' + (done ? ' disabled' : '') + '>' +
+        '<span class="name">' + mark + F.esc(W.language(slug).name) + '</span>' + where + '</button>';
+    }).join('');
+    // clues, or the result once answered
+    $('cluePanel').hidden = done;
+    $('resultPanel').hidden = !done;
+    if (!done) renderClues(); else renderResult();
+  }
+
+  function renderClues() {
+    var r = round(), all = clueList(r.c), shown = all.slice(0, r.clues), html = [];
+    shown.forEach(function (k) {
+      if (k.kind === 'letters') lettersHtml(k.groups).forEach(function (h) { html.push('<li>' + h + '</li>'); });
+      else html.push('<li>' + countryHtml(r.c) + '</li>');
+    });
+    $('clues').innerHTML = html.join('');
+    $('clues').hidden = !html.length;
+    $('clueBtn').hidden = r.clues >= all.length;
+    $('clueBtn').textContent = '🔍 ' + F.t(r.clues ? 'det.clue.more' : 'det.clue');
+  }
+
+  function renderResult() {
+    var r = round(), c = r.c, concept = W.concept(c.concept), lang = W.language(c.lang);
+    var right = r.answer === c.lang;
+    $('resultHead').className = 'result-head ' + (right ? 'right' : 'wrong');
+    $('resultHead').textContent = F.t(right ? 'det.right' : 'det.wrong');
+    $('resultLang').textContent = F.t('det.is', lang.name);
+    $('meaning').innerHTML = (concept.picture ? '<img src="' + F.esc(concept.picture) + '" alt="">' : '') +
+      '<div><div class="label" lang="' + F.lang + '">' + F.esc(W.label(concept)) + '</div><div class="others">' +
+      W.otherLabels(concept).map(function (o) { return '<span lang="' + o.lang + '"><b>' + o.lang.toUpperCase() + '</b>' + F.esc(o.text) + '</span>'; }).join('') +
+      '</div></div>';
+    var facts = [];
+    var groups = W.clueGroups(c.word, c.lang);
+    if (groups.length) lettersHtml(groups).forEach(function (h) { facts.push('<li>' + h + '</li>'); });
+    facts.push('<li>' + countryHtml(c) + '</li>');
+    var src = c.source === 'ai' ? W.aiLabel(c.draft) + '. ' + F.t('w.said.' + W.status(c.draft)) : F.t('w.visitor.long') + '.';
+    facts.push('<li class="src">' + F.esc(src) + '</li>');
+    $('facts').innerHTML = facts.join('');
+    $('nextBtn').textContent = F.t(game.pos + 1 < game.rounds.length ? 'det.next' : 'det.last');
+  }
+
+  function answer(slug) {
+    var r = round();
+    if (r.answer !== null) return;
+    r.answer = slug;
+    if (slug === r.c.lang) game.right++;
+    renderRound();
+    $('nextBtn').focus({ preventScroll: true });
+    if (window.matchMedia('(max-width: 899px)').matches) $('resultPanel').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  function next() {
+    if (game.pos + 1 < game.rounds.length) { game.pos++; renderRound(); window.scrollTo(0, 0); return; }
+    showEnd();
+  }
+
+  function showEnd() {
+    var n = game.right, total = game.rounds.length, share = total ? n / total : 0;
+    $('endScore').textContent = F.t('det.end.score', n, total);
+    $('endText').textContent = F.t(n === total ? 'det.end.perfect' : share >= 0.7 ? 'det.end.good' : share >= 0.4 ? 'det.end.ok' : 'det.end.low');
+    showStep('stepEnd');
+    $('againBtn').focus({ preventScroll: true });
+  }
+
+  // ------------------------------------------------------------ the start screen
+  var EXAMPLES = [['akan', 'ɛ'], ['yoruba', 'ẹ'], ['gikuyu', 'ũ'], ['wolof', 'ë'], ['hausa', 'ƙ'], ['ewe', 'ɖ']];
+  function renderStart() {
+    $('how').textContent = F.t('det.how', D.languages.length);
+    // a few of the game's own words, with their clue letters marked
+    var byLang = W.loaded ? candidates() : {};
+    var ex = [];
+    EXAMPLES.forEach(function (e) {
+      var list = (byLang[e[0]] || []).filter(function (c) { return W.clues(c.word, c.lang).some(function (x) { return x.letter === e[1]; }); });
+      if (list.length) ex.push('<span>' + W.markClues(list[0].word, e[0]) + '</span>');
+    });
+    $('examples').innerHTML = ex.slice(0, 4).join('');
+    var playable = Object.keys(byLang).length > 0;
+    $('startBtn').disabled = !playable;
+    $('startNote').textContent = !W.loaded ? W.statusText() : playable ? (W.online === false ? W.statusText() : '') : F.t('det.soon');
+  }
+
+  function renderCredits() {
+    $('aiCredit').textContent = F.t('credit.ai', S.MODEL, S.date(S.DRAFTED_ON));
+    var pc = F.pictureCredit();
+    $('picCredit').textContent = pc;
+    $('picCredit').hidden = !pc;
+  }
+
+  function toStart() { game = null; renderStart(); showStep('stepStart'); }
+
+  // ------------------------------------------------------------ idle reset for the next visitor
+  var idleTimer = null;
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () { if (game || !$('stepEnd').hidden) toStart(); }, IDLE_RESET_MS);
+  }
+  ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(function (ev) {
+    window.addEventListener(ev, resetIdle, { passive: true });
+  });
+
+  // ------------------------------------------------------------ start
+  F.initHeader();
+  F.onLang(function () {
+    renderCredits();
+    if (!$('stepStart').hidden) renderStart();
+    if (!$('stepGame').hidden && game) renderRound();
+    if (!$('stepEnd').hidden && game) showEnd();
+  });
+  F.apply();
+  renderCredits();
+  W.onUpdate(function () { if (!$('stepStart').hidden) renderStart(); });
+  W.start();
+
+  $('startBtn').addEventListener('click', start);
+  $('againBtn').addEventListener('click', start);
+  $('restartBtn').addEventListener('click', start);
+  $('options').addEventListener('click', function (e) {
+    var b = e.target.closest('.option');
+    if (b && !b.disabled) answer(b.getAttribute('data-lang'));
+  });
+  $('clueBtn').addEventListener('click', function () { round().clues++; renderRound(); });
+  $('nextBtn').addEventListener('click', next);
+  resetIdle();
+})();
+</script>
+</body>
+</html>
