@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Sanojen tarkistus · Helsingin kirjamessut 2026</title>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="data/fair_data.js"></script>
+<script src="assets/fair.js"></script>
+<script src="assets/keyboard.js"></script>
+<script src="assets/checkai.js"></script>
+<script src="assets/vendor/xlsx-0.18.5.full.min.js"></script>
+<style>
+.notice { font-size: 14px; color: var(--muted); margin: 8px 0; }
+.error { color: var(--coral); font-weight: 700; margin: 8px 0; }
+.ok-msg { color: var(--teal-dark); font-weight: 700; margin: 8px 0; }
+.link-btn { background: none; border: none; color: var(--teal); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 6px; font-size: 15px; }
+.btn {
+  padding: 8px 16px; min-height: 44px; border-radius: 22px; border: 2px solid var(--teal);
+  background: var(--white); color: var(--teal-dark); font-weight: 700; font-size: 15px; cursor: pointer;
+}
+.btn.primary { background: var(--teal); color: #fff; }
+.btn.danger { border-color: var(--coral); color: var(--coral); }
+.btn:disabled { opacity: .5; cursor: default; }
+.field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 12px; }
+.field label { font-weight: 700; color: var(--teal-dark); font-size: 14px; }
+.input, select.input {
+  width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 17px; background: var(--white); color: var(--text); min-height: 46px;
+}
+.input:focus { outline: none; border-color: var(--teal-mid); }
+
+/* Sign-in */
+.signin { max-width: 420px; }
+
+/* Signed in */
+.topbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.topbar .who { margin-right: auto; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 2px solid var(--border); }
+.tab { border: none; background: none; padding: 10px 14px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; font-size: 15px; }
+.tab.active { color: var(--teal-dark); border-bottom-color: var(--teal); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.toolbar select { max-width: 280px; }
+.toolbar .updated { margin-left: auto; color: var(--muted); font-size: 13px; }
+
+/* Entries */
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.entry { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 14px; display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; }
+.entry img { width: 72px; height: 72px; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+.entry .top { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--muted); }
+.entry .top .concept { font-weight: 700; color: var(--teal-dark); }
+.entry .hw { font-size: 26px; font-weight: 700; margin: 2px 0; overflow-wrap: anywhere; }
+.entry .ex { font-style: italic; margin: 2px 0 4px; overflow-wrap: anywhere; }
+.entry .flags { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+.entry .flags span { background: var(--gold-light); border: 1px solid #e3cf86; border-radius: 6px; padding: 2px 8px; font-size: 13px; font-weight: 600; }
+.entry .note { font-size: 14px; color: var(--muted); }
+.entry .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+.entry .acts .input { max-width: 320px; min-height: 40px; font-size: 15px; }
+.tag { display: inline-block; border-radius: 6px; padding: 1px 7px; font-size: 12px; font-weight: 700; }
+.tag.consent { background: var(--teal-light); color: var(--teal-dark); }
+.edit { display: grid; gap: 4px; }
+.keyboard { margin: 6px 0 0; padding: 8px; background: #e9eff0; border-radius: var(--radius); user-select: none; -webkit-user-select: none; }
+.kb-row { display: flex; gap: 5px; justify-content: center; margin-bottom: 5px; flex-wrap: wrap; }
+.kb-row:last-child { margin-bottom: 0; }
+.kb-key { flex: 1 1 0; min-width: 34px; max-width: 54px; height: 42px; font-size: 19px; border-radius: 7px; border: 1px solid #c9d6d8; background: #fff; color: var(--text); cursor: pointer; padding: 0; font-family: var(--font); }
+.kb-row-special .kb-key { background: var(--gold-light); border-color: #e3cf86; }
+.kb-toggle { flex: 0 0 auto; min-width: 60px; max-width: none; padding: 0 10px; font-size: 13px; font-weight: 700; color: var(--teal-dark); }
+.kb-wide { max-width: 84px; flex: 1.6 1 0; }
+.kb-shift.active { background: var(--teal); color: #fff; }
+.kb-space { max-width: 420px; flex: 8 1 0; font-size: 14px; color: var(--muted); }
+
+/* AI words */
+.ai-list .entry { grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; }
+.ai-list .entry img { width: 56px; height: 56px; }
+.ai-list .hw { font-size: 22px; }
+.ai-list .entry.withheld { opacity: .65; border-left: 5px solid var(--coral); }
+.counts { font-size: 14px; color: var(--muted); }
+.panel { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; max-width: 640px; }
+@media (max-width: 560px) {
+  .entry { grid-template-columns: 52px minmax(0, 1fr); }
+  .entry img { width: 52px; height: 52px; }
+  .ai-list .entry { grid-template-columns: 52px minmax(0, 1fr); }
+  .ai-list .entry .btn { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body data-title="apv.title">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span><span class="fair-name" data-t="fair.name">Helsingin kirjamessut 2026</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="app wide">
+  <section>
+    <h1 class="page-title" data-t="apv.title"></h1>
+    <p class="page-intro" data-t="apv.intro"></p>
+  </section>
+
+  <!-- signed out -->
+  <section id="signinBox" class="card signin">
+    <form id="signinForm" autocomplete="on">
+      <div class="field">
+        <label for="email" data-t="apv.email"></label>
+        <input class="input" id="email" type="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password" data-t="apv.password"></label>
+        <input class="input" id="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn primary" type="submit" id="signinBtn" data-t="apv.signin"></button>
+      <p class="error" id="signinError" role="alert" hidden></p>
+      <p class="notice" id="signinNote" hidden></p>
+      <p class="notice" data-t="apv.privacy"></p>
+    </form>
+  </section>
+
+  <!-- signed in -->
+  <section id="appBox" hidden>
+    <div class="topbar">
+      <span class="who" id="who"></span>
+      <button class="link-btn" type="button" id="signoutBtn" data-t="apv.signout"></button>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" type="button" data-tab="new" id="tabNew"></button>
+      <button class="tab" type="button" data-tab="approved" id="tabApproved"></button>
+      <button class="tab" type="button" data-tab="rejected" id="tabRejected"></button>
+      <button class="tab" type="button" data-tab="ai" data-t="apv.tab.ai"></button>
+      <button class="tab" type="button" data-tab="export" data-t="apv.tab.export"></button>
+      <button class="tab" type="button" data-tab="password" data-t="apv.tab.password"></button>
+    </nav>
+    <p class="error" id="appError" role="alert" hidden></p>
+
+    <div id="paneEntries">
+      <div class="toolbar">
+        <select class="input" id="langFilter"></select>
+        <span class="updated" id="updated"></span>
+      </div>
+      <p class="notice" id="rules" data-t="apv.rules"></p>
+      <ul class="list" id="entryList"></ul>
+      <p class="notice" id="noEntries" data-t="apv.none" hidden></p>
+    </div>
+
+    <div id="paneAi" hidden>
+      <div class="toolbar">
+        <select class="input" id="aiLang"></select>
+        <span class="updated" id="aiSummary"></span>
+      </div>
+      <p class="notice" data-t="apv.ai.text"></p>
+      <ul class="list ai-list" id="aiList"></ul>
+    </div>
+
+    <div id="paneExport" hidden>
+      <div class="panel">
+        <p data-t="apv.export.text"></p>
+        <button class="btn primary" type="button" id="exportBtn" data-t="apv.export.btn"></button>
+        <p class="ok-msg" id="exportDone" hidden></p>
+      </div>
+    </div>
+
+    <div id="panePassword" hidden>
+      <form class="panel" id="pwForm" novalidate>
+        <div class="field">
+          <label for="pw1" data-t="apv.pw.new"></label>
+          <input class="input" id="pw1" type="password" autocomplete="new-password" minlength="10" required>
+        </div>
+        <div class="field">
+          <label for="pw2" data-t="apv.pw.repeat"></label>
+          <input class="input" id="pw2" type="password" autocomplete="new-password" minlength="10" required>
+        </div>
+        <button class="btn primary" type="submit" data-t="apv.pw.save"></button>
+        <p class="error" id="pwError" role="alert" hidden></p>
+        <p class="ok-msg" id="pwDone" hidden></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="fair-footer">
+  <div class="inner">
+    <p data-t="apv.footer"></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair, D = window.FAIR_DATA, S = window.FairScores, CFG = D.supabase;
+
+  // ------------------------------------------------------------ settings
+  var IDLE_MS = 10 * 60 * 1000;     // signed out after 10 minutes without use
+  var POLL_MS = 30 * 1000;          // new words are fetched every 30 seconds
+  var MIN_PASSWORD = 10;
+
+  F.add({
+    fi: {
+      'apv.title': 'Sanojen tarkistus',
+      'apv.intro': 'Osaston henkilökunnalle. Kirjaudu sisään omalla tunnuksellasi.',
+      'apv.email': 'Sähköposti', 'apv.password': 'Salasana', 'apv.signin': 'Kirjaudu', 'apv.signout': 'Kirjaudu ulos',
+      'apv.privacy': 'Kirjautuminen on voimassa vain tässä välilehdessä: se päättyy, kun välilehti suljetaan tai sivua ei käytetä 10 minuuttiin.',
+      'apv.signedin': function (e) { return 'Kirjautuneena: ' + e; },
+      'apv.err.login': 'Sähköposti tai salasana on väärin.',
+      'apv.err.notstaff': 'Tämä tunnus ei ole henkilökunnan listalla.',
+      'apv.err.net': 'Ei yhteyttä tietokantaan. Yritä uudelleen.',
+      'apv.err.save': 'Muutosta ei voitu tallentaa: ',
+      'apv.idle': 'Sinut kirjattiin ulos 10 minuutin käyttämättömyyden jälkeen.',
+      'apv.tab.new': function (n) { return 'Uudet (' + n + ')'; },
+      'apv.tab.approved': function (n) { return 'Hyväksytyt (' + n + ')'; },
+      'apv.tab.rejected': function (n) { return 'Hylätyt (' + n + ')'; },
+      'apv.tab.ai': 'Tekoälyn sanat', 'apv.tab.export': 'Vienti', 'apv.tab.password': 'Vaihda salasana',
+      'apv.rules': 'Hyväksytyt sanat näkyvät sanaseinällä. Hylkää nimet, henkilötiedot ja loukkaavat sanat.',
+      'apv.none': 'Ei sanoja.',
+      'apv.filter.all': 'Kaikki kielet',
+      'apv.updated': function (t) { return 'Päivitetty ' + t; },
+      'apv.approve': 'Hyväksy', 'apv.edit': 'Korjaa', 'apv.reject': 'Hylkää', 'apv.tonew': 'Palauta uusiin',
+      'apv.save': 'Tallenna ja hyväksy', 'apv.cancel': 'Peruuta',
+      'apv.f.word': 'Sana', 'apv.f.example': 'Esimerkkilause', 'apv.f.lang': 'Kieli',
+      'apv.f.other': function (l) { return 'Muu kieli: ' + l; },
+      'apv.f.note': 'Huomautus (ei näy kävijöille)',
+      'apv.reject.reason': 'Syy (vapaaehtoinen)',
+      'apv.note': 'Huomautus: ',
+      'apv.src.visitor': 'Lisää sana',
+      'apv.consent': 'tutkimuslupa',
+      'apv.flag.3': 'Onko ”3” kirjain ɛ?', 'apv.flag.paren': 'Onko ”)” kirjain ɔ?', 'apv.flag.ng': 'Pitäisikö ”ng” olla ŋ?',
+      'apv.flag.x': 'Onko ”x” dagbanin ɣ?', 'apv.flag.ntilde': 'Onko ”ñ” igbon ṅ?',
+      'apv.flag.personal': 'Henkilötietoja (numero tai sähköposti)?', 'apv.flag.long': 'Pitkä: lause tai nimi?',
+      'apv.ai.text': 'Kaikki tekoälyn sanat ovat pelissä. Jos sana on loukkaava tai muuten sopimaton, poista se pelistä; sen voi myöhemmin palauttaa.',
+      'apv.ai.out': 'Poista pelistä', 'apv.ai.in': 'Palauta peliin', 'apv.ai.withheld': 'Poistettu pelistä',
+      'apv.ai.counts': function (r, w, n) { return 'oikein ' + r + ' · väärin ' + w + ' · ei varma ' + n; },
+      'apv.ai.suggested': 'Kävijöiden ehdotukset: ',
+      'apv.ai.summary': function (n, out) { return n + ' sanaa pelissä, ' + out + ' poistettu'; },
+      'apv.export.text': 'Lataa kaikki messujen tiedot Excel-tiedostona: sanat, tekoälyn sanat ja kävijöiden vastaukset. Tutkimuksessa ja opetuksessa saa käyttää vain rivejä, joissa research_consent on TRUE.',
+      'apv.export.btn': 'Lataa Excel-tiedosto',
+      'apv.export.done': function (f) { return 'Ladattu: ' + f; },
+      'apv.pw.new': 'Uusi salasana (vähintään 10 merkkiä)', 'apv.pw.repeat': 'Uusi salasana uudelleen', 'apv.pw.save': 'Vaihda salasana',
+      'apv.pw.short': 'Salasanan on oltava vähintään 10 merkkiä.', 'apv.pw.mismatch': 'Salasanat eivät täsmää.', 'apv.pw.done': 'Salasana vaihdettu.',
+      'apv.footer': 'Tämä sivu on vain osaston henkilökunnalle. Tietokanta sallii muutokset vain henkilökunnan listalla oleville tunnuksille.'
+    },
+    sv: {
+      'apv.title': 'Granskning av ord',
+      'apv.intro': 'För personalen i montern. Logga in med ditt eget konto.',
+      'apv.email': 'E-post', 'apv.password': 'Lösenord', 'apv.signin': 'Logga in', 'apv.signout': 'Logga ut',
+      'apv.privacy': 'Inloggningen gäller bara i den här fliken: den upphör när fliken stängs eller sidan inte används på 10 minuter.',
+      'apv.signedin': function (e) { return 'Inloggad som ' + e; },
+      'apv.err.login': 'Fel e-post eller lösenord.',
+      'apv.err.notstaff': 'Det här kontot finns inte på personallistan.',
+      'apv.err.net': 'Ingen anslutning till databasen. Försök igen.',
+      'apv.err.save': 'Ändringen kunde inte sparas: ',
+      'apv.idle': 'Du loggades ut efter 10 minuter utan aktivitet.',
+      'apv.tab.new': function (n) { return 'Nya (' + n + ')'; },
+      'apv.tab.approved': function (n) { return 'Godkända (' + n + ')'; },
+      'apv.tab.rejected': function (n) { return 'Avvisade (' + n + ')'; },
+      'apv.tab.ai': 'AI:ns ord', 'apv.tab.export': 'Export', 'apv.tab.password': 'Byt lösenord',
+      'apv.rules': 'Godkända ord visas på ordväggen. Avvisa namn, personuppgifter och allt som är stötande.',
+      'apv.none': 'Inga ord.',
+      'apv.filter.all': 'Alla språk',
+      'apv.updated': function (t) { return 'Uppdaterad ' + t; },
+      'apv.approve': 'Godkänn', 'apv.edit': 'Rätta', 'apv.reject': 'Avvisa', 'apv.tonew': 'Tillbaka till nya',
+      'apv.save': 'Spara och godkänn', 'apv.cancel': 'Avbryt',
+      'apv.f.word': 'Ord', 'apv.f.example': 'Exempelmening', 'apv.f.lang': 'Språk',
+      'apv.f.other': function (l) { return 'Annat språk: ' + l; },
+      'apv.f.note': 'Anteckning (syns inte för besökare)',
+      'apv.reject.reason': 'Orsak (frivillig)',
+      'apv.note': 'Anteckning: ',
+      'apv.src.visitor': 'Lägg till ett ord',
+      'apv.consent': 'samtycke',
+      'apv.flag.3': 'Är ”3” bokstaven ɛ?', 'apv.flag.paren': 'Är ”)” bokstaven ɔ?', 'apv.flag.ng': 'Ska ”ng” vara ŋ?',
+      'apv.flag.x': 'Är ”x” dagbanins ɣ?', 'apv.flag.ntilde': 'Är ”ñ” igbons ṅ?',
+      'apv.flag.personal': 'Personuppgifter (nummer eller e-post)?', 'apv.flag.long': 'Långt: en mening eller ett namn?',
+      'apv.ai.text': 'Alla AI:ns ord är med i spelet. Om ett ord är stötande eller olämpligt på annat sätt, ta bort det ur spelet; det kan tas tillbaka senare.',
+      'apv.ai.out': 'Ta bort ur spelet', 'apv.ai.in': 'Ta tillbaka till spelet', 'apv.ai.withheld': 'Borttaget ur spelet',
+      'apv.ai.counts': function (r, w, n) { return 'rätt ' + r + ' · fel ' + w + ' · vet inte ' + n; },
+      'apv.ai.suggested': 'Besökarnas förslag: ',
+      'apv.ai.summary': function (n, out) { return n + ' ord i spelet, ' + out + ' borttagna'; },
+      'apv.export.text': 'Ladda ner alla data från mässan som Excel-fil: orden, AI:ns ord och besökarnas svar. I forskning och undervisning får endast rader med research_consent = TRUE användas.',
+      'apv.export.btn': 'Ladda ner Excel-filen',
+      'apv.export.done': function (f) { return 'Nedladdad: ' + f; },
+      'apv.pw.new': 'Nytt lösenord (minst 10 tecken)', 'apv.pw.repeat': 'Nytt lösenord igen', 'apv.pw.save': 'Byt lösenord',
+      'apv.pw.short': 'Lösenordet måste ha minst 10 tecken.', 'apv.pw.mismatch': 'Lösenorden stämmer inte överens.', 'apv.pw.done': 'Lösenordet har bytts.',
+      'apv.footer': 'Den här sidan är bara för personalen i montern. Databasen tillåter ändringar endast för konton på personallistan.'
+    },
+    en: {
+      'apv.title': 'Approve words',
+      'apv.intro': 'For the stall team. Sign in with your own account.',
+      'apv.email': 'Email', 'apv.password': 'Password', 'apv.signin': 'Sign in', 'apv.signout': 'Sign out',
+      'apv.privacy': 'You stay signed in only in this tab: the session ends when the tab is closed or after 10 minutes without use.',
+      'apv.signedin': function (e) { return 'Signed in as ' + e; },
+      'apv.err.login': 'Wrong email or password.',
+      'apv.err.notstaff': 'This account is not on the staff list.',
+      'apv.err.net': 'No connection to the database. Please try again.',
+      'apv.err.save': 'The change could not be saved: ',
+      'apv.idle': 'You were signed out after 10 minutes without use.',
+      'apv.tab.new': function (n) { return 'New (' + n + ')'; },
+      'apv.tab.approved': function (n) { return 'Approved (' + n + ')'; },
+      'apv.tab.rejected': function (n) { return 'Rejected (' + n + ')'; },
+      'apv.tab.ai': 'AI words', 'apv.tab.export': 'Export', 'apv.tab.password': 'Change password',
+      'apv.rules': 'Approved words appear on the word wall. Reject names, personal details and anything offensive.',
+      'apv.none': 'No words.',
+      'apv.filter.all': 'All languages',
+      'apv.updated': function (t) { return 'Updated ' + t; },
+      'apv.approve': 'Approve', 'apv.edit': 'Correct', 'apv.reject': 'Reject', 'apv.tonew': 'Back to new',
+      'apv.save': 'Save and approve', 'apv.cancel': 'Cancel',
+      'apv.f.word': 'Word', 'apv.f.example': 'Example sentence', 'apv.f.lang': 'Language',
+      'apv.f.other': function (l) { return 'Other language: ' + l; },
+      'apv.f.note': 'Note (not shown to visitors)',
+      'apv.reject.reason': 'Reason (optional)',
+      'apv.note': 'Note: ',
+      'apv.src.visitor': 'Add a word',
+      'apv.consent': 'research consent',
+      'apv.flag.3': 'Is “3” meant to be ɛ?', 'apv.flag.paren': 'Is “)” meant to be ɔ?', 'apv.flag.ng': 'Should “ng” be ŋ?',
+      'apv.flag.x': 'Is “x” Dagbani ɣ?', 'apv.flag.ntilde': 'Is “ñ” Igbo ṅ?',
+      'apv.flag.personal': 'Personal details (a number or an email address)?', 'apv.flag.long': 'Long: a sentence or a name?',
+      'apv.ai.text': 'All of the AI’s words are in the game. If a word is offensive or otherwise unsuitable, take it out of the game; it can be put back later.',
+      'apv.ai.out': 'Take out of the game', 'apv.ai.in': 'Put back in the game', 'apv.ai.withheld': 'Out of the game',
+      'apv.ai.counts': function (r, w, n) { return 'right ' + r + ' · wrong ' + w + ' · not sure ' + n; },
+      'apv.ai.suggested': 'Visitors’ suggestions: ',
+      'apv.ai.summary': function (n, out) { return n + ' words in the game, ' + out + ' taken out'; },
+      'apv.export.text': 'Download all data from the fair as an Excel file: the words, the AI’s words and the visitors’ answers. Only rows with research_consent = TRUE may be used in research or teaching.',
+      'apv.export.btn': 'Download the Excel file',
+      'apv.export.done': function (f) { return 'Downloaded: ' + f; },
+      'apv.pw.new': 'New password (at least 10 characters)', 'apv.pw.repeat': 'New password again', 'apv.pw.save': 'Change password',
+      'apv.pw.short': 'The password must have at least 10 characters.', 'apv.pw.mismatch': 'The passwords do not match.', 'apv.pw.done': 'Password changed.',
+      'apv.footer': 'This page is for the stall team only. The database accepts changes only from accounts on the staff list.'
+    },
+    fr: {
+      'apv.title': 'Valider les mots',
+      'apv.intro': 'Pour l’équipe du stand. Connectez-vous avec votre propre compte.',
+      'apv.email': 'E-mail', 'apv.password': 'Mot de passe', 'apv.signin': 'Se connecter', 'apv.signout': 'Se déconnecter',
+      'apv.privacy': 'La connexion ne vaut que dans cet onglet : elle prend fin quand l’onglet est fermé ou après 10 minutes d’inactivité.',
+      'apv.signedin': function (e) { return 'Connecté avec ' + e; },
+      'apv.err.login': 'E-mail ou mot de passe incorrect.',
+      'apv.err.notstaff': 'Ce compte ne figure pas sur la liste de l’équipe.',
+      'apv.err.net': 'Pas de connexion à la base de données. Réessayez.',
+      'apv.err.save': 'La modification n’a pas pu être enregistrée : ',
+      'apv.idle': 'La session a été fermée après 10 minutes d’inactivité.',
+      'apv.tab.new': function (n) { return 'Nouveaux (' + n + ')'; },
+      'apv.tab.approved': function (n) { return 'Validés (' + n + ')'; },
+      'apv.tab.rejected': function (n) { return 'Refusés (' + n + ')'; },
+      'apv.tab.ai': 'Mots de l’IA', 'apv.tab.export': 'Export', 'apv.tab.password': 'Changer le mot de passe',
+      'apv.rules': 'Les mots validés apparaissent sur le mur de mots. Refusez les noms, les données personnelles et tout ce qui est offensant.',
+      'apv.none': 'Aucun mot.',
+      'apv.filter.all': 'Toutes les langues',
+      'apv.updated': function (t) { return 'Mis à jour à ' + t; },
+      'apv.approve': 'Valider', 'apv.edit': 'Corriger', 'apv.reject': 'Refuser', 'apv.tonew': 'Remettre en attente',
+      'apv.save': 'Enregistrer et valider', 'apv.cancel': 'Annuler',
+      'apv.f.word': 'Mot', 'apv.f.example': 'Phrase d’exemple', 'apv.f.lang': 'Langue',
+      'apv.f.other': function (l) { return 'Autre langue : ' + l; },
+      'apv.f.note': 'Note (non visible pour les visiteurs)',
+      'apv.reject.reason': 'Raison (facultatif)',
+      'apv.note': 'Note : ',
+      'apv.src.visitor': 'Ajoutez un mot',
+      'apv.consent': 'accord recherche',
+      'apv.flag.3': '« 3 » pour ɛ ?', 'apv.flag.paren': '« ) » pour ɔ ?', 'apv.flag.ng': '« ng » pour ŋ ?',
+      'apv.flag.x': '« x » pour le ɣ du dagbani ?', 'apv.flag.ntilde': '« ñ » pour le ṅ de l’igbo ?',
+      'apv.flag.personal': 'Données personnelles (numéro ou e-mail) ?', 'apv.flag.long': 'Long : une phrase ou un nom ?',
+      'apv.ai.text': 'Tous les mots de l’IA sont dans le jeu. Si un mot est offensant ou inadapté, retirez-le du jeu ; il pourra y être remis plus tard.',
+      'apv.ai.out': 'Retirer du jeu', 'apv.ai.in': 'Remettre dans le jeu', 'apv.ai.withheld': 'Retiré du jeu',
+      'apv.ai.counts': function (r, w, n) { return 'juste ' + r + ' · faux ' + w + ' · ne sait pas ' + n; },
+      'apv.ai.suggested': 'Suggestions des visiteurs : ',
+      'apv.ai.summary': function (n, out) { return n + ' mots dans le jeu, ' + out + ' retirés'; },
+      'apv.export.text': 'Téléchargez toutes les données du salon dans un fichier Excel : les mots, les mots de l’IA et les réponses des visiteurs. Seules les lignes avec research_consent = TRUE peuvent servir à la recherche ou à l’enseignement.',
+      'apv.export.btn': 'Télécharger le fichier Excel',
+      'apv.export.done': function (f) { return 'Téléchargé : ' + f; },
+      'apv.pw.new': 'Nouveau mot de passe (au moins 10 caractères)', 'apv.pw.repeat': 'Nouveau mot de passe, à nouveau', 'apv.pw.save': 'Changer le mot de passe',
+      'apv.pw.short': 'Le mot de passe doit comporter au moins 10 caractères.', 'apv.pw.mismatch': 'Les mots de passe ne correspondent pas.', 'apv.pw.done': 'Mot de passe modifié.',
+      'apv.footer': 'Cette page est réservée à l’équipe du stand. La base de données n’accepte de modifications que des comptes figurant sur la liste de l’équipe.'
+    }
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var langBySlug = {}, conceptBySlug = {};
+  D.languages.forEach(function (l) { langBySlug[l.slug] = l; });
+  D.concepts.forEach(function (c) { conceptBySlug[c.slug] = c; });
+  function label(c) { return c ? (c[F.lang] || c.en) : ''; }
+  function langName(slug) { return langBySlug[slug] ? langBySlug[slug].name : ''; }
+  function time(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    var t = d.toLocaleTimeString(F.locale(), { hour: '2-digit', minute: '2-digit' });
+    return d.toDateString() === new Date().toDateString() ? t : d.toLocaleDateString(F.locale(), { day: 'numeric', month: 'numeric' }) + ' ' + t;
+  }
+
+  // ------------------------------------------------------------ session: kept in this tab's memory only
+  var session = null, refreshTimer = null, pollTimer = null, idleTimer = null;
+
+  function call(url, opts) {
+    return fetch(url, opts).then(function (r) {
+      return r.text().then(function (t) {
+        var j = null;
+        try { j = t ? JSON.parse(t) : null; } catch (e) { /* not JSON */ }
+        if (!r.ok) {
+          var err = new Error((j && (j.msg || j.error_description || j.message || j.error)) || ('HTTP ' + r.status));
+          err.status = r.status;
+          throw err;
+        }
+        return j;
+      });
+    });
+  }
+
+  function auth(method, path, body, token) {
+    var h = { apikey: CFG.key, 'Content-Type': 'application/json' };
+    if (token) h.Authorization = 'Bearer ' + token;
+    return call(CFG.url + '/auth/v1/' + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined, keepalive: path === 'logout' });
+  }
+
+  function api(method, path, body, prefer) {
+    var h = { apikey: CFG.key, Accept: 'application/json', Authorization: 'Bearer ' + session.access };
+    if (body !== undefined) h['Content-Type'] = 'application/json';
+    if (prefer) h.Prefer = prefer;
+    return call(CFG.url + '/rest/v1/' + path, { method: method, headers: h, body: body === undefined ? undefined : JSON.stringify(body) });
+  }
+
+  function all(path) {
+    var rows = [];
+    function next(offset) {
+      return api('GET', path + '&limit=1000&offset=' + offset).then(function (b) {
+        b = b || [];
+        rows = rows.concat(b);
+        return b.length ? next(offset + b.length) : rows;
+      });
+    }
+    return next(0);
+  }
+
+  function setSession(j) {
+    session = {
+      access: j.access_token, refresh: j.refresh_token,
+      expiresAt: Date.now() + (Number(j.expires_in) || 3600) * 1000,
+      email: (j.user && j.user.email) || (session && session.email) || ''
+    };
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(function () {
+      if (!session) return;
+      auth('POST', 'token?grant_type=refresh_token', { refresh_token: session.refresh }).then(setSession, function () { signOut(); });
+    }, Math.max(30000, session.expiresAt - Date.now() - 120000));
+  }
+
+  function signIn(email, password) {
+    return auth('POST', 'token?grant_type=password', { email: email, password: password }).then(function (j) {
+      setSession(j);
+      return api('POST', 'rpc/is_staff', {});
+    }).then(function (isStaff) {
+      if (isStaff !== true) { signOut(); var e = new Error('not staff'); e.notStaff = true; throw e; }
+      showApp();
+      return load();
+    });
+  }
+
+  function signOut(note) {
+    var s = session;
+    session = null;
+    clearTimeout(refreshTimer); clearInterval(pollTimer); clearTimeout(idleTimer);
+    entries = []; drafts = []; checks = []; editing = null;
+    $('entryList').innerHTML = ''; $('aiList').innerHTML = '';
+    if (s) auth('POST', 'logout', null, s.access).catch(function () { /* the token expires anyway */ });
+    $('appBox').hidden = true;
+    $('signinBox').hidden = false;
+    $('password').value = '';
+    $('signinNote').hidden = !note;
+    $('signinNote').textContent = note || '';
+  }
+
+  // ------------------------------------------------------------ data
+  var entries = [], drafts = [], checks = [], lastLoad = null;
+  var tab = 'new', langFilter = '', editing = null, rejecting = null;
+
+  function load() {
+    if (!session) return Promise.resolve();
+    return Promise.all([
+      all('entries?select=id,concept_slug,language_slug,language_label,headword,example_phrase,source,status,notes,research_consent,created_at,reviewed_at&order=id'),
+      all('ai_drafts?select=id,concept_slug,language_slug,draft,confidence,withheld&order=id'),
+      all('ai_checks?select=id,draft_id,judgement,suggested,research_consent,created_at&order=id')
+    ]).then(function (r) {
+      entries = r[0]; drafts = r[1]; checks = r[2]; lastLoad = new Date();
+      $('appError').hidden = true;
+      render();
+    }, function (err) {
+      if (err.status === 401) { signOut(F.t('apv.idle')); return; }
+      showError(F.t('apv.err.net') + ' (' + err.message + ')');
+    });
+  }
+
+  function showError(msg) { $('appError').textContent = msg; $('appError').hidden = false; }
+
+  function update(table, id, fields) {
+    return api('PATCH', table + '?id=eq.' + id, fields, 'return=representation').then(function (rows) {
+      if (!rows || rows.length !== 1) throw new Error(F.t('apv.err.notstaff'));
+      return rows[0];
+    });
+  }
+
+  // ------------------------------------------------------------ hints for the stall team
+  function flags(e) {
+    var w = String(e.headword || ''), ex = String(e.example_phrase || ''), out = [];
+    var letters = e.language_slug && langBySlug[e.language_slug] ? langBySlug[e.language_slug].letters : [];
+    if (/(^|\D)3(\D|$)/.test(w) && /\p{L}/u.test(w)) out.push(F.t('apv.flag.3'));      // a lone 3 among letters, not in a number
+    if (/\)/.test(w)) out.push(F.t('apv.flag.paren'));
+    if (letters.indexOf('ŋ') >= 0 && /ng/i.test(w)) out.push(F.t('apv.flag.ng'));
+    if (e.language_slug === 'dagbani' && /x/i.test(w)) out.push(F.t('apv.flag.x'));
+    if (e.language_slug === 'igbo' && /ñ/i.test(w)) out.push(F.t('apv.flag.ntilde'));
+    if (/@|\d{4,}/.test(w + ' ' + ex)) out.push(F.t('apv.flag.personal'));
+    if (w.trim().split(/\s+/).length > 3) out.push(F.t('apv.flag.long'));
+    return out;
+  }
+
+  // ------------------------------------------------------------ rendering
+  function render() {
+    var n = { draft: 0, approved: 0, rejected: 0 };
+    entries.forEach(function (e) { n[e.status] = (n[e.status] || 0) + 1; });
+    $('tabNew').textContent = F.t('apv.tab.new', n.draft);
+    $('tabApproved').textContent = F.t('apv.tab.approved', n.approved);
+    $('tabRejected').textContent = F.t('apv.tab.rejected', n.rejected);
+    document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
+    var isList = tab === 'new' || tab === 'approved' || tab === 'rejected';
+    $('paneEntries').hidden = !isList;
+    $('paneAi').hidden = tab !== 'ai';
+    $('paneExport').hidden = tab !== 'export';
+    $('panePassword').hidden = tab !== 'password';
+    $('updated').textContent = lastLoad ? F.t('apv.updated', time(lastLoad.toISOString())) : '';
+    if (isList) renderEntries();
+    if (tab === 'ai') renderAi();
+  }
+
+  function languageOptions(sel, current, includeAll, otherLabel) {
+    var html = includeAll ? '<option value="">' + F.esc(F.t('apv.filter.all')) + '</option>' : '';
+    D.languages.slice().sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); }).forEach(function (l) {
+      html += '<option value="' + l.slug + '"' + (l.slug === current ? ' selected' : '') + '>' + F.esc(l.name) + '</option>';
+    });
+    if (otherLabel !== undefined) html += '<option value=""' + (!current ? ' selected' : '') + '>' + F.esc(F.t('apv.f.other', otherLabel)) + '</option>';
+    sel.innerHTML = html;
+  }
+
+  function renderEntries() {
+    var status = tab === 'new' ? 'draft' : tab;
+    var list = entries.filter(function (e) { return e.status === status && (!langFilter || e.language_slug === langFilter); });
+    if (status !== 'draft') list.reverse();   // newest first; new words oldest first
+    $('rules').hidden = tab !== 'new';
+    $('noEntries').hidden = list.length > 0;
+    var ul = $('entryList');
+    ul.innerHTML = list.map(entryHtml).join('');
+    if (editing) {
+      var form = ul.querySelector('[data-id="' + editing + '"] .edit');
+      if (form) attachKeyboard(form);
+    }
+  }
+
+  function entryHtml(e) {
+    var c = conceptBySlug[e.concept_slug];
+    var langText = e.language_slug ? (F.key(e.language_label) === F.key(langName(e.language_slug)) ? langName(e.language_slug) : e.language_label + ' → ' + langName(e.language_slug)) : e.language_label;
+    var src = e.source === 'check_the_ai' ? F.t('ai.name') : e.source === 'visitor' ? F.t('apv.src.visitor') : e.source;
+    var html = '<li class="entry" data-id="' + e.id + '">' + (c && c.picture ? '<img src="' + F.esc(c.picture) + '" alt="">' : '<span></span>') + '<div>';
+    html += '<div class="top"><span class="concept">' + F.esc(label(c) + (c && F.lang !== 'en' ? ' · ' + c.en : '')) + '</span><span>' + F.esc(langText) +
+      '</span><span>' + F.esc(time(e.created_at)) + ' · ' + F.esc(src) + '</span>' + (e.research_consent ? '<span class="tag consent">' + F.esc(F.t('apv.consent')) + '</span>' : '') + '</div>';
+    if (editing === e.id) {
+      html += '<div class="edit">' +
+        '<label class="field"><span>' + F.esc(F.t('apv.f.word')) + '</span><input class="input" data-f="headword" maxlength="80" value="' + F.esc(e.headword) + '"></label>' +
+        '<label class="field"><span>' + F.esc(F.t('apv.f.example')) + '</span><input class="input" data-f="example_phrase" maxlength="200" value="' + F.esc(e.example_phrase || '') + '"></label>' +
+        '<label class="field"><span>' + F.esc(F.t('apv.f.lang')) + '</span><select class="input" data-f="language_slug"></select></label>' +
+        '<label class="field"><span>' + F.esc(F.t('apv.f.note')) + '</span><input class="input" data-f="notes" maxlength="300" value="' + F.esc(e.notes || '') + '"></label>' +
+        '<div class="keyboard"></div>' +
+        '<div class="acts"><button class="btn primary" type="button" data-act="save">' + F.esc(F.t('apv.save')) + '</button>' +
+        '<button class="btn" type="button" data-act="cancel">' + F.esc(F.t('apv.cancel')) + '</button></div></div>';
+    } else {
+      html += '<div class="hw" lang="">' + F.esc(e.headword) + '</div>';
+      if (e.example_phrase) html += '<div class="ex" lang="">' + F.esc(e.example_phrase) + '</div>';
+      var fl = e.status === 'draft' ? flags(e) : [];
+      if (fl.length) html += '<div class="flags">' + fl.map(function (f) { return '<span>' + F.esc(f) + '</span>'; }).join('') + '</div>';
+      if (e.notes) html += '<div class="note">' + F.esc(F.t('apv.note') + e.notes) + '</div>';
+      html += '<div class="acts">';
+      if (rejecting === e.id) {
+        html += '<input class="input" data-f="reason" maxlength="300" placeholder="' + F.esc(F.t('apv.reject.reason')) + '">' +
+          '<button class="btn danger" type="button" data-act="reject-confirm">' + F.esc(F.t('apv.reject')) + '</button>' +
+          '<button class="btn" type="button" data-act="cancel">' + F.esc(F.t('apv.cancel')) + '</button>';
+      } else if (e.status === 'draft') {
+        html += '<button class="btn primary" type="button" data-act="approve">' + F.esc(F.t('apv.approve')) + '</button>' +
+          '<button class="btn" type="button" data-act="edit">' + F.esc(F.t('apv.edit')) + '</button>' +
+          '<button class="btn danger" type="button" data-act="reject">' + F.esc(F.t('apv.reject')) + '</button>';
+      } else {
+        html += '<button class="btn" type="button" data-act="tonew">' + F.esc(F.t('apv.tonew')) + '</button>' +
+          (e.status === 'approved' ? '<button class="btn" type="button" data-act="edit">' + F.esc(F.t('apv.edit')) + '</button>' : '');
+      }
+      html += '</div>';
+    }
+    return html + '</div></li>';
+  }
+
+  var kb = null;
+  function attachKeyboard(form) {
+    var sel = form.querySelector('[data-f="language_slug"]');
+    var e = entries.filter(function (x) { return x.id === editing; })[0];
+    languageOptions(sel, e.language_slug || '', false, e.language_label);
+    kb = new window.LiliemaKeyboard(form.querySelector('.keyboard'), {
+      labels: { space: F.t('kb.space'), all: F.t('kb.all'), lang: F.t('kb.lang'), shift: F.t('kb.shift'), backspace: F.t('kb.backspace') }
+    });
+    kb.attach(form.querySelector('[data-f="headword"]'));
+    kb.attach(form.querySelector('[data-f="example_phrase"]'));
+    var setLetters = function () { var l = langBySlug[sel.value]; kb.setLetters(l ? l.letters : []); };
+    sel.addEventListener('change', setLetters);
+    setLetters();
+  }
+
+  function clean(s) { return String(s || '').normalize('NFC').trim().replace(/\s+/g, ' '); }
+
+  function onEntryAction(ev) {
+    var b = ev.target.closest('[data-act]');
+    if (!b) return;
+    var li = b.closest('[data-id]'), id = Number(li.getAttribute('data-id'));
+    var e = entries.filter(function (x) { return x.id === id; })[0];
+    var act = b.getAttribute('data-act');
+    if (act === 'edit') { editing = id; rejecting = null; renderEntries(); return; }
+    if (act === 'reject') {
+      rejecting = id; editing = null; renderEntries();
+      var r = $('entryList').querySelector('[data-id="' + id + '"] [data-f="reason"]');
+      if (r) r.focus();
+      return;
+    }
+    if (act === 'cancel') { editing = null; rejecting = null; renderEntries(); return; }
+    var fields;
+    if (act === 'approve') fields = { status: 'approved' };
+    else if (act === 'tonew') fields = { status: 'draft' };
+    else if (act === 'reject-confirm') {
+      var reason = clean(li.querySelector('[data-f="reason"]').value);
+      fields = { status: 'rejected' };
+      if (reason) fields.notes = reason;
+    } else if (act === 'save') {
+      var get = function (f) { return li.querySelector('[data-f="' + f + '"]').value; };
+      var slug = get('language_slug');
+      fields = { status: 'approved', headword: clean(get('headword')), example_phrase: clean(get('example_phrase')) || null, notes: clean(get('notes')) || null };
+      if (!fields.headword) return;
+      if (slug && slug !== e.language_slug) fields.language_slug = slug;
+      else if (!slug && e.language_slug) fields.language_slug = null;
+    } else return;
+    b.disabled = true;
+    update('entries', id, fields).then(function (row) {
+      entries = entries.map(function (x) { return x.id === id ? row : x; });
+      editing = null; rejecting = null;
+      $('appError').hidden = true;
+      render();
+    }, function (err) {
+      b.disabled = false;
+      if (err.status === 401) { signOut(F.t('apv.idle')); return; }
+      showError(F.t('apv.err.save') + err.message);
+    });
+  }
+
+  // ------------------------------------------------------------ AI words: take out of the game, or put back
+  var aiLang = '';
+  function renderAi() {
+    var sel = $('aiLang');
+    if (!sel.options.length || sel.getAttribute('data-lang') !== F.lang) {
+      languageOptions(sel, aiLang || D.languages[0].slug, false);
+      sel.setAttribute('data-lang', F.lang);
+    }
+    aiLang = sel.value;
+    var byDraft = {};
+    checks.forEach(function (c) {
+      var o = byDraft[c.draft_id] || (byDraft[c.draft_id] = { right: 0, wrong: 0, not_sure: 0, suggested: [] });
+      o[c.judgement]++;
+      if (c.suggested && o.suggested.indexOf(c.suggested) < 0) o.suggested.push(c.suggested);
+    });
+    var list = drafts.filter(function (d) { return d.language_slug === aiLang; });
+    var out = drafts.filter(function (d) { return d.withheld; }).length;
+    $('aiSummary').textContent = F.t('apv.ai.summary', drafts.length - out, out);
+    var order = {};
+    D.concepts.forEach(function (c, i) { order[c.slug] = i; });
+    list.sort(function (a, b) { return order[a.concept_slug] - order[b.concept_slug]; });
+    $('aiList').innerHTML = list.map(function (d) {
+      var c = conceptBySlug[d.concept_slug], o = byDraft[d.id] || { right: 0, wrong: 0, not_sure: 0, suggested: [] };
+      return '<li class="entry' + (d.withheld ? ' withheld' : '') + '" data-id="' + d.id + '">' +
+        (c && c.picture ? '<img src="' + F.esc(c.picture) + '" alt="">' : '<span></span>') +
+        '<div><div class="top"><span class="concept">' + F.esc(label(c)) + '</span>' + (d.withheld ? '<span>' + F.esc(F.t('apv.ai.withheld')) + '</span>' : '') + '</div>' +
+        '<div class="hw" lang="">' + F.esc(d.draft) + '</div>' +
+        '<div class="counts">' + F.esc(F.t('apv.ai.counts', o.right, o.wrong, o.not_sure)) +
+        (o.suggested.length ? '<br>' + F.esc(F.t('apv.ai.suggested') + o.suggested.join(', ')) : '') + '</div></div>' +
+        '<button class="btn' + (d.withheld ? '' : ' danger') + '" type="button" data-act="' + (d.withheld ? 'in' : 'out') + '">' +
+        F.esc(F.t(d.withheld ? 'apv.ai.in' : 'apv.ai.out')) + '</button></li>';
+    }).join('');
+  }
+
+  function onAiAction(ev) {
+    var b = ev.target.closest('[data-act]');
+    if (!b) return;
+    var id = Number(b.closest('[data-id]').getAttribute('data-id'));
+    b.disabled = true;
+    update('ai_drafts', id, { withheld: b.getAttribute('data-act') === 'out' }).then(function (row) {
+      drafts = drafts.map(function (d) { return d.id === id ? Object.assign({}, d, { withheld: row.withheld }) : d; });
+      renderAi();
+    }, function (err) {
+      b.disabled = false;
+      if (err.status === 401) { signOut(F.t('apv.idle')); return; }
+      showError(F.t('apv.err.save') + err.message);
+    });
+  }
+
+  // ------------------------------------------------------------ export: everything, as an Excel file
+  function exportData() {
+    load().then(function () {
+      if (!session) return;
+      var c = function (slug) { return conceptBySlug[slug] || {}; };
+      var draftById = {};
+      drafts.forEach(function (d) { draftById[d.id] = d; });
+      var counts = {};
+      checks.forEach(function (k) {
+        var o = counts[k.draft_id] || (counts[k.draft_id] = { n_right: 0, n_wrong: 0, n_not_sure: 0 });
+        o[k.judgement === 'right' ? 'n_right' : k.judgement === 'wrong' ? 'n_wrong' : 'n_not_sure']++;
+      });
+      var wb = XLSX.utils.book_new();
+      var stamp = new Date();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+        ['LILIEMA, Helsinki Book Fair 2026: export of the fair database (Supabase project liliema-bookfair)'],
+        ['Exported', stamp.toISOString()],
+        ['Entries', entries.length], ['AI judgements', checks.length], ['AI words', drafts.length],
+        [''],
+        ['Research and teaching: only rows with research_consent = TRUE may be used (visitors aged 15 or over who ticked the box).'],
+        ['No names or contact details of visitors are collected. Times are in UTC.']
+      ]), 'About');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(entries.map(function (e) {
+        return {
+          id: e.id, created_at: e.created_at, status: e.status, concept: e.concept_slug, concept_en: c(e.concept_slug).en, concept_fi: c(e.concept_slug).fi,
+          language: e.language_slug ? langName(e.language_slug) : '', language_label: e.language_label, headword: e.headword,
+          example_phrase: e.example_phrase || '', source: e.source, research_consent: !!e.research_consent,
+          reviewed_at: e.reviewed_at || '', notes: e.notes || ''
+        };
+      })), 'Entries');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(checks.map(function (k) {
+        var d = draftById[k.draft_id] || {};
+        return {
+          id: k.id, created_at: k.created_at, draft_id: k.draft_id, concept: d.concept_slug || '', language: langName(d.language_slug),
+          ai_word: d.draft || '', judgement: k.judgement, suggested: k.suggested || '', research_consent: !!k.research_consent
+        };
+      })), 'AI judgements');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(drafts.map(function (d) {
+        var o = counts[d.id] || { n_right: 0, n_wrong: 0, n_not_sure: 0 };
+        return {
+          draft_id: d.id, concept: d.concept_slug, concept_en: c(d.concept_slug).en, language: langName(d.language_slug), ai_word: d.draft,
+          ai_confidence: d.confidence, withheld: !!d.withheld, n_right: o.n_right, n_wrong: o.n_wrong, n_not_sure: o.n_not_sure,
+          result: d.withheld ? 'withheld' : S.status(o)
+        };
+      })), 'AI words');
+      var pad = function (x) { return String(x).padStart(2, '0'); };
+      var name = 'LILIEMA_BookFair_data_' + stamp.getFullYear() + '-' + pad(stamp.getMonth() + 1) + '-' + pad(stamp.getDate()) + '_' + pad(stamp.getHours()) + pad(stamp.getMinutes()) + '.xlsx';
+      XLSX.writeFile(wb, name);
+      $('exportDone').textContent = F.t('apv.export.done', name);
+      $('exportDone').hidden = false;
+    });
+  }
+
+  // ------------------------------------------------------------ password
+  function changePassword(ev) {
+    ev.preventDefault();
+    var p1 = $('pw1').value, p2 = $('pw2').value;
+    $('pwError').hidden = true; $('pwDone').hidden = true;
+    if (p1.length < MIN_PASSWORD) { $('pwError').textContent = F.t('apv.pw.short'); $('pwError').hidden = false; return; }
+    if (p1 !== p2) { $('pwError').textContent = F.t('apv.pw.mismatch'); $('pwError').hidden = false; return; }
+    auth('PUT', 'user', { password: p1 }, session.access).then(function () {
+      $('pw1').value = ''; $('pw2').value = '';
+      $('pwDone').textContent = F.t('apv.pw.done'); $('pwDone').hidden = false;
+    }, function (err) {
+      $('pwError').textContent = F.t('apv.err.save') + err.message; $('pwError').hidden = false;
+    });
+  }
+
+  // ------------------------------------------------------------ screens
+  function showApp() {
+    $('signinBox').hidden = true;
+    $('appBox').hidden = false;
+    $('signinError').hidden = true;
+    $('who').textContent = F.t('apv.signedin', session.email);
+    languageOptions($('langFilter'), langFilter, true);
+    tab = 'new';
+    clearInterval(pollTimer);
+    pollTimer = setInterval(function () { if (!editing && !rejecting) load(); }, POLL_MS);
+    resetIdle();
+  }
+
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    if (!session) return;
+    idleTimer = setTimeout(function () { signOut(F.t('apv.idle')); }, IDLE_MS);
+  }
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
+    window.addEventListener(ev, resetIdle, { passive: true });
+  });
+
+  // ------------------------------------------------------------ start
+  F.initHeader();
+  F.onLang(function () {
+    if (session) { $('who').textContent = F.t('apv.signedin', session.email); languageOptions($('langFilter'), langFilter, true); render(); }
+  });
+  F.apply();
+
+  $('signinForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    $('signinError').hidden = true;
+    $('signinNote').hidden = true;
+    $('signinBtn').disabled = true;
+    signIn($('email').value.trim(), $('password').value).then(function () {
+      $('password').value = '';
+    }, function (err) {
+      $('signinError').textContent = err.notStaff ? F.t('apv.err.notstaff') : (err.status === 400 || err.status === 401) ? F.t('apv.err.login') : F.t('apv.err.net');
+      $('signinError').hidden = false;
+    }).then(function () { $('signinBtn').disabled = false; });
+  });
+  $('signoutBtn').addEventListener('click', function () { signOut(); });
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.addEventListener('click', function () { tab = b.getAttribute('data-tab'); editing = null; rejecting = null; render(); });
+  });
+  $('langFilter').addEventListener('change', function () { langFilter = this.value; renderEntries(); });
+  $('aiLang').addEventListener('change', function () { aiLang = this.value; renderAi(); });
+  $('entryList').addEventListener('click', onEntryAction);
+  $('aiList').addEventListener('click', onAiAction);
+  $('exportBtn').addEventListener('click', exportData);
+  $('pwForm').addEventListener('submit', changePassword);
+  window.addEventListener('pagehide', function () { if (session) signOut(); });
+})();
+</script>
+</body>
+</html>
