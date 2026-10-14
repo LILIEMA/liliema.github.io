@@ -207,6 +207,8 @@
       'apv.signedin': function (e) { return 'Kirjautuneena: ' + e; },
       'apv.err.login': 'Sähköposti tai salasana on väärin.',
       'apv.err.notstaff': 'Tämä tunnus ei ole henkilökunnan listalla.',
+      'apv.err.unconfirmed': 'Tunnusta ei ole vahvistettu. Pyydä tunnuksesi luonutta henkilöä vahvistamaan se.',
+      'apv.err.toomany': 'Liian monta yritystä. Odota muutama minuutti ja yritä uudelleen.',
       'apv.err.net': 'Ei yhteyttä tietokantaan. Yritä uudelleen.',
       'apv.err.save': 'Muutosta ei voitu tallentaa: ',
       'apv.idle': 'Sinut kirjattiin ulos 10 minuutin käyttämättömyyden jälkeen.',
@@ -250,6 +252,8 @@
       'apv.signedin': function (e) { return 'Inloggad som ' + e; },
       'apv.err.login': 'Fel e-post eller lösenord.',
       'apv.err.notstaff': 'Det här kontot finns inte på personallistan.',
+      'apv.err.unconfirmed': 'Kontot är inte bekräftat. Be den som skapade ditt konto att bekräfta det.',
+      'apv.err.toomany': 'För många försök. Vänta några minuter och försök igen.',
       'apv.err.net': 'Ingen anslutning till databasen. Försök igen.',
       'apv.err.save': 'Ändringen kunde inte sparas: ',
       'apv.idle': 'Du loggades ut efter 10 minuter utan aktivitet.',
@@ -293,6 +297,8 @@
       'apv.signedin': function (e) { return 'Signed in as ' + e; },
       'apv.err.login': 'Wrong email or password.',
       'apv.err.notstaff': 'This account is not on the staff list.',
+      'apv.err.unconfirmed': 'Account not confirmed. Ask the person who created your account to confirm it.',
+      'apv.err.toomany': 'Too many attempts. Wait a few minutes and try again.',
       'apv.err.net': 'No connection to the database. Please try again.',
       'apv.err.save': 'The change could not be saved: ',
       'apv.idle': 'You were signed out after 10 minutes without use.',
@@ -336,6 +342,8 @@
       'apv.signedin': function (e) { return 'Connecté avec ' + e; },
       'apv.err.login': 'E-mail ou mot de passe incorrect.',
       'apv.err.notstaff': 'Ce compte ne figure pas sur la liste de l’équipe.',
+      'apv.err.unconfirmed': 'Compte non confirmé. Demandez à la personne qui a créé votre compte de le confirmer.',
+      'apv.err.toomany': 'Trop de tentatives. Patientez quelques minutes, puis réessayez.',
       'apv.err.net': 'Pas de connexion à la base de données. Réessayez.',
       'apv.err.save': 'La modification n’a pas pu être enregistrée : ',
       'apv.idle': 'La session a été fermée après 10 minutes d’inactivité.',
@@ -397,6 +405,9 @@
         if (!r.ok) {
           var err = new Error((j && (j.msg || j.error_description || j.message || j.error)) || ('HTTP ' + r.status));
           err.status = r.status;
+          // Supabase Auth names the reason in error_code (email_not_confirmed, invalid_credentials ...);
+          // the REST API gives a string code such as 42501
+          err.code = (j && (j.error_code || (typeof j.code === 'string' ? j.code : ''))) || '';
           throw err;
         }
         return j;
@@ -451,6 +462,16 @@
       showApp();
       return load();
     });
+  }
+
+  // Why a sign-in failed, in the interface language. An account made without "Auto Confirm User" gets its own message;
+  // an account made with "Send invitation" has no password yet, which Supabase reports as wrong credentials.
+  function signinMessage(err) {
+    if (err.notStaff) return F.t('apv.err.notstaff');
+    if (err.code === 'email_not_confirmed' || /not confirmed/i.test(err.message || '')) return F.t('apv.err.unconfirmed');
+    if (err.status === 429 || err.code === 'over_request_rate_limit') return F.t('apv.err.toomany');
+    if (err.status === 400 || err.status === 401) return F.t('apv.err.login');
+    return F.t('apv.err.net');
   }
 
   function signOut(note) {
@@ -804,7 +825,7 @@
     signIn($('email').value.trim(), $('password').value).then(function () {
       $('password').value = '';
     }, function (err) {
-      $('signinError').textContent = err.notStaff ? F.t('apv.err.notstaff') : (err.status === 400 || err.status === 401) ? F.t('apv.err.login') : F.t('apv.err.net');
+      $('signinError').textContent = signinMessage(err);
       $('signinError').hidden = false;
     }).then(function () { $('signinBtn').disabled = false; });
   });
