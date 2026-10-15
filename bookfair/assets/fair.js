@@ -152,16 +152,16 @@
   };
 
   Fair.add({
-    fi: { 'fair.name': 'Helsingin kirjamessut 2026', 'fair.langs': 'Kieli',
+    fi: { 'fair.name': 'Helsingin kirjamessut 2026', 'fair.langs': 'Kieli', 'site.label': 'LILIEMAn verkkosivut:',
       'credit.tools': 'LILIEMA-työkalut: tekninen kehitys Friederike Lüpke, kehitetty yhdessä vuoden 2026 LILIEMA-työpajojen osallistujien kanssa.',
       'credit.pictures': function (name, licence) { return 'Kuvat: ' + name + ' (LILIEMA)' + (licence ? ', ' + licence + ' (muokattu verkkoon)' : '') + '.'; } },
-    sv: { 'fair.name': 'Helsingfors bokmässa 2026', 'fair.langs': 'Språk',
+    sv: { 'fair.name': 'Helsingfors bokmässa 2026', 'fair.langs': 'Språk', 'site.label': 'LILIEMAs webbplats:',
       'credit.tools': 'LILIEMAs verktyg: teknisk utveckling Friederike Lüpke, utvecklade tillsammans med deltagarna i LILIEMAs workshoppar 2026.',
       'credit.pictures': function (name, licence) { return 'Bilder: ' + name + ' (LILIEMA)' + (licence ? ', ' + licence + ' (bearbetade för webben)' : '') + '.'; } },
-    en: { 'fair.name': 'Helsinki Book Fair 2026', 'fair.langs': 'Language',
+    en: { 'fair.name': 'Helsinki Book Fair 2026', 'fair.langs': 'Language', 'site.label': 'LILIEMA website:',
       'credit.tools': 'LILIEMA tools: technical development by Friederike Lüpke, co-developed with the participants in the 2026 LILIEMA workshops.',
       'credit.pictures': function (name, licence) { return 'Pictures: ' + name + ' for LILIEMA' + (licence ? ', ' + licence + ' (adapted for the web)' : '') + '.'; } },
-    fr: { 'fair.name': 'Salon du livre d’Helsinki 2026', 'fair.langs': 'Langue',
+    fr: { 'fair.name': 'Salon du livre d’Helsinki 2026', 'fair.langs': 'Langue', 'site.label': 'Site web de LILIEMA :',
       'credit.tools': 'Outils LILIEMA : développement technique par Friederike Lüpke, co-développés avec les participants aux ateliers LILIEMA de 2026.',
       'credit.pictures': function (name, licence) { return 'Images : ' + name + ' pour LILIEMA' + (licence ? ', ' + licence + ' (adaptées pour le web)' : '') + '.'; } }
   });

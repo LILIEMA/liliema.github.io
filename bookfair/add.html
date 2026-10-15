@@ -186,7 +186,8 @@
       <p data-t="add.thanks.text"></p>
       <p class="notice" id="queuedNote" data-t="add.thanks.queued" hidden></p>
       <div class="actions">
-        <button type="button" class="btn primary" id="anotherBtn" data-t="add.another"></button>
+        <button type="button" class="btn primary" id="samePicBtn" data-t="add.samepic"></button>
+        <button type="button" class="btn" id="anotherBtn" data-t="add.another"></button>
         <button type="button" class="btn" id="nextBtn" data-t="add.next"></button>
       </div>
     </div>
@@ -211,14 +212,14 @@
   F.add({
     fi: {
       'add.title': 'Lisää sana',
-      'add.intro': 'Valitse kuva ja kerro, mitä se on sinun kielelläsi.',
+      'add.intro': 'Valitse kuva ja kerro, mitä se on jollakin kielistäsi. Sen jälkeen voit lisätä sen nimen muillakin kielilläsi, yksi kieli kerrallaan.',
       'add.step1': '1 Kuva', 'add.step2': '2 Kieli', 'add.step3': '3 Sana',
       'add.pick': 'Valitse kuva',
       'add.nopics': 'Kuvia ei ole vielä.',
-      'add.lang.q': 'Millä kielellä kirjoitat?',
+      'add.lang.q': 'Millä kielistäsi kirjoitat?',
       'add.lang.ph': 'Kirjoita kielen nimi tai valitse alta',
       'add.lang.other': function (n) { return 'Käytä nimeä ”' + n + '”'; },
-      'add.word.q': 'Kirjoita sana kielelläsi',
+      'add.word.q': 'Kirjoita sana tällä kielellä',
       'add.example': '+ Esimerkkilause (vapaaehtoinen)',
       'add.example.ph': 'Esimerkiksi lyhyt lause, jossa sana esiintyy',
       'add.change.pic': 'Vaihda kuva', 'add.change.lang': 'Vaihda kieli',
@@ -232,20 +233,21 @@
       'add.thanks.title': 'Kiitos!',
       'add.thanks.text': 'Sanasi näkyy sanaseinällä, kun olemme tarkistaneet sen.',
       'add.thanks.queued': 'Yhteys on poikki: sana lähetetään heti, kun yhteys palaa.',
-      'add.another': 'Lisää toinen sana',
+      'add.another': 'Toinen kuva',
+      'add.samepic': 'Sama kuva toisella kielelläsi',
       'add.next': 'Seuraava kävijä',
       'add.queue': function (n) { return n === 1 ? '1 sana odottaa lähetystä.' : n + ' sanaa odottaa lähetystä.'; }
     },
     sv: {
       'add.title': 'Lägg till ett ord',
-      'add.intro': 'Välj en bild och berätta vad den heter på ditt språk.',
+      'add.intro': 'Välj en bild och berätta vad den heter på ett av dina språk. Sedan kan du lägga till namnet på dina andra språk, ett språk i taget.',
       'add.step1': '1 Bild', 'add.step2': '2 Språk', 'add.step3': '3 Ord',
       'add.pick': 'Välj en bild',
       'add.nopics': 'Inga bilder ännu.',
-      'add.lang.q': 'På vilket språk skriver du?',
+      'add.lang.q': 'Vilket av dina språk skriver du på?',
       'add.lang.ph': 'Skriv språkets namn eller välj nedan',
       'add.lang.other': function (n) { return 'Använd namnet ”' + n + '”'; },
-      'add.word.q': 'Skriv ordet på ditt språk',
+      'add.word.q': 'Skriv ordet på det här språket',
       'add.example': '+ Exempelmening (frivillig)',
       'add.example.ph': 'Till exempel en kort mening där ordet förekommer',
       'add.change.pic': 'Byt bild', 'add.change.lang': 'Byt språk',
@@ -259,20 +261,21 @@
       'add.thanks.title': 'Tack!',
       'add.thanks.text': 'Ditt ord visas på ordväggen när vi har granskat det.',
       'add.thanks.queued': 'Ingen anslutning just nu: ordet skickas så snart anslutningen är tillbaka.',
-      'add.another': 'Lägg till ett ord till',
+      'add.another': 'En annan bild',
+      'add.samepic': 'Samma bild på ett annat av dina språk',
       'add.next': 'Nästa besökare',
       'add.queue': function (n) { return n + ' ord väntar på att skickas.'; }
     },
     en: {
       'add.title': 'Add a word',
-      'add.intro': 'Choose a picture and tell us what it is called in your language.',
+      'add.intro': 'Choose a picture and tell us what it is called in one of your languages. Then you can add its name in your other languages, one language at a time.',
       'add.step1': '1 Picture', 'add.step2': '2 Language', 'add.step3': '3 Word',
       'add.pick': 'Choose a picture',
       'add.nopics': 'No pictures yet.',
-      'add.lang.q': 'Which language are you writing in?',
+      'add.lang.q': 'Which of your languages are you writing in?',
       'add.lang.ph': 'Type the name of the language or choose below',
       'add.lang.other': function (n) { return 'Use the name “' + n + '”'; },
-      'add.word.q': 'Write the word in your language',
+      'add.word.q': 'Write the word in this language',
       'add.example': '+ Example sentence (optional)',
       'add.example.ph': 'For example a short sentence with the word',
       'add.change.pic': 'Change picture', 'add.change.lang': 'Change language',
@@ -286,20 +289,21 @@
       'add.thanks.title': 'Thank you!',
       'add.thanks.text': 'Your word appears on the word wall once we have checked it.',
       'add.thanks.queued': 'No connection at the moment: your word will be sent as soon as the connection is back.',
-      'add.another': 'Add another word',
+      'add.another': 'Another picture',
+      'add.samepic': 'This picture in another of your languages',
       'add.next': 'Next visitor',
       'add.queue': function (n) { return n + (n === 1 ? ' word is' : ' words are') + ' waiting to be sent.'; }
     },
     fr: {
       'add.title': 'Ajoutez un mot',
-      'add.intro': 'Choisissez une image et dites-nous comment elle s’appelle dans votre langue.',
+      'add.intro': 'Choisissez une image et dites-nous comment elle s’appelle dans l’une de vos langues. Vous pourrez ensuite ajouter son nom dans vos autres langues, une langue à la fois.',
       'add.step1': '1 Image', 'add.step2': '2 Langue', 'add.step3': '3 Mot',
       'add.pick': 'Choisissez une image',
       'add.nopics': 'Pas encore d’images.',
-      'add.lang.q': 'Dans quelle langue écrivez-vous ?',
+      'add.lang.q': 'Dans laquelle de vos langues écrivez-vous ?',
       'add.lang.ph': 'Tapez le nom de la langue ou choisissez ci-dessous',
       'add.lang.other': function (n) { return 'Utiliser le nom « ' + n + ' »'; },
-      'add.word.q': 'Écrivez le mot dans votre langue',
+      'add.word.q': 'Écrivez le mot dans cette langue',
       'add.example': '+ Phrase d’exemple (facultatif)',
       'add.example.ph': 'Par exemple une courte phrase avec le mot',
       'add.change.pic': 'Changer d’image', 'add.change.lang': 'Changer de langue',
@@ -313,7 +317,8 @@
       'add.thanks.title': 'Merci !',
       'add.thanks.text': 'Votre mot apparaîtra sur le mur de mots une fois vérifié.',
       'add.thanks.queued': 'Pas de connexion pour le moment : votre mot sera envoyé dès le retour de la connexion.',
-      'add.another': 'Ajouter un autre mot',
+      'add.another': 'Une autre image',
+      'add.samepic': 'Cette image dans une autre de vos langues',
       'add.next': 'Visiteur suivant',
       'add.queue': function (n) { return n + (n > 1 ? ' mots attendent' : ' mot attend') + ' d’être envoyé' + (n > 1 ? 's.' : '.'); }
     }
@@ -330,8 +335,9 @@
 
   // ------------------------------------------------------------ visitor session
   // consent is asked once per visitor; the language is kept for the next word
-  var visitor = { consent: null, langSlug: null, langLabel: '' };
+  var visitor = { consent: null, langSlug: null, langLabel: '', used: {} };   // used: picture -> languages already sent
   var current = { concept: null };
+  function langKey(slug, labelText) { return slug ? 's:' + slug : 'o:' + F.fold(labelText).trim(); }
 
   function showStep(n) {
     ['step1', 'step2', 'step3', 'done'].forEach(function (id, i) { $(id).hidden = (i + 1) !== n; });
@@ -399,7 +405,8 @@
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'lang-chip';
-      b.innerHTML = F.esc(l.name) + '<small>' + F.esc(countryNames(l)) + '</small>';
+      var done = current.concept && (visitor.used[current.concept.slug] || {})[langKey(l.slug)];
+      b.innerHTML = F.esc(l.name) + (done ? ' ✓' : '') + '<small>' + F.esc(countryNames(l)) + '</small>';
       b.addEventListener('click', function () { setLanguage(l.slug, l.name); });
       grid.appendChild(b);
     });
@@ -500,6 +507,8 @@
     sending = true;
     $('sendBtn').disabled = true;
     window.FairDB.add('entries', row).then(function (status) {
+      var u = visitor.used[current.concept.slug] || (visitor.used[current.concept.slug] = {});
+      u[langKey(visitor.langSlug, visitor.langLabel)] = true;
       showDone(word, status === 'queued');
     }, function (err) {
       if (window.console) console.error('[LILIEMA] entry refused:', err && err.message);
@@ -518,7 +527,7 @@
   }
 
   function resetVisitor() {
-    visitor = { consent: null, langSlug: null, langLabel: '' };
+    visitor = { consent: null, langSlug: null, langLabel: '', used: {} };
     current = { concept: null };
     showStep(1);
   }
@@ -579,6 +588,7 @@
   $('backBtn').addEventListener('click', function () { goLanguage(); });
   $('sendBtn').addEventListener('click', send);
   $('wordInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
+  $('samePicBtn').addEventListener('click', function () { goLanguage(); });
   $('anotherBtn').addEventListener('click', function () { current.concept = null; showStep(1); });
   $('nextBtn').addEventListener('click', resetVisitor);
   showStep(1);
