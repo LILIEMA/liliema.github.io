@@ -580,6 +580,24 @@ body.wall-page { height: 100vh; overflow: hidden; }
     if (d.requestFullscreen) d.requestFullscreen().catch(function () { /* not allowed */ });
   });
   document.addEventListener('fullscreenchange', function () { $('fsBtn').hidden = !!document.fullscreenElement; });
+
+  // Keep the screen on while the wall is shown, so that the display does not dim, sleep or lock when nobody
+  // touches the computer (Screen Wake Lock: Chrome, Edge, Safari, Firefox). The lock ends when the page is
+  // hidden or the system lets go of it (battery saver, policy), so it is asked for again when the page is
+  // visible and every minute. If the browser or the device refuses, the computer's power settings decide.
+  var wakeLock = null, wakePending = false;
+  function keepScreenOn() {
+    if (wakeLock && wakeLock.released) wakeLock = null;   // let go without a release event
+    if (!('wakeLock' in navigator) || wakeLock || wakePending || document.visibilityState !== 'visible') return;
+    wakePending = true;
+    navigator.wakeLock.request('screen').then(function (lock) {
+      wakeLock = lock;
+      lock.addEventListener('release', function () { wakeLock = null; });
+    }).catch(function () { /* refused: the power settings decide */ }).then(function () { wakePending = false; });
+  }
+  keepScreenOn();
+  document.addEventListener('visibilitychange', keepScreenOn);
+  setInterval(keepScreenOn, REFRESH_MS);
 })();
 </script>
 </body>
