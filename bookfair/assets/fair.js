@@ -166,32 +166,32 @@
       'credit.pictures': function (name, licence) { return 'Images : ' + name + ' pour LILIEMA' + (licence ? ', ' + licence + ' (adaptées pour le web)' : '') + '.'; } }
   });
 
-  // Texts shared by the pages where visitors send words or answers (consent asked once per visitor)
+  // Texts shared by the pages where visitors send words or answers (consent asked once per visit, see visit.js)
   Fair.add({
     fi: {
       'consent.title': 'Tutkimus ja opetus',
-      'consent.text': 'Sanasi ja vastauksesi tallennetaan ilman nimeäsi. Suostumuksellasi LILIEMA ja Helsingin yliopisto voivat käyttää niitä myös tutkimuksessa ja opetuksessa. Ilman suostumusta niitä käytetään vain messuilla. Koska niissä ei ole nimeä, niitä ei voi jälkikäteen yhdistää sinuun eikä poistaa.',
+      'consent.text': 'Sanasi ja vastauksesi tallennetaan ilman nimeäsi. Suostumuksellasi LILIEMA ja Helsingin yliopisto voivat käyttää niitä myös tutkimuksessa ja opetuksessa. Silloin ne pidetään yhdessä satunnaisen numeron alla, jotta näemme, mitkä sanat ja kielet tulevat samalta kävijältä. Ilman suostumusta niitä käytetään vain messuilla. Koska niissä ei ole nimeä, niitä ei voi jälkikäteen yhdistää sinuun eikä poistaa.',
       'consent.box': 'Olen vähintään 15-vuotias ja annan suostumukseni.',
       'notice.entry': 'Sanasi tallennetaan messujen sanakokoelmaan (LILIEMA ja Helsingin yliopiston AfriStadi). Älä kirjoita nimiä tai muita henkilötietoja. Sanat näkyvät näytöllä, kun olemme tarkistaneet ne.',
       'kb.space': 'välilyönti', 'kb.all': 'kaikki', 'kb.lang': 'kielen', 'kb.shift': 'isot kirjaimet', 'kb.backspace': 'poista'
     },
     sv: {
       'consent.title': 'Forskning och undervisning',
-      'consent.text': 'Dina ord och svar sparas utan ditt namn. Med ditt samtycke kan LILIEMA och Helsingfors universitet också använda dem i forskning och undervisning. Utan samtycke används de bara under mässan. Eftersom de inte har något namn kan de inte senare kopplas till dig eller tas bort.',
+      'consent.text': 'Dina ord och svar sparas utan ditt namn. Med ditt samtycke kan LILIEMA och Helsingfors universitet också använda dem i forskning och undervisning. Då hålls de samman under ett slumpmässigt nummer, så att vi kan se vilka ord och språk som kommer från samma besökare. Utan samtycke används de bara under mässan. Eftersom de inte har något namn kan de inte senare kopplas till dig eller tas bort.',
       'consent.box': 'Jag är 15 år eller äldre och ger mitt samtycke.',
       'notice.entry': 'Ditt ord sparas i mässans ordsamling (LILIEMA och AfriStadi, Helsingfors universitet). Skriv inga namn eller andra personuppgifter. Orden visas på skärmen när vi har granskat dem.',
       'kb.space': 'mellanslag', 'kb.all': 'alla', 'kb.lang': 'språkets', 'kb.shift': 'versaler', 'kb.backspace': 'radera'
     },
     en: {
       'consent.title': 'Research and teaching',
-      'consent.text': 'Your words and answers are stored without your name. With your agreement, LILIEMA and the University of Helsinki may also use them in research and teaching. Without it, they are used only at the fair. As they carry no name, they cannot be traced back to you or withdrawn later.',
+      'consent.text': 'Your words and answers are stored without your name. With your agreement, LILIEMA and the University of Helsinki may also use them in research and teaching, kept together under a random number so that we can see which words and languages come from the same visitor. Without it, they are used only at the fair. As they carry no name, they cannot be traced back to you or withdrawn later.',
       'consent.box': 'I am 15 or older and I agree.',
       'notice.entry': 'Your word goes into the fair’s word collection (LILIEMA and AfriStadi, University of Helsinki). Please do not write names or other personal information. Words appear on the screen once we have checked them.',
       'kb.space': 'space', 'kb.all': 'all', 'kb.lang': 'language', 'kb.shift': 'capitals', 'kb.backspace': 'delete'
     },
     fr: {
       'consent.title': 'Recherche et enseignement',
-      'consent.text': 'Vos mots et vos réponses sont enregistrés sans votre nom. Avec votre accord, LILIEMA et l’Université d’Helsinki peuvent aussi les utiliser dans la recherche et l’enseignement. Sans votre accord, ils ne servent que pendant le salon. Comme ils ne portent pas de nom, ils ne peuvent ni vous être rattachés ni être retirés par la suite.',
+      'consent.text': 'Vos mots et vos réponses sont enregistrés sans votre nom. Avec votre accord, LILIEMA et l’Université d’Helsinki peuvent aussi les utiliser dans la recherche et l’enseignement ; ils sont alors regroupés sous un numéro aléatoire, afin que nous puissions voir quels mots et quelles langues viennent d’une même personne. Sans votre accord, ils ne servent que pendant le salon. Comme ils ne portent pas de nom, ils ne peuvent ni vous être rattachés ni être retirés par la suite.',
       'consent.box': 'J’ai 15 ans ou plus et je donne mon accord.',
       'notice.entry': 'Votre mot entre dans la collection de mots du salon (LILIEMA et AfriStadi, Université d’Helsinki). Merci de ne pas écrire de noms ni d’autres informations personnelles. Les mots apparaissent à l’écran une fois vérifiés.',
       'kb.space': 'espace', 'kb.all': 'toutes', 'kb.lang': 'langue', 'kb.shift': 'majuscules', 'kb.backspace': 'effacer'

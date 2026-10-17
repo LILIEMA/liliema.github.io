@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/fair.css">
 <script src="assets/vendor/xlsx-0.18.5.full.min.js"></script>
 <script src="assets/fair.js"></script>
+<script src="assets/visit.js"></script>
 <script src="data/liliema_glosses.js"></script>
 <style>
 /* Search */
@@ -811,5 +812,6 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   resetIdle();
 })();
 </script>
+<script>window.FairVisit.guard();   // keeps a visit alive here and asks after a pause (visit.js)</script>
 </body>
 </html>

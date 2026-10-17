@@ -10,6 +10,7 @@
 <script src="data/fair_data.js"></script>
 <script src="assets/fair.js"></script>
 <script src="assets/db.js"></script>
+<script src="assets/visit.js"></script>
 <script src="assets/keyboard.js"></script>
 <style>
 .steps { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
@@ -204,7 +205,7 @@
 <script>
 (function () {
   'use strict';
-  var F = window.Fair, D = window.FAIR_DATA;
+  var F = window.Fair, D = window.FAIR_DATA, V = window.FairVisit;
 
   // ------------------------------------------------------------ settings
   var IDLE_RESET_MS = 2 * 60 * 1000;     // after 2 minutes without use the page starts again for the next visitor
@@ -235,7 +236,7 @@
       'add.thanks.queued': 'Yhteys on poikki: sana lähetetään heti, kun yhteys palaa.',
       'add.another': 'Toinen kuva',
       'add.samepic': 'Sama kuva toisella kielelläsi',
-      'add.next': 'Seuraava kävijä',
+      'add.next': 'Olen valmis',
       'add.queue': function (n) { return n === 1 ? '1 sana odottaa lähetystä.' : n + ' sanaa odottaa lähetystä.'; }
     },
     sv: {
@@ -263,7 +264,7 @@
       'add.thanks.queued': 'Ingen anslutning just nu: ordet skickas så snart anslutningen är tillbaka.',
       'add.another': 'En annan bild',
       'add.samepic': 'Samma bild på ett annat av dina språk',
-      'add.next': 'Nästa besökare',
+      'add.next': 'Jag är klar',
       'add.queue': function (n) { return n + ' ord väntar på att skickas.'; }
     },
     en: {
@@ -291,7 +292,7 @@
       'add.thanks.queued': 'No connection at the moment: your word will be sent as soon as the connection is back.',
       'add.another': 'Another picture',
       'add.samepic': 'This picture in another of your languages',
-      'add.next': 'Next visitor',
+      'add.next': 'I’m done',
       'add.queue': function (n) { return n + (n === 1 ? ' word is' : ' words are') + ' waiting to be sent.'; }
     },
     fr: {
@@ -319,7 +320,7 @@
       'add.thanks.queued': 'Pas de connexion pour le moment : votre mot sera envoyé dès le retour de la connexion.',
       'add.another': 'Une autre image',
       'add.samepic': 'Cette image dans une autre de vos langues',
-      'add.next': 'Visiteur suivant',
+      'add.next': 'J’ai terminé',
       'add.queue': function (n) { return n + (n > 1 ? ' mots attendent' : ' mot attend') + ' d’être envoyé' + (n > 1 ? 's.' : '.'); }
     }
   });
@@ -334,8 +335,8 @@
   }
 
   // ------------------------------------------------------------ visitor session
-  // consent is asked once per visitor; the language is kept for the next word
-  var visitor = { consent: null, langSlug: null, langLabel: '', used: {} };   // used: picture -> languages already sent
+  // consent is asked once per visit and shared with the other pages (visit.js); the language is kept for the next word
+  var visitor = { langSlug: null, langLabel: '', used: {} };   // used: picture -> languages already sent
   var current = { concept: null };
   function langKey(slug, labelText) { return slug ? 's:' + slug : 'o:' + F.fold(labelText).trim(); }
 
@@ -474,18 +475,16 @@
   }
 
   function renderConsent() {
-    var asked = visitor.consent !== null;
+    var consent = V.consent(), asked = consent !== null;
     $('consentBox').hidden = asked;
     $('consentDone').hidden = !asked;
-    if (!asked) { $('consentCheck').checked = false; return; }
-    $('consentDone').innerHTML = F.esc(F.t(visitor.consent ? 'add.consent.yes' : 'add.consent.no')) +
-      ' <button type="button" class="link-btn" id="consentChange">' + F.esc(F.t('add.consent.change')) + '</button>';
-    $('consentChange').addEventListener('click', function () {
-      var previous = !!visitor.consent;
-      visitor.consent = null;
-      renderConsent();
-      $('consentCheck').checked = previous;
-    });
+    $('consentCheck').checked = false;   // never ticked in advance; a tick is used once
+    if (!asked) return;
+    $('consentDone').innerHTML = F.esc(F.t(consent ? 'add.consent.yes' : 'add.consent.no')) +
+      ' <button type="button" class="link-btn" id="consentChange">' + F.esc(F.t('add.consent.change')) + '</button>' +
+      ' <button type="button" class="link-btn" id="consentNotYou">' + F.esc(F.t('visit.notyou')) + '</button>';
+    $('consentChange').addEventListener('click', function () { V.setConsent(null); renderConsent(); });
+    $('consentNotYou').addEventListener('click', function () { V.end(); });
   }
 
   var sending = false;
@@ -494,16 +493,20 @@
     var word = $('wordInput').value.normalize('NFC').trim().replace(/\s+/g, ' ');
     var example = $('exampleInput').value.normalize('NFC').trim().replace(/\s+/g, ' ');
     if (!word) { showError(F.t('add.err.word')); $('wordInput').focus(); return; }
-    if (visitor.consent === null) visitor.consent = $('consentCheck').checked;
-    var row = {
+    if (!V.current()) return;   // the visit shown here ended meanwhile: the page has started again
+    if (V.consent() === null) {
+      if ($('consentBox').hidden) { renderConsent(); return; }   // never take the answer from a box nobody sees
+      V.setConsent($('consentCheck').checked);
+      renderConsent();
+    }
+    var row = V.stamp({   // research_consent, and the visit number only with consent
       concept_slug: current.concept.slug,
       language_slug: visitor.langSlug,
       language_label: visitor.langLabel,
       headword: word,
       example_phrase: example || null,
-      source: 'visitor',
-      research_consent: visitor.consent === true
-    };
+      source: 'visitor'
+    });
     sending = true;
     $('sendBtn').disabled = true;
     window.FairDB.add('entries', row).then(function (status) {
@@ -526,11 +529,14 @@
     showStep(4);
   }
 
-  function resetVisitor() {
-    visitor = { consent: null, langSlug: null, langLabel: '', used: {} };
+  // the page starts again for the next visitor; also when the visit ends elsewhere ("No, I'm new here", another tab)
+  function resetPage() {
+    visitor = { langSlug: null, langLabel: '', used: {} };
     current = { concept: null };
     showStep(1);
   }
+  function resetVisitor() { V.end(); resetPage(); }
+  V.onEnd(resetPage);
 
   // ------------------------------------------------------------ queue info for the staff
   function updateQueue() {
@@ -545,12 +551,14 @@
   function resetIdle() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(function () {
-      if (visitor.consent !== null || visitor.langLabel || current.concept) resetVisitor();
+      if (V.active() || visitor.langLabel || current.concept) resetVisitor();
     }, IDLE_RESET_MS);
   }
-  ['pointerdown', 'keydown', 'touchstart', 'input'].forEach(function (ev) {
+  ['pointerdown', 'keydown', 'touchstart', 'input', 'wheel'].forEach(function (ev) {
     window.addEventListener(ev, resetIdle, { passive: true });
   });
+  // a box ticked but never sent is unticked after 45 seconds without use, so the next person does not find it ticked
+  V.onPause(function () { if (V.consent() === null) $('consentCheck').checked = false; });
 
   // the credit line for the pictures, once the licence is agreed (set in the app data)
   function showPictureCredit() {
@@ -566,7 +574,7 @@
     renderPictures();
     if (!$('step2').hidden) { chosenBox($('chosen2'), false); renderSuggestions(); renderLanguages(); }
     if (!$('step3').hidden) { chosenBox($('chosen3'), true); keyboardLabels(); kb.render(); renderConsent(); }
-    if (visitor.consent === null) $('consentCheck').checked = ticked;
+    if (V.consent() === null) $('consentCheck').checked = ticked;
     updateQueue();
     showPictureCredit();
   });
@@ -590,9 +598,10 @@
   $('wordInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
   $('samePicBtn').addEventListener('click', function () { goLanguage(); });
   $('anotherBtn').addEventListener('click', function () { current.concept = null; showStep(1); });
-  $('nextBtn').addEventListener('click', resetVisitor);
+  $('nextBtn').addEventListener('click', function () { V.done(); resetPage(); });
   showStep(1);
   resetIdle();
+  V.guard();
 })();
 </script>
 </body>

@@ -10,6 +10,7 @@
 <script src="data/fair_data.js"></script>
 <script src="assets/fair.js"></script>
 <script src="assets/db.js"></script>
+<script src="assets/visit.js"></script>
 <script src="assets/keyboard.js"></script>
 <script src="assets/checkai.js"></script>
 <style>
@@ -269,7 +270,7 @@ a.link-btn { display: inline-flex; align-items: center; }
 <script>
 (function () {
   'use strict';
-  var F = window.Fair, D = window.FAIR_DATA, S = window.FairScores;
+  var F = window.Fair, D = window.FAIR_DATA, S = window.FairScores, V = window.FairVisit;
 
   // ------------------------------------------------------------ settings
   var IDLE_RESET_MS = 2 * 60 * 1000;   // after 2 minutes without use the page starts again for the next visitor
@@ -320,7 +321,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.few': function (min) { return 'Vastauksia on vielä alle ' + min + ', joten on liian aikaista sanoa.'; },
       'chk.collection': 'Sanakokoelmassa tälle kuvalle:',
       'chk.confidence': function (c) { return 'Tekoälyn oma arvio sanasta: ' + c + '.'; },
-      'chk.next': 'Seuraava sana', 'chk.nextvisitor': 'Seuraava kävijä',
+      'chk.next': 'Seuraava sana', 'chk.nextvisitor': 'Olen valmis',
       'chk.end': function (n, name) { return 'Olet tarkistanut kaikki ' + n + ' sanaa kielellä ' + name + '. Kiitos!'; },
       'chk.otherlang': 'Valitse toinen kielesi',
       'chk.queue': function (n) { return n === 1 ? '1 vastaus odottaa lähetystä.' : n + ' vastausta odottaa lähetystä.'; }
@@ -355,7 +356,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.few': function (min) { return 'Det finns ännu färre än ' + min + ' svar, så det är för tidigt att säga.'; },
       'chk.collection': 'I ordsamlingen för den här bilden:',
       'chk.confidence': function (c) { return 'AI:ns egen bedömning av ordet: ' + c + '.'; },
-      'chk.next': 'Nästa ord', 'chk.nextvisitor': 'Nästa besökare',
+      'chk.next': 'Nästa ord', 'chk.nextvisitor': 'Jag är klar',
       'chk.end': function (n, name) { return 'Du har granskat alla ' + n + ' ord på ' + name + '. Tack!'; },
       'chk.otherlang': 'Välj ett annat av dina språk',
       'chk.queue': function (n) { return n + ' svar väntar på att skickas.'; }
@@ -390,7 +391,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.few': function (min) { return 'Fewer than ' + min + ' answers so far, so it is too early to tell.'; },
       'chk.collection': 'In the word collection for this picture:',
       'chk.confidence': function (c) { return 'The AI’s own estimate for this word: ' + c + '.'; },
-      'chk.next': 'Next word', 'chk.nextvisitor': 'Next visitor',
+      'chk.next': 'Next word', 'chk.nextvisitor': 'I’m done',
       'chk.end': function (n, name) { return 'You have checked all ' + n + ' words in ' + name + '. Thank you!'; },
       'chk.otherlang': 'Choose another of your languages',
       'chk.queue': function (n) { return n + (n === 1 ? ' answer is' : ' answers are') + ' waiting to be sent.'; }
@@ -425,7 +426,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.few': function (min) { return 'Moins de ' + min + ' réponses pour l’instant : il est trop tôt pour conclure.'; },
       'chk.collection': 'Dans la collection de mots pour cette image :',
       'chk.confidence': function (c) { return 'L’estimation de l’IA elle-même pour ce mot : ' + c + '.'; },
-      'chk.next': 'Mot suivant', 'chk.nextvisitor': 'Visiteur suivant',
+      'chk.next': 'Mot suivant', 'chk.nextvisitor': 'J’ai terminé',
       'chk.end': function (n, name) { return 'Vous avez vérifié les ' + n + ' mots en ' + name + '. Merci !'; },
       'chk.otherlang': 'Choisir une autre de vos langues',
       'chk.queue': function (n) { return n + (n > 1 ? ' réponses attendent' : ' réponse attend') + ' d’être envoyée' + (n > 1 ? 's.' : '.'); }
@@ -489,8 +490,8 @@ a.link-btn { display: inline-flex; align-items: center; }
 
   // ------------------------------------------------------------ the visitor
   var visitor, local;   // local: this device's answers not yet in the fetched scores
-  function newVisitor() {
-    visitor = { consent: null, langSlug: null, langLabel: '', queue: [], pos: 0, current: null, done: {} };
+  function newVisitor() {   // the research answer is part of the visit (visit.js), shared with Add a word
+    visitor = { langSlug: null, langLabel: '', queue: [], pos: 0, current: null, done: {} };
   }
   newVisitor();
   local = {};
@@ -568,8 +569,18 @@ a.link-btn { display: inline-flex; align-items: center; }
     return a;
   }
 
+  // the answer to the research question is taken from the box only while the visitor can see it
+  function takeConsent() {
+    if (!V.current()) return false;   // the visit shown here ended meanwhile: the page has started again
+    if (V.consent() !== null) return true;
+    if ($('consentBox').hidden) { renderConsent(); return false; }
+    V.setConsent($('consentCheck').checked);
+    renderConsent();
+    return true;
+  }
+
   function startLanguage(slug, name) {
-    if (visitor.consent === null) visitor.consent = $('consentCheck').checked;
+    if (!takeConsent()) return;
     visitor.langSlug = slug;
     visitor.langLabel = String(name).normalize('NFC').trim().slice(0, 60);
     visitor.queue = shuffle((byLang[slug] || []).filter(function (d) { return !visitor.done[d.id]; }).slice());
@@ -617,24 +628,22 @@ a.link-btn { display: inline-flex; align-items: center; }
   }
 
   function renderConsent() {
-    var asked = visitor.consent !== null;
+    var consent = V.consent(), asked = consent !== null;
     var slot = $('stepWord').hidden ? $('consentSlotLang') : $('consentSlotGame');
     if ($('consentBox').parentNode !== slot) slot.appendChild($('consentBox'));
     $('consentBox').hidden = asked;
     $('consentDone').hidden = !asked;
-    if (!asked) { $('consentCheck').checked = false; return; }   // never ticked in advance for a new visitor
-    $('consentDone').innerHTML = F.esc(F.t(visitor.consent ? 'chk.consent.yes' : 'chk.consent.no')) +
-      ' <button type="button" class="link-btn" id="consentChange">' + F.esc(F.t('chk.consent.change')) + '</button>';
-    $('consentChange').addEventListener('click', function () {
-      var previous = !!visitor.consent;
-      visitor.consent = null;
-      renderConsent();
-      $('consentCheck').checked = previous;
-    });
+    $('consentCheck').checked = false;   // never ticked in advance for a new visitor; a tick is used once
+    if (!asked) return;
+    $('consentDone').innerHTML = F.esc(F.t(consent ? 'chk.consent.yes' : 'chk.consent.no')) +
+      ' <button type="button" class="link-btn" id="consentChange">' + F.esc(F.t('chk.consent.change')) + '</button>' +
+      ' <button type="button" class="link-btn" id="consentNotYou">' + F.esc(F.t('visit.notyou')) + '</button>';
+    $('consentChange').addEventListener('click', function () { V.setConsent(null); renderConsent(); });
+    $('consentNotYou').addEventListener('click', function () { V.end(); });
   }
 
   function answer(j) {
-    if (visitor.consent === null) visitor.consent = $('consentCheck').checked;
+    if (!takeConsent()) return;
     if (j === 'wrong') {
       setAnswersEnabled(false);
       renderConsent();
@@ -650,16 +659,17 @@ a.link-btn { display: inline-flex; align-items: center; }
   }
 
   function record(j, suggested) {
+    if (!V.current()) return;
     var d = visitor.current;
-    var consent = visitor.consent === true;
-    var check = { draft_id: d.id, judgement: j, research_consent: consent };
+    // research_consent, and the visit number only with consent; the visitor's own name for the language
+    var check = { draft_id: d.id, judgement: j, language_label: visitor.langLabel || null };
     if (suggested) check.suggested = suggested;
-    send('ai_checks', check);
+    send('ai_checks', V.stamp(check));
     if (suggested) {
-      send('entries', {
+      send('entries', V.stamp({
         concept_slug: d.concept_slug, language_slug: d.language_slug, language_label: visitor.langLabel,
-        headword: suggested, example_phrase: null, source: 'check_the_ai', research_consent: consent
-      });
+        headword: suggested, example_phrase: null, source: 'check_the_ai'
+      }));
     }
     var l = local[d.id] || (local[d.id] = { right: 0, wrong: 0, not_sure: 0 });
     l[j]++;
@@ -727,10 +737,13 @@ a.link-btn { display: inline-flex; align-items: center; }
     renderConsent();
   }
 
-  function resetVisitor() {
+  // the page starts again for the next visitor; also when the visit ends elsewhere ("No, I'm new here", another tab)
+  function resetPage() {
     newVisitor();
     goLanguage();
   }
+  function resetVisitor() { V.end(); resetPage(); }
+  V.onEnd(resetPage);
 
   // ------------------------------------------------------------ queue info and credits
   function updateQueue() {
@@ -752,12 +765,14 @@ a.link-btn { display: inline-flex; align-items: center; }
   function resetIdle() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(function () {
-      if (visitor.consent !== null || visitor.langSlug) resetVisitor();
+      if (V.active() || visitor.langSlug) resetVisitor();
     }, IDLE_RESET_MS);
   }
-  ['pointerdown', 'keydown', 'touchstart', 'input'].forEach(function (ev) {
+  ['pointerdown', 'keydown', 'touchstart', 'input', 'wheel'].forEach(function (ev) {
     window.addEventListener(ev, resetIdle, { passive: true });
   });
+  // a box ticked but never used is unticked after 45 seconds without use, so the next person does not find it ticked
+  V.onPause(function () { if (V.consent() === null) $('consentCheck').checked = false; });
 
   // ------------------------------------------------------------ start
   F.initHeader();
@@ -767,7 +782,7 @@ a.link-btn { display: inline-flex; align-items: center; }
     updateQueue();
     if (!$('stepLang').hidden) { renderLanguageStep(); renderConsent(); }
     if (!$('stepWord').hidden) { renderWord(); renderConsent(); keyboardLabels(); kb.render(); }
-    if (visitor.consent === null) $('consentCheck').checked = ticked;
+    if (V.consent() === null) $('consentCheck').checked = ticked;
     if (!$('stepResult').hidden && visitor.last) showResult(visitor.last.d, visitor.last.j, visitor.last.suggested);
     if (!$('stepEnd').hidden) showEnd();
   });
@@ -798,10 +813,11 @@ a.link-btn { display: inline-flex; align-items: center; }
   $('fixInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('fixSend').click(); });
   $('fixSkip').addEventListener('click', function () { record('wrong', ''); });
   $('nextWord').addEventListener('click', nextWord);
-  $('nextVisitor').addEventListener('click', resetVisitor);
+  $('nextVisitor').addEventListener('click', function () { V.done(); resetPage(); });
   $('endLang').addEventListener('click', goLanguage);
-  $('endVisitor').addEventListener('click', resetVisitor);
+  $('endVisitor').addEventListener('click', function () { V.done(); resetPage(); });
   resetIdle();
+  V.guard();
 })();
 </script>
 </body>

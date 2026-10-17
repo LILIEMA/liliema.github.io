@@ -237,7 +237,7 @@
       'apv.ai.counts': function (r, w, n) { return 'oikein ' + r + ' · väärin ' + w + ' · ei varma ' + n; },
       'apv.ai.suggested': 'Kävijöiden ehdotukset: ',
       'apv.ai.summary': function (n, out) { return n + ' sanaa pelissä, ' + out + ' poistettu'; },
-      'apv.export.text': 'Lataa kaikki messujen tiedot Excel-tiedostona: sanat, tekoälyn sanat ja kävijöiden vastaukset. Tutkimuksessa ja opetuksessa saa käyttää vain rivejä, joissa research_consent on TRUE.',
+      'apv.export.text': 'Lataa kaikki messujen tiedot Excel-tiedostona: sanat, tekoälyn sanat, kävijöiden vastaukset ja käynnit. Tutkimuksessa ja opetuksessa saa käyttää vain rivejä, joissa research_consent on TRUE.',
       'apv.export.btn': 'Lataa Excel-tiedosto',
       'apv.export.done': function (f) { return 'Ladattu: ' + f; },
       'apv.pw.new': 'Uusi salasana (vähintään 10 merkkiä)', 'apv.pw.repeat': 'Uusi salasana uudelleen', 'apv.pw.save': 'Vaihda salasana',
@@ -282,7 +282,7 @@
       'apv.ai.counts': function (r, w, n) { return 'rätt ' + r + ' · fel ' + w + ' · vet inte ' + n; },
       'apv.ai.suggested': 'Besökarnas förslag: ',
       'apv.ai.summary': function (n, out) { return n + ' ord i spelet, ' + out + ' borttagna'; },
-      'apv.export.text': 'Ladda ner alla data från mässan som Excel-fil: orden, AI:ns ord och besökarnas svar. I forskning och undervisning får endast rader med research_consent = TRUE användas.',
+      'apv.export.text': 'Ladda ner alla data från mässan som Excel-fil: orden, AI:ns ord, besökarnas svar och besöken. I forskning och undervisning får endast rader med research_consent = TRUE användas.',
       'apv.export.btn': 'Ladda ner Excel-filen',
       'apv.export.done': function (f) { return 'Nedladdad: ' + f; },
       'apv.pw.new': 'Nytt lösenord (minst 10 tecken)', 'apv.pw.repeat': 'Nytt lösenord igen', 'apv.pw.save': 'Byt lösenord',
@@ -327,7 +327,7 @@
       'apv.ai.counts': function (r, w, n) { return 'right ' + r + ' · wrong ' + w + ' · not sure ' + n; },
       'apv.ai.suggested': 'Visitors’ suggestions: ',
       'apv.ai.summary': function (n, out) { return n + ' words in the game, ' + out + ' taken out'; },
-      'apv.export.text': 'Download all data from the fair as an Excel file: the words, the AI’s words and the visitors’ answers. Only rows with research_consent = TRUE may be used in research or teaching.',
+      'apv.export.text': 'Download all data from the fair as an Excel file: the words, the AI’s words, the visitors’ answers and the visits. Only rows with research_consent = TRUE may be used in research or teaching.',
       'apv.export.btn': 'Download the Excel file',
       'apv.export.done': function (f) { return 'Downloaded: ' + f; },
       'apv.pw.new': 'New password (at least 10 characters)', 'apv.pw.repeat': 'New password again', 'apv.pw.save': 'Change password',
@@ -372,7 +372,7 @@
       'apv.ai.counts': function (r, w, n) { return 'juste ' + r + ' · faux ' + w + ' · ne sait pas ' + n; },
       'apv.ai.suggested': 'Suggestions des visiteurs : ',
       'apv.ai.summary': function (n, out) { return n + ' mots dans le jeu, ' + out + ' retirés'; },
-      'apv.export.text': 'Téléchargez toutes les données du salon dans un fichier Excel : les mots, les mots de l’IA et les réponses des visiteurs. Seules les lignes avec research_consent = TRUE peuvent servir à la recherche ou à l’enseignement.',
+      'apv.export.text': 'Téléchargez toutes les données du salon dans un fichier Excel : les mots, les mots de l’IA, les réponses des visiteurs et les visites. Seules les lignes avec research_consent = TRUE peuvent servir à la recherche ou à l’enseignement.',
       'apv.export.btn': 'Télécharger le fichier Excel',
       'apv.export.done': function (f) { return 'Téléchargé : ' + f; },
       'apv.pw.new': 'Nouveau mot de passe (au moins 10 caractères)', 'apv.pw.repeat': 'Nouveau mot de passe, à nouveau', 'apv.pw.save': 'Changer le mot de passe',
@@ -495,16 +495,18 @@
   function load() {
     if (!session) return Promise.resolve();
     return Promise.all([
-      all('entries?select=id,concept_slug,language_slug,language_label,headword,example_phrase,source,status,notes,research_consent,created_at,reviewed_at&order=id'),
+      all('entries?select=id,concept_slug,language_slug,language_label,headword,example_phrase,source,status,notes,research_consent,created_at,reviewed_at,visit_id&order=id'),
       all('ai_drafts?select=id,concept_slug,language_slug,draft,confidence,withheld&order=id'),
-      all('ai_checks?select=id,draft_id,judgement,suggested,research_consent,created_at&order=id')
+      all('ai_checks?select=id,draft_id,judgement,suggested,language_label,research_consent,created_at,visit_id&order=id')
     ]).then(function (r) {
       entries = r[0]; drafts = r[1]; checks = r[2]; lastLoad = new Date();
       $('appError').hidden = true;
       render();
+      return true;
     }, function (err) {
-      if (err.status === 401) { signOut(F.t('apv.idle')); return; }
+      if (err.status === 401) { signOut(F.t('apv.idle')); return false; }
       showError(F.t('apv.err.net') + ' (' + err.message + ')');
+      return false;
     });
   }
 
@@ -722,8 +724,8 @@
 
   // ------------------------------------------------------------ export: everything, as an Excel file
   function exportData() {
-    load().then(function () {
-      if (!session) return;
+    load().then(function (ok) {
+      if (!session || !ok) return;   // no file from old or missing data: the error is shown above
       var c = function (slug) { return conceptBySlug[slug] || {}; };
       var draftById = {};
       drafts.forEach(function (d) { draftById[d.id] = d; });
@@ -732,31 +734,86 @@
         var o = counts[k.draft_id] || (counts[k.draft_id] = { n_right: 0, n_wrong: 0, n_not_sure: 0 });
         o[k.judgement === 'right' ? 'n_right' : k.judgement === 'wrong' ? 'n_wrong' : 'n_not_sure']++;
       });
+      // visits: rows with the same visit number come from one visitor who agreed to research use (visit.js)
+      var visits = {}, order = [];
+      function visitOf(id, at) {
+        if (!id) return null;
+        var v = visits[id];
+        if (!v) { v = visits[id] = { id: id, first: at, last: at, langs: [], seen: {}, distinct: {}, words: [], answers: [], right: 0, wrong: 0, not_sure: 0, fixes: 0 }; order.push(v); }
+        if (at < v.first) v.first = at;
+        if (at > v.last) v.last = at;
+        return v;
+      }
+      function shownLang(lbl, slug) {   // the visitor's own name, with the canonical name when it differs
+        var name = slug ? langName(slug) : '';
+        if (lbl && name && F.fold(lbl).trim() !== F.fold(name).trim()) return lbl + ' (' + name + ')';
+        return lbl || name || '';
+      }
+      function addLang(v, shown, slug, lbl) {
+        var k = F.fold(shown).trim();
+        if (shown && !v.seen[k]) { v.seen[k] = 1; v.langs.push(shown); }
+        var lk = slug ? 's:' + slug : 'o:' + F.fold(lbl || '').trim();   // one language, whatever name was used
+        if (lk !== 'o:') v.distinct[lk] = 1;
+      }
+      var cell = function (t) { return t.length > 32000 ? t.slice(0, 32000) + ' …' : t; };   // Excel's limit per cell
+      entries.forEach(function (e) {
+        var v = visitOf(e.visit_id, e.created_at);
+        if (!v) return;
+        var lg = shownLang(e.language_label, e.language_slug);
+        addLang(v, lg, e.language_slug, e.language_label);
+        if (e.source === 'visitor') v.words.push(e.headword + ' (' + lg + ', ' + (c(e.concept_slug).en || e.concept_slug) +
+          (e.status !== 'approved' ? ', ' + e.status : '') + ')');
+      });
+      checks.forEach(function (k) {
+        var v = visitOf(k.visit_id, k.created_at);
+        if (!v) return;
+        var d = draftById[k.draft_id] || {}, lg = shownLang(k.language_label, d.language_slug);
+        addLang(v, lg, d.language_slug, k.language_label);
+        if (v[k.judgement] !== undefined) v[k.judgement]++;
+        if (k.suggested) v.fixes++;
+        v.answers.push((d.draft || '?') + ' (' + lg + ', ' + (c(d.concept_slug).en || d.concept_slug || '') + '): ' +
+          String(k.judgement).replace('_', ' ') + (k.suggested ? ' → ' + k.suggested : ''));
+      });
+      order.sort(function (a, b) { return a.first < b.first ? -1 : a.first > b.first ? 1 : 0; });
+      var visitLabel = {};
+      order.forEach(function (v, i) { v.label = 'V' + (i + 1); visitLabel[v.id] = v.label; });
+
       var wb = XLSX.utils.book_new();
       var stamp = new Date();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
         ['LILIEMA, Helsinki Book Fair 2026: export of the fair database (Supabase project liliema-bookfair)'],
         ['Exported', stamp.toISOString()],
-        ['Entries', entries.length], ['AI judgements', checks.length], ['AI words', drafts.length],
+        ['Entries', entries.length], ['AI judgements', checks.length], ['AI words', drafts.length], ['Visits', order.length],
         [''],
-        ['Research and teaching: only rows with research_consent = TRUE may be used (visitors aged 15 or over who ticked the box).'],
-        ['No names or contact details of visitors are collected. Times are in UTC.']
+        ['Research and teaching: only rows with research_consent = TRUE may be used: rows sent during a visit in which the research box was ticked (“I am 15 or older and I agree”).'],
+        ['No names or contact details of visitors are collected. Times are in UTC and are the times the database received each row (rows that waited on a device without a network arrive later).'],
+        ['Visits: rows with the same visit_id come from one visit, from the research question until “I’m done”, “No, I’m new here”, “Someone else? Start afresh” or two minutes without use.'],
+        ['Visit numbers exist only for visitors who agreed to research use. One person may appear as several visits, and a visit may include more than one person if no new visit was started between people.'],
+        ['The labels V1, V2 ... are numbered by first appearance in each export; use visit_id to match visits across exports. n_languages counts languages, not names (Twi and Akan are one language). Words not yet approved are marked draft or rejected.']
       ]), 'About');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(entries.map(function (e) {
         return {
           id: e.id, created_at: e.created_at, status: e.status, concept: e.concept_slug, concept_en: c(e.concept_slug).en, concept_fi: c(e.concept_slug).fi,
           language: e.language_slug ? langName(e.language_slug) : '', language_label: e.language_label, headword: e.headword,
           example_phrase: e.example_phrase || '', source: e.source, research_consent: !!e.research_consent,
-          reviewed_at: e.reviewed_at || '', notes: e.notes || ''
+          reviewed_at: e.reviewed_at || '', notes: e.notes || '', visit: visitLabel[e.visit_id] || '', visit_id: e.visit_id || ''
         };
       })), 'Entries');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(checks.map(function (k) {
         var d = draftById[k.draft_id] || {};
         return {
           id: k.id, created_at: k.created_at, draft_id: k.draft_id, concept: d.concept_slug || '', language: langName(d.language_slug),
-          ai_word: d.draft || '', judgement: k.judgement, suggested: k.suggested || '', research_consent: !!k.research_consent
+          language_label: k.language_label || '', ai_word: d.draft || '', judgement: k.judgement, suggested: k.suggested || '',
+          research_consent: !!k.research_consent, visit: visitLabel[k.visit_id] || '', visit_id: k.visit_id || ''
         };
       })), 'AI judgements');
+      XLSX.utils.book_append_sheet(wb, order.length ? XLSX.utils.json_to_sheet(order.map(function (v) {
+        return {
+          visit: v.label, first: v.first, last: v.last, languages: cell(v.langs.join('; ')), n_languages: Object.keys(v.distinct).length,
+          words_added: v.words.length, words: cell(v.words.join('; ')), ai_words_rated: v.right + v.wrong + v.not_sure,
+          right: v.right, wrong: v.wrong, not_sure: v.not_sure, corrections: v.fixes, answers: cell(v.answers.join('; ')), visit_id: v.id
+        };
+      })) : XLSX.utils.aoa_to_sheet([['No visits with research consent yet.']]), 'Visits');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(drafts.map(function (d) {
         var o = counts[d.id] || { n_right: 0, n_wrong: 0, n_not_sure: 0 };
         return {

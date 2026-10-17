@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/fair.css">
 <script src="data/fair_data.js"></script>
 <script src="assets/fair.js"></script>
+<script src="assets/visit.js"></script>
 <script src="assets/db.js"></script>
 <script src="assets/keyboard.js"></script>
 <script src="assets/checkai.js"></script>
@@ -551,5 +552,6 @@ mark { background: #f6e08e; color: inherit; border-radius: 3px; padding: 0 1px; 
   resetIdle();
 })();
 </script>
+<script>window.FairVisit.guard();   // keeps a visit alive here and asks after a pause (visit.js)</script>
 </body>
 </html>
