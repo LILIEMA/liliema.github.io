@@ -155,7 +155,7 @@ window.FAIR_DATA = {
    "fi": "selkä",
    "sv": "rygg",
    "core": false,
-   "picture": null
+   "picture": "pictures/back.png"
   },
   {
    "slug": "cow",
@@ -165,7 +165,7 @@ window.FAIR_DATA = {
    "fi": "lehmä",
    "sv": "ko",
    "core": true,
-   "picture": null
+   "picture": "pictures/cow.png"
   },
   {
    "slug": "goat",
@@ -175,7 +175,7 @@ window.FAIR_DATA = {
    "fi": "vuohi",
    "sv": "get",
    "core": true,
-   "picture": null
+   "picture": "pictures/goat.png"
   },
   {
    "slug": "chicken",
@@ -185,7 +185,7 @@ window.FAIR_DATA = {
    "fi": "kana",
    "sv": "höna",
    "core": true,
-   "picture": null
+   "picture": "pictures/chicken.png"
   },
   {
    "slug": "fish",
@@ -205,7 +205,7 @@ window.FAIR_DATA = {
    "fi": "koira",
    "sv": "hund",
    "core": false,
-   "picture": null
+   "picture": "pictures/dog.png"
   },
   {
    "slug": "cat",
@@ -225,7 +225,7 @@ window.FAIR_DATA = {
    "fi": "lammas",
    "sv": "får",
    "core": false,
-   "picture": null
+   "picture": "pictures/sheep.png"
   },
   {
    "slug": "donkey",
@@ -235,7 +235,7 @@ window.FAIR_DATA = {
    "fi": "aasi",
    "sv": "åsna",
    "core": false,
-   "picture": null
+   "picture": "pictures/donkey.png"
   },
   {
    "slug": "bird",
@@ -245,7 +245,7 @@ window.FAIR_DATA = {
    "fi": "lintu",
    "sv": "fågel",
    "core": false,
-   "picture": null
+   "picture": "pictures/bird.png"
   },
   {
    "slug": "snake",
@@ -255,7 +255,7 @@ window.FAIR_DATA = {
    "fi": "käärme",
    "sv": "orm",
    "core": false,
-   "picture": null
+   "picture": "pictures/snake.png"
   },
   {
    "slug": "sun",
@@ -265,7 +265,7 @@ window.FAIR_DATA = {
    "fi": "aurinko",
    "sv": "sol",
    "core": true,
-   "picture": null
+   "picture": "pictures/sun.png"
   },
   {
    "slug": "moon",
@@ -275,7 +275,7 @@ window.FAIR_DATA = {
    "fi": "kuu",
    "sv": "måne",
    "core": true,
-   "picture": null
+   "picture": "pictures/moon.png"
   },
   {
    "slug": "tree",
@@ -285,7 +285,7 @@ window.FAIR_DATA = {
    "fi": "puu",
    "sv": "träd",
    "core": true,
-   "picture": null
+   "picture": "pictures/tree.png"
   },
   {
    "slug": "river",
@@ -295,7 +295,7 @@ window.FAIR_DATA = {
    "fi": "joki",
    "sv": "flod",
    "core": true,
-   "picture": null
+   "picture": "pictures/river.png"
   },
   {
    "slug": "rain",
@@ -305,7 +305,7 @@ window.FAIR_DATA = {
    "fi": "sade",
    "sv": "regn",
    "core": false,
-   "picture": null
+   "picture": "pictures/rain.png"
   },
   {
    "slug": "fire",
@@ -315,7 +315,7 @@ window.FAIR_DATA = {
    "fi": "tuli",
    "sv": "eld",
    "core": false,
-   "picture": null
+   "picture": "pictures/fire.png"
   },
   {
    "slug": "stone",
@@ -325,7 +325,7 @@ window.FAIR_DATA = {
    "fi": "kivi",
    "sv": "sten",
    "core": false,
-   "picture": null
+   "picture": "pictures/stone.png"
   },
   {
    "slug": "cloud",
@@ -335,7 +335,7 @@ window.FAIR_DATA = {
    "fi": "pilvi",
    "sv": "moln",
    "core": false,
-   "picture": null
+   "picture": "pictures/cloud.png"
   },
   {
    "slug": "house",
@@ -345,7 +345,7 @@ window.FAIR_DATA = {
    "fi": "talo",
    "sv": "hus",
    "core": true,
-   "picture": null
+   "picture": "pictures/house.png"
   },
   {
    "slug": "cooking_pot",
@@ -355,7 +355,7 @@ window.FAIR_DATA = {
    "fi": "pata",
    "sv": "gryta",
    "core": true,
-   "picture": null
+   "picture": "pictures/cooking_pot.png"
   },
   {
    "slug": "sleeping_mat",
@@ -365,7 +365,7 @@ window.FAIR_DATA = {
    "fi": "makuumatto",
    "sv": "sovmatta",
    "core": true,
-   "picture": null
+   "picture": "pictures/sleeping_mat.png"
   },
   {
    "slug": "door",
@@ -375,7 +375,7 @@ window.FAIR_DATA = {
    "fi": "ovi",
    "sv": "dörr",
    "core": false,
-   "picture": null
+   "picture": "pictures/door.png"
   },
   {
    "slug": "broom",
@@ -385,7 +385,7 @@ window.FAIR_DATA = {
    "fi": "luuta",
    "sv": "kvast",
    "core": false,
-   "picture": null
+   "picture": "pictures/broom.png"
   },
   {
    "slug": "mortar_and_pestle",
@@ -395,7 +395,7 @@ window.FAIR_DATA = {
    "fi": "huhmar ja survin",
    "sv": "mortel och mortelstöt",
    "core": false,
-   "picture": null
+   "picture": "pictures/mortar_and_pestle.png"
   },
   {
    "slug": "calabash",
@@ -405,7 +405,7 @@ window.FAIR_DATA = {
    "fi": "kalebassi",
    "sv": "kalebass",
    "core": false,
-   "picture": null
+   "picture": "pictures/calabash.png"
   },
   {
    "slug": "basket",
@@ -415,7 +415,7 @@ window.FAIR_DATA = {
    "fi": "kori",
    "sv": "korg",
    "core": false,
-   "picture": null
+   "picture": "pictures/basket.png"
   },
   {
    "slug": "rope",
@@ -425,7 +425,7 @@ window.FAIR_DATA = {
    "fi": "köysi",
    "sv": "rep",
    "core": false,
-   "picture": null
+   "picture": "pictures/rope.png"
   },
   {
    "slug": "mango",
@@ -435,7 +435,7 @@ window.FAIR_DATA = {
    "fi": "mango",
    "sv": "mango",
    "core": true,
-   "picture": null
+   "picture": "pictures/mango.png"
   },
   {
    "slug": "groundnut",
@@ -445,7 +445,7 @@ window.FAIR_DATA = {
    "fi": "maapähkinä",
    "sv": "jordnöt",
    "core": true,
-   "picture": null
+   "picture": "pictures/groundnut.png"
   },
   {
    "slug": "rice",
@@ -455,7 +455,7 @@ window.FAIR_DATA = {
    "fi": "riisi",
    "sv": "ris",
    "core": false,
-   "picture": null
+   "picture": "pictures/rice.png"
   },
   {
    "slug": "millet",
@@ -465,7 +465,7 @@ window.FAIR_DATA = {
    "fi": "hirssi",
    "sv": "hirs",
    "core": false,
-   "picture": null
+   "picture": "pictures/millet.png"
   },
   {
    "slug": "onion",
@@ -475,7 +475,7 @@ window.FAIR_DATA = {
    "fi": "sipuli",
    "sv": "lök",
    "core": false,
-   "picture": null
+   "picture": "pictures/onion.png"
   },
   {
    "slug": "banana",
@@ -485,7 +485,7 @@ window.FAIR_DATA = {
    "fi": "banaani",
    "sv": "banan",
    "core": false,
-   "picture": null
+   "picture": "pictures/banana.png"
   },
   {
    "slug": "tomato",
@@ -495,7 +495,7 @@ window.FAIR_DATA = {
    "fi": "tomaatti",
    "sv": "tomat",
    "core": false,
-   "picture": null
+   "picture": "pictures/tomato.png"
   },
   {
    "slug": "knife",
@@ -505,7 +505,7 @@ window.FAIR_DATA = {
    "fi": "veitsi",
    "sv": "kniv",
    "core": true,
-   "picture": null
+   "picture": "pictures/knife.png"
   },
   {
    "slug": "hoe",
@@ -515,7 +515,7 @@ window.FAIR_DATA = {
    "fi": "kuokka",
    "sv": "hacka",
    "core": false,
-   "picture": null
+   "picture": "pictures/hoe.png"
   },
   {
    "slug": "axe",
@@ -525,7 +525,7 @@ window.FAIR_DATA = {
    "fi": "kirves",
    "sv": "yxa",
    "core": false,
-   "picture": null
+   "picture": "pictures/axe.png"
   },
   {
    "slug": "bucket",
@@ -535,7 +535,7 @@ window.FAIR_DATA = {
    "fi": "ämpäri",
    "sv": "hink",
    "core": false,
-   "picture": null
+   "picture": "pictures/bucket.png"
   },
   {
    "slug": "man",
@@ -545,7 +545,7 @@ window.FAIR_DATA = {
    "fi": "mies",
    "sv": "man",
    "core": false,
-   "picture": null
+   "picture": "pictures/man.png"
   },
   {
    "slug": "woman",
@@ -555,7 +555,7 @@ window.FAIR_DATA = {
    "fi": "nainen",
    "sv": "kvinna",
    "core": false,
-   "picture": null
+   "picture": "pictures/woman.png"
   },
   {
    "slug": "camel",
