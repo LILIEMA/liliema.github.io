@@ -1,0 +1,559 @@
+<!-- FILMING COPY (filming day 28 October 2026) of the fair page bookfair/lookup.html, built by make_film_pages.py. -->
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Etsi sana · LILIEMA</title>
+<link rel="stylesheet" href="../bookfair/assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="data/film_data.js"></script>
+<script src="assets/fair.js"></script>
+<script src="assets/visit.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/keyboard.js"></script>
+<script src="assets/checkai.js"></script>
+<script src="assets/words.js"></script>
+<style>
+.layout { display: flex; flex-direction: column; gap: 16px; }
+.search-card { display: flex; flex-direction: column; gap: 12px; }
+.search-wrap { position: relative; }
+.search-input {
+  width: 100%; padding: 14px 52px 14px 18px; border: 2px solid var(--border); border-radius: var(--radius);
+  font-size: 24px; font-weight: 600; color: var(--text); background: var(--white); min-height: 62px;
+  -webkit-appearance: none; appearance: none;
+}
+.search-input::-webkit-search-cancel-button { display: none; }
+.search-input:focus { outline: none; border-color: var(--teal-mid); box-shadow: 0 0 0 3px rgba(0, 144, 144, .15); }
+.search-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-size: 22px; color: var(--muted); cursor: pointer; width: 48px; height: 48px; border-radius: 50%;
+}
+.search-clear:hover { color: var(--coral); background: var(--bg); }
+.check { display: flex; gap: 12px; align-items: center; font-weight: 600; font-size: 16px; cursor: pointer; min-height: 44px; }
+.check input { width: 26px; height: 26px; flex: 0 0 auto; accent-color: var(--teal); margin: 0; }
+.status-line { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Keyboard (as on Add a word) */
+.keyboard { padding: 12px; background: #e9eff0; border-radius: var(--radius); user-select: none; -webkit-user-select: none; }
+.kb-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; flex-wrap: wrap; }
+.kb-row:last-child { margin-bottom: 0; }
+.kb-key {
+  flex: 1 1 0; min-width: 36px; max-width: 66px; height: 52px; font-size: 22px; font-family: var(--font);
+  border-radius: 8px; border: 1px solid #c9d6d8; background: #fff; color: var(--text); cursor: pointer; padding: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .12);
+}
+.kb-key:active { background: var(--teal-light); }
+.kb-row-special .kb-key { background: var(--gold-light); border-color: #e3cf86; }
+/* all the special letters (the language is not known here): an even block of ten a row */
+.kb-row-special { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.kb-row-special .kb-key { max-width: none; min-width: 0; width: auto; }
+.kb-mark { font-size: 24px; }
+.kb-wide { max-width: 100px; flex: 1.6 1 0; font-size: 22px; }
+.kb-shift.active { background: var(--teal); color: #fff; }
+.kb-space { max-width: 520px; flex: 8 1 0; font-size: 15px; color: var(--muted); }
+.kb-compact .kb-key { height: 46px; font-size: 19px; }
+.kb-compact .kb-row-special { grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); }
+
+/* Results */
+.results-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.results-count { font-size: 15px; color: var(--muted); }
+.results-count strong { font-size: 22px; color: var(--teal-dark); margin-right: 4px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend .w { font-size: 13px; padding: 1px 8px; }
+.cards { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+.lu-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: 0 1px 6px rgba(0, 100, 100, .07); }
+.lu-head { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
+.lu-pic { width: 96px; height: 96px; flex: 0 0 auto; object-fit: contain; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
+.lu-label { font-family: var(--font-display); color: var(--teal-dark); font-size: 28px; line-height: 1.15; margin: 0; }
+.lu-others { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 4px; font-size: 15px; }
+.lu-others b { font-size: 11px; letter-spacing: .1em; color: var(--muted); margin-right: 4px; }
+.lu-domain { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.lu-rows { display: flex; flex-direction: column; border-top: 1px solid var(--border); }
+.lu-row { display: grid; grid-template-columns: minmax(120px, 190px) minmax(0, 1fr); gap: 4px 14px; padding: 8px 0; border-bottom: 1px solid #edf3f3; align-items: baseline; }
+.lu-row:last-child { border-bottom: none; }
+.lu-row.hit { background: linear-gradient(90deg, var(--gold-light), transparent 70%); }
+.lu-lang { font-weight: 700; color: var(--teal-dark); font-size: 15px; padding-left: 4px; }
+.lu-lang small { font-weight: 400; color: var(--muted); }
+.lu-words { display: flex; flex-wrap: wrap; gap: 6px; }
+.lu-ex { grid-column: 2; font-size: 14px; color: var(--muted); }
+.lu-ex em { color: var(--text); }
+.w { display: inline-flex; align-items: center; gap: 6px; border-radius: 16px; padding: 3px 12px; font-size: 19px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.w.v { background: var(--gold-light); border: 1.5px solid #e3cf86; }
+.w.ai { background: var(--white); border: 1.5px dashed #9aa7ad; font-weight: 500; }
+.w.ai.right { border-style: solid; border-color: var(--teal-mid); }
+.w.ai.wrong { color: var(--muted); }
+.w.ai.wrong .t { text-decoration: line-through; }
+.ai-badge { font-size: 10px; font-weight: 700; letter-spacing: .05em; color: var(--teal-dark); background: var(--teal-light); border-radius: 6px; padding: 1px 5px; }
+.st { font-size: 15px; font-weight: 700; }
+.st.right { color: var(--teal); } .st.wrong { color: var(--coral); }
+mark { background: #f6e08e; color: inherit; border-radius: 3px; padding: 0 1px; }
+.more-btn {
+  width: 100%; padding: 14px; margin-top: 12px; min-height: 52px; background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--radius); color: var(--teal-dark); font-size: 16px; font-weight: 600; cursor: pointer;
+}
+.more-btn:hover { border-color: var(--teal-mid); background: var(--teal-light); }
+.empty { text-align: center; padding: 32px 16px; color: var(--muted); background: var(--white); border-radius: var(--radius); }
+.empty .title { font-size: 20px; font-weight: 700; color: var(--teal-dark); margin-bottom: 6px; }
+.link-btn { background: none; border: none; color: var(--teal); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 8px 6px; min-height: 44px; font-size: 16px; display: inline-flex; align-items: center; }
+.back-btn { align-self: flex-start; }
+
+#results { scroll-margin-top: 80px; }
+
+/* Browsing by picture */
+.browse h2 { font-family: var(--font-display); color: var(--teal-dark); font-size: 22px; margin: 4px 0 12px; }
+.domain h3 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+.tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); cursor: pointer;
+  min-height: 112px; font-size: 15px; font-weight: 600; color: var(--teal-dark); text-align: center;
+}
+.tile:hover { border-color: var(--teal-mid); box-shadow: 0 3px 12px rgba(0, 100, 100, .15); }
+.tile:focus-visible { border-color: var(--teal-mid); outline: none; box-shadow: 0 3px 12px rgba(0, 100, 100, .15); }
+.tile img { width: 76px; height: 76px; object-fit: contain; }
+.tile.nopic { background: var(--teal-light); font-size: 17px; }
+
+@media (min-width: 1100px) {
+  .layout { display: grid; grid-template-columns: 520px minmax(0, 1fr); gap: 22px; align-items: start; }
+  .search-col { position: sticky; top: 76px; }
+}
+@media (max-width: 560px) {
+  .search-input { font-size: 21px; }
+  .lu-row { grid-template-columns: 1fr; }
+  .lu-ex { grid-column: 1; }
+  .lu-pic { width: 72px; height: 72px; }
+  .lu-label { font-size: 24px; }
+  .tiles { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+}
+</style>
+</head>
+<body data-title="lu.title">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="app wide">
+  <section>
+    <h1 class="page-title" data-t="lu.title"></h1>
+    <p class="page-intro" data-t="lu.intro"></p>
+  </section>
+
+  <div class="layout">
+    <div class="search-col">
+      <section class="card search-card">
+        <div class="search-wrap">
+          <input type="search" class="search-input" id="q" data-t-placeholder="lu.ph" data-t-aria="lu.ph" maxlength="80"
+                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+          <button type="button" class="search-clear" id="clearBtn" data-t-aria="lu.clear" hidden>✕</button>
+        </div>
+        <label class="check"><input type="checkbox" id="exact"> <span data-t="lu.exact"></span></label>
+        <div class="keyboard" id="keyboard"></div>
+        <p class="status-line" id="statusLine" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <div class="results-col">
+      <section id="results" hidden>
+        <button type="button" class="link-btn back-btn" id="backBtn" data-t="lu.back" hidden></button>
+        <div class="results-head">
+          <div class="results-count" id="count" aria-live="polite"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="cards" id="cards"></div>
+        <button type="button" class="more-btn" id="moreBtn" hidden></button>
+        <div class="empty" id="empty" hidden>
+          <div class="title" id="emptyTitle"></div>
+          <div id="emptySub" data-t="lu.none.sub"></div>
+          <a class="link-btn" id="emptyLink" href="add.html" data-t="lu.addlink"></a>
+        </div>
+      </section>
+
+      <section class="browse" id="browse">
+        <h2 data-t="lu.browse"></h2>
+        <div id="domains"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="fair-footer">
+  <div class="inner">
+    <p id="aiCredit"></p>
+    <p id="picCredit" hidden></p>
+    <p data-t="credit.tools"></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair, D = window.FAIR_DATA, S = window.FairScores, W = window.FairWords;
+
+  // ------------------------------------------------------------ settings
+  var PAGE_SIZE = 12;                    // cards shown at first; "Show more" adds as many again
+  var IDLE_RESET_MS = 24 * 60 * 60 * 1000;   // filming copy: no reset during takes
+  var DEBOUNCE_MS = 120;
+
+  F.add({
+    fi: {
+      'lu.title': 'Etsi sana',
+      'lu.intro': 'Kirjoita sana suomeksi, ruotsiksi, englanniksi, ranskaksi tai jollakin afrikkalaisella kielellä, niin näet sen kaikilla kielillä. Toonimerkeillä ja pisteillä ei ole väliä: oko löytää sanan ọkọ́.',
+      'lu.ph': 'Kirjoita sana',
+      'lu.clear': 'Tyhjennä haku',
+      'lu.exact': 'Tarkka kirjoitusasu (toonimerkit ja pisteet otetaan huomioon)',
+      'lu.browse': 'Tai valitse kuva',
+      'lu.back': '← Kaikki kuvat',
+      'lu.count': function (n) { return n === 1 ? '<strong>1</strong> tulos' : '<strong>' + F.number(n) + '</strong> tulosta'; },
+      'lu.more': function (k) { return 'Näytä ' + k + ' lisää'; },
+      'lu.none': 'Ei tuloksia',
+      'lu.none.sub': 'Kokeile toista kirjoitusasua tai lisää oma sanasi.',
+      'lu.addlink': 'Siirry sivulle Lisää sana',
+      'lu.legend.v': 'ihmisen kirjoittama sana',
+      'lu.legend.ai': 'tekoälyn sana, tarkistamaton',
+      'lu.legend.right': 'puhujien mukaan oikein',
+      'lu.legend.wrong': 'puhujien mukaan väärin',
+      'lu.nowords': 'Tälle kuvalle ei ole vielä sanoja.',
+      'lu.example': 'Esimerkki:'
+    },
+    sv: {
+      'lu.title': 'Slå upp ett ord',
+      'lu.intro': 'Skriv ett ord på finska, svenska, engelska, franska eller ett afrikanskt språk och se det på alla språk. Tonmarkeringar och punkter spelar ingen roll: oko hittar ọkọ́.',
+      'lu.ph': 'Skriv ett ord',
+      'lu.clear': 'Töm sökningen',
+      'lu.exact': 'Exakt stavning (tonmarkeringar och punkter räknas)',
+      'lu.browse': 'Eller välj en bild',
+      'lu.back': '← Alla bilder',
+      'lu.count': function (n) { return '<strong>' + F.number(n) + '</strong> ' + (n === 1 ? 'träff' : 'träffar'); },
+      'lu.more': function (k) { return 'Visa ' + k + ' till'; },
+      'lu.none': 'Inga träffar',
+      'lu.none.sub': 'Pröva en annan stavning eller lägg till ditt eget ord.',
+      'lu.addlink': 'Gå till Lägg till ett ord',
+      'lu.legend.v': 'ett ord skrivet av en människa',
+      'lu.legend.ai': 'AI:ns ord, ogranskat',
+      'lu.legend.right': 'rätt enligt talarna',
+      'lu.legend.wrong': 'fel enligt talarna',
+      'lu.nowords': 'Inga ord för den här bilden ännu.',
+      'lu.example': 'Exempel:'
+    },
+    en: {
+      'lu.title': 'Look up a word',
+      'lu.intro': 'Type a word in Finnish, Swedish, English, French or an African language and see it in all the languages. Tone marks and dots do not matter: oko finds ọkọ́.',
+      'lu.ph': 'Type a word',
+      'lu.clear': 'Clear the search',
+      'lu.exact': 'Exact spelling (tone marks and dots count)',
+      'lu.browse': 'Or choose a picture',
+      'lu.back': '← All pictures',
+      'lu.count': function (n) { return '<strong>' + F.number(n) + '</strong> ' + (n === 1 ? 'result' : 'results'); },
+      'lu.more': function (k) { return 'Show ' + k + ' more'; },
+      'lu.none': 'No results',
+      'lu.none.sub': 'Try another spelling, or add your own word.',
+      'lu.addlink': 'Go to Add a word',
+      'lu.legend.v': 'a word written by a person',
+      'lu.legend.ai': 'the AI’s word, unchecked',
+      'lu.legend.right': 'right according to speakers',
+      'lu.legend.wrong': 'wrong according to speakers',
+      'lu.nowords': 'No words for this picture yet.',
+      'lu.example': 'Example:'
+    },
+    fr: {
+      'lu.title': 'Cherchez un mot',
+      'lu.intro': 'Tapez un mot en finnois, en suédois, en anglais, en français ou dans une langue africaine, et voyez-le dans toutes les langues. Les tons et les points n’ont pas d’importance : oko trouve ọkọ́.',
+      'lu.ph': 'Tapez un mot',
+      'lu.clear': 'Effacer la recherche',
+      'lu.exact': 'Orthographe exacte (les tons et les points comptent)',
+      'lu.browse': 'Ou choisissez une image',
+      'lu.back': '← Toutes les images',
+      'lu.count': function (n) { return '<strong>' + F.number(n) + '</strong> ' + (n > 1 ? 'résultats' : 'résultat'); },
+      'lu.more': function (k) { return 'Afficher ' + k + ' de plus'; },
+      'lu.none': 'Aucun résultat',
+      'lu.none.sub': 'Essayez une autre orthographe ou ajoutez votre propre mot.',
+      'lu.addlink': 'Aller à Ajoutez un mot',
+      'lu.legend.v': 'un mot écrit par une personne',
+      'lu.legend.ai': 'mot de l’IA, non vérifié',
+      'lu.legend.right': 'juste selon les locuteurs',
+      'lu.legend.wrong': 'faux selon les locuteurs',
+      'lu.nowords': 'Pas encore de mots pour cette image.',
+      'lu.example': 'Exemple :'
+    }
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var domainBySlug = {};
+  D.domains.forEach(function (d) { domainBySlug[d.slug] = d; });
+
+  // ------------------------------------------------------------ state
+  var query = '', exactMode = false, selected = null, visible = PAGE_SIZE;
+  var timer = null;   // the search runs a moment after the last key press
+
+  // ------------------------------------------------------------ search
+  // One item per searchable text: the four labels of each picture, the visitors' words and the AI's words
+  var items = [];
+  function buildIndex() {
+    items = [];
+    D.concepts.forEach(function (c) {
+      ['fi', 'sv', 'en', 'fr'].forEach(function (l) { push(c.slug, 'label', c[l], null); });
+      var w = W.forConcept(c.slug);
+      w.entries.forEach(function (e) { push(c.slug, 'entry', e.headword, e); });
+      w.drafts.forEach(function (d) { push(c.slug, 'draft', d.draft, d); });
+    });
+  }
+  function push(concept, kind, text, ref) {
+    if (!text) return;
+    var f = loose(text), fn = loose(text, true);
+    items.push({ concept: concept, kind: kind, text: text, ref: ref, f: f, fn: fn !== f ? fn : '', x: W.exact(text) });
+  }
+
+  // The usual search ignores tones, dots, other marks and apostrophes (ngombe finds ngʼombe) and folds the special
+  // letters (ŋ = ng, ɛ = e ...); phone spellings with n for ŋ match too (hinmei finds hiŋmɛi). The exact search does not.
+  function folded(t, nForNg) {
+    var fm = F.foldMap(t), s = '', map = [];
+    for (var i = 0; i < fm.text.length; i++) {
+      var ch = fm.text[i];
+      if (ch === "'") continue;
+      if (nForNg && ch === 'g' && i > 0 && fm.map[i - 1] === fm.map[i] && /[ŋŊ]/.test(t.charAt(fm.map[i]))) continue;
+      s += ch; map.push(fm.map[i]);
+    }
+    map.push(fm.map[fm.text.length]);
+    return { s: s, map: map };
+  }
+  function loose(s, nForNg) { return folded(String(s == null ? '' : s), nForNg).s.replace(/\s+/g, ' ').trim(); }
+  function form(s) { return exactMode ? W.exact(s) : loose(s); }
+
+  // The text with the matching part marked, comparing as the usual search does
+  function mark(text, q) {
+    var t = String(text == null ? '' : text), fq = loose(q);
+    if (!fq) return F.esc(t);
+    var f = folded(t, false), at = f.s.indexOf(fq);
+    if (at < 0) { f = folded(t, true); at = f.s.indexOf(fq); }
+    if (at < 0) return F.esc(t);
+    var map = f.map, last = map[at + fq.length - 1], j = at + fq.length;
+    while (j < map.length - 1 && map[j] === last) j++;   // the whole letter (ŋ folds to two)
+    var a = map[at], b = map[j];
+    return F.esc(t.slice(0, a)) + '<mark>' + F.esc(t.slice(a, b)) + '</mark>' + F.esc(t.slice(b));
+  }
+
+  // 6 the whole text, 5 its start, 4 the start of a word in it, 2 anywhere in it (from 3 letters)
+  function score(text, q, wordStart) {
+    if (!text || !q) return 0;
+    if (text === q) return 6;
+    if (text.indexOf(q) === 0) return 5;
+    if (wordStart.test(text)) return 4;
+    if (Array.from(q).length >= 3 && text.indexOf(q) >= 0) return 2;
+    return 0;
+  }
+
+  function search() {
+    var q = form(query);
+    if (!q) return [];
+    var wordStart = new RegExp('[\\s\\-/(),;]' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    var byC = {};
+    items.forEach(function (it) {
+      var s = exactMode ? score(it.x, q, wordStart) : Math.max(score(it.f, q, wordStart), score(it.fn, q, wordStart));
+      if (!s) return;
+      var r = byC[it.concept] || (byC[it.concept] = { concept: it.concept, best: 0, bestLabel: 0, hits: [] });
+      if (s > r.best) r.best = s;
+      if (it.kind === 'label' && s > r.bestLabel) r.bestLabel = s;
+      r.hits.push(it);
+    });
+    // best match first; at the same level a picture's own name before a word in a language
+    return Object.keys(byC).map(function (k) { return byC[k]; }).sort(function (a, b) {
+      var la = a.bestLabel === a.best ? 1 : 0, lb = b.bestLabel === b.best ? 1 : 0;
+      return b.best - a.best || lb - la || W.conceptOrder(a.concept) - W.conceptOrder(b.concept);
+    });
+  }
+
+  // ------------------------------------------------------------ cards
+  function isHit(r, ref) { return !!r && r.hits.some(function (h) { return h.ref === ref; }); }
+
+  function chip(text, cls, hit, extra, lang) {
+    var inner = hit && query ? mark(text, query) : F.esc(text);
+    return '<span class="w ' + cls + '"' + (lang ? ' lang="' + lang + '"' : '') + (extra.title ? ' title="' + F.esc(extra.title) + '"' : '') + '>' +
+      '<span class="t">' + inner + '</span>' + (extra.after || '') + '</span>';
+  }
+
+  function aiChip(d, hit) {
+    var st = W.status(d);
+    var after = '<span class="ai-badge" aria-hidden="true">AI</span>';
+    if (st === 'right') after += '<span class="st right" aria-hidden="true">✓</span>';
+    if (st === 'wrong') after += '<span class="st wrong" aria-hidden="true">✗</span>';
+    var title = W.aiLabel(d) + '. ' + F.t('w.said.' + st);
+    return chip(d.draft, 'ai ' + st, hit, { after: after, title: title }, W.bcp47(d.language_slug));
+  }
+
+  // The words of one concept, grouped by language: the fair's languages by their name, other languages by the
+  // visitors' own name; visitors' names that differ from ours are shown in brackets
+  function rows(slug, r) {
+    var w = W.forConcept(slug), groups = {}, list = [];
+    function group(key, name, slugL) {
+      var g = groups[key];
+      if (!g) { g = groups[key] = { name: name, slug: slugL, labels: [], seenLabel: {}, entries: [], seen: {}, drafts: [], hit: false }; list.push(g); }
+      return g;
+    }
+    w.entries.forEach(function (e) {
+      var lang = e.language_slug ? W.language(e.language_slug) : null;
+      var g = lang ? group('s:' + lang.slug, lang.name, lang.slug) : group('o:' + F.fold(e.language_label).trim(), e.language_label, null);
+      var lk = F.fold(e.language_label).trim();
+      if (lang && lk && lk !== F.fold(lang.name).trim() && !g.seenLabel[lk]) { g.seenLabel[lk] = 1; g.labels.push(e.language_label); }
+      var k = W.exact(e.headword);
+      if (!g.seen[k]) { g.seen[k] = 1; g.entries.push(e); }
+      if (isHit(r, e)) g.hit = true;
+    });
+    w.drafts.forEach(function (d) {
+      var lang = W.language(d.language_slug);
+      var g = group('s:' + lang.slug, lang.name, lang.slug);
+      g.drafts.push(d);
+      if (isHit(r, d)) g.hit = true;
+    });
+    list.sort(function (a, b) { return (b.hit ? 1 : 0) - (a.hit ? 1 : 0) || a.name.localeCompare(b.name, F.locale()); });
+    return list;
+  }
+
+  function card(slug, r) {
+    var c = W.concept(slug), dom = domainBySlug[c.domain];
+    var labelHit = r && r.hits.some(function (h) { return h.kind === 'label'; });
+    var hl = function (t) { return labelHit && query ? mark(t, query) : F.esc(t); };
+    var html = '<article class="lu-card"><div class="lu-head">' +
+      (c.picture ? '<img class="lu-pic" src="' + F.esc(c.picture) + '" alt="">' : '') +
+      '<div><h2 class="lu-label" lang="' + F.lang + '">' + hl(W.label(c)) + '</h2><div class="lu-others">' +
+      W.otherLabels(c).map(function (o) { return '<span lang="' + o.lang + '"><b>' + o.lang.toUpperCase() + '</b>' + hl(o.text) + '</span>'; }).join('') +
+      '</div>' + (dom ? '<div class="lu-domain">' + F.esc(dom[F.lang] || dom.en) + '</div>' : '') + '</div></div>';
+    var gs = rows(slug, r);
+    if (!gs.length) return html + '<p class="lu-domain">' + F.esc(W.loaded ? F.t('lu.nowords') : W.statusText()) + '</p></article>';
+    html += '<div class="lu-rows">';
+    gs.forEach(function (g) {
+      var lang = g.slug ? W.bcp47(g.slug) : '';
+      var words = g.entries.map(function (e) { return chip(e.headword, 'v', isHit(r, e), { title: F.t('w.visitor.long') }, lang); })
+        .concat(g.drafts.map(function (d) { return aiChip(d, isHit(r, d)); }));
+      var ex = g.entries.filter(function (e) { return e.example_phrase; }).map(function (e) { return '<em' + (lang ? ' lang="' + lang + '"' : '') + '>' + F.esc(e.example_phrase) + '</em>'; });
+      html += '<div class="lu-row' + (g.hit ? ' hit' : '') + '"><div class="lu-lang">' + F.esc(g.name) +
+        (g.labels.length ? ' <small>(' + F.esc(g.labels.join(', ')) + ')</small>' : '') + '</div>' +
+        '<div class="lu-words">' + words.join('') + '</div>' +
+        (ex.length ? '<div class="lu-ex">' + F.esc(F.t('lu.example')) + ' ' + ex.join(' · ') + '</div>' : '') + '</div>';
+    });
+    return html + '</div></article>';
+  }
+
+  function legend() {
+    return '<span><span class="w v">abc</span>' + F.esc(F.t('lu.legend.v')) + '</span>' +
+      '<span><span class="w ai">abc <span class="ai-badge">AI</span></span>' + F.esc(F.t('lu.legend.ai')) + '</span>' +
+      '<span><span class="st right">✓</span>' + F.esc(F.t('lu.legend.right')) + '</span>' +
+      '<span><span class="st wrong">✗</span>' + F.esc(F.t('lu.legend.wrong')) + '</span>';
+  }
+
+  // ------------------------------------------------------------ rendering
+  function render() {
+    var browsing = !query.trim() && !selected;
+    $('browse').hidden = !browsing;
+    $('results').hidden = browsing;
+    $('clearBtn').hidden = !query;
+    $('backBtn').hidden = !selected || !!query.trim();
+    if (browsing) return;
+    var list = selected && !query.trim() ? [{ concept: selected, hits: [] }] : search();
+    $('count').innerHTML = selected && !query.trim() ? '' : F.t('lu.count', list.length);
+    $('legend').innerHTML = list.length ? legend() : '';
+    $('empty').hidden = list.length > 0;
+    $('emptyTitle').textContent = W.loaded ? F.t('lu.none') : W.statusText();   // the words have not arrived yet
+    $('emptySub').hidden = $('emptyLink').hidden = !W.loaded;
+    $('cards').innerHTML = list.slice(0, visible).map(function (r) { return card(r.concept, r.hits.length ? r : null); }).join('');
+    var more = list.length - visible;
+    $('moreBtn').hidden = more <= 0;
+    if (more > 0) $('moreBtn').textContent = F.t('lu.more', Math.min(PAGE_SIZE, more));
+  }
+
+  function renderBrowse() {
+    var html = '';
+    D.domains.forEach(function (dom) {
+      var cs = D.concepts.filter(function (c) { return c.domain === dom.slug; });
+      if (!cs.length) return;
+      html += '<div class="domain"><h3>' + F.esc(dom[F.lang] || dom.en) + '</h3><div class="tiles">' + cs.map(function (c) {
+        return '<button type="button" class="tile' + (c.picture ? '' : ' nopic') + '" data-c="' + F.esc(c.slug) + '">' +
+          (c.picture ? '<img src="' + F.esc(c.picture) + '" alt="">' : '') + '<span>' + F.esc(W.label(c)) + '</span></button>';
+      }).join('') + '</div></div>';
+    });
+    $('domains').innerHTML = html;
+  }
+
+  function setQuery(q) {
+    query = q;
+    if (q.trim()) selected = null;
+    visible = PAGE_SIZE;
+    render();
+  }
+
+  function renderStatus() { $('statusLine').textContent = W.statusText(); }
+
+  function renderCredits() {
+    $('aiCredit').textContent = F.t('credit.ai', S.MODEL, S.date(S.DRAFTED_ON));
+    var pc = F.pictureCredit();
+    $('picCredit').textContent = pc;
+    $('picCredit').hidden = !pc;
+  }
+
+  // ------------------------------------------------------------ keyboard
+  var kb = new window.LiliemaKeyboard($('keyboard'), {});
+  kb.attach($('q'));
+  function keyboardLabels() {
+    kb.opts.labels = { space: F.t('kb.space'), all: F.t('kb.all'), lang: F.t('kb.lang'), shift: F.t('kb.shift'), backspace: F.t('kb.backspace') };
+    kb.setLetters([]);    // any language: all the special letters, with å, ä and ö
+  }
+
+  // ------------------------------------------------------------ the stall screen returns to the start when idle
+  var idleTimer = null;
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () {
+      clearTimeout(timer);
+      $('q').value = ''; $('exact').checked = false; exactMode = false; selected = null;
+      setQuery('');
+      window.scrollTo(0, 0);
+    }, IDLE_RESET_MS);
+  }
+  ['pointerdown', 'keydown', 'wheel', 'touchstart', 'input'].forEach(function (ev) {
+    window.addEventListener(ev, resetIdle, { passive: true });
+  });
+
+  // ------------------------------------------------------------ start
+  F.initHeader();
+  F.onLang(function () { keyboardLabels(); renderCredits(); renderStatus(); renderBrowse(); render(); });
+  F.apply();
+  keyboardLabels();
+  renderCredits();
+  renderBrowse();
+  W.onUpdate(function () { buildIndex(); renderStatus(); render(); });
+  W.start();
+
+  $('q').addEventListener('input', function () {
+    var v = this.value;
+    clearTimeout(timer);
+    timer = setTimeout(function () { setQuery(v); }, DEBOUNCE_MS);
+  });
+  $('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(timer); setQuery(this.value); } });
+  $('clearBtn').addEventListener('click', function () { clearTimeout(timer); $('q').value = ''; setQuery(''); $('q').focus({ preventScroll: true }); });
+  $('exact').addEventListener('change', function () { exactMode = this.checked; visible = PAGE_SIZE; render(); });
+  $('moreBtn').addEventListener('click', function () { visible += PAGE_SIZE; render(); });
+  $('backBtn').addEventListener('click', function () { selected = null; render(); window.scrollTo(0, 0); });
+  $('domains').addEventListener('click', function (e) {
+    var t = e.target.closest('.tile');
+    if (!t) return;
+    selected = t.getAttribute('data-c');
+    visible = PAGE_SIZE;
+    render();
+    $('results').scrollIntoView({ block: 'start' });
+  });
+  resetIdle();
+})();
+</script>
+<script>window.FairVisit.guard();   // keeps a visit alive here and asks after a pause (visit.js)</script>
+</body>
+</html>

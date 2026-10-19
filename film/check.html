@@ -1,0 +1,826 @@
+<!-- FILMING COPY (filming day 28 October 2026) of the fair page bookfair/check.html, built by make_film_pages.py. -->
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Tarkista tekoäly · LILIEMA</title>
+<link rel="stylesheet" href="../bookfair/assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fair.css">
+<script src="data/film_data.js"></script>
+<script src="assets/fair.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/visit.js"></script>
+<script src="assets/keyboard.js"></script>
+<script src="assets/checkai.js"></script>
+<style>
+.step h2 { font-family: var(--font-display); color: var(--teal-dark); font-size: 24px; margin: 4px 0 14px; }
+.ai-note { border-left: 5px solid var(--teal-mid); font-size: 15px; color: var(--text); }
+.notice { font-size: 14px; color: var(--muted); margin: 12px 0; }
+.link-btn { background: none; border: none; color: var(--teal); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 8px 6px; min-height: 40px; font-size: 15px; }
+a.link-btn { display: inline-flex; align-items: center; }
+
+/* Language */
+.text-input {
+  width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: var(--radius);
+  font-size: 20px; background: var(--white); color: var(--text); min-height: 58px;
+}
+.text-input:focus { outline: none; border-color: var(--teal-mid); box-shadow: 0 0 0 3px rgba(0, 144, 144, .15); }
+.text-input.big { font-size: 28px; font-weight: 600; letter-spacing: .02em; min-height: 66px; }
+.suggest { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 18px; min-height: 8px; }
+.suggest button, .lang-chip {
+  padding: 10px 16px; min-height: 48px; border-radius: 24px; border: 1.5px solid var(--teal-mid);
+  background: var(--teal-light); color: var(--teal-dark); font-weight: 600; font-size: 16px; cursor: pointer; text-align: left;
+}
+.lang-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.lang-chip { background: var(--white); border-color: var(--border); border-radius: var(--radius); display: flex; flex-direction: column; gap: 2px; }
+.lang-chip small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.lang-chip:hover { border-color: var(--teal-mid); }
+.not-in { background: var(--gold-light); border-radius: var(--radius); padding: 12px 16px; margin: 0 0 16px; }
+.not-in p { margin: 0 0 4px; }
+
+/* Game */
+.game-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--white); border-radius: var(--radius); padding: 8px 14px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.game-bar strong { color: var(--teal-dark); font-size: 18px; margin-right: auto; }
+.game-bar .count { color: var(--muted); font-weight: 600; }
+.game { display: grid; gap: 22px; }
+.game-pic { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px; text-align: center; }
+.game-pic img { width: min(100%, 380px); aspect-ratio: 1; object-fit: contain; display: block; margin: 0 auto; }
+.game-pic .concept { color: var(--muted); font-size: 17px; margin-top: 6px; }
+.ai-word { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; }
+.ai-tag { display: inline-block; background: var(--teal-light); color: var(--teal-dark); font-weight: 700; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; border-radius: 6px; padding: 4px 8px; }
+.ai-word .word { font-size: 46px; font-weight: 700; line-height: 1.15; margin: 10px 0 4px; overflow-wrap: anywhere; }
+.question { font-size: 20px; font-weight: 600; color: var(--teal-dark); margin: 16px 0 10px; }
+.ai-norm { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
+.answers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.answer {
+  min-height: 64px; border-radius: 14px; border: 2px solid; font-weight: 700; font-size: 19px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 10px; background: var(--white);
+}
+.answer .mark { font-size: 24px; line-height: 1; }
+.answer.right { border-color: var(--teal); background: var(--teal); color: #fff; }
+.answer.wrong { border-color: var(--coral); background: var(--coral); color: #fff; }
+.answer.notsure { border-color: #9aa7ad; color: var(--text); }
+.answer:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.answer[disabled] { opacity: .5; cursor: default; }
+.fix { margin-top: 16px; }
+.field-label { display: block; font-weight: 700; color: var(--teal-dark); font-size: 18px; margin: 6px 0 8px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.btn {
+  padding: 12px 22px; min-height: 54px; border-radius: 28px; border: 2px solid var(--teal);
+  background: var(--white); color: var(--teal-dark); font-weight: 700; font-size: 18px; cursor: pointer;
+}
+.btn.primary { background: var(--teal); color: #fff; }
+.btn.primary:disabled { background: #9bbcbc; border-color: #9bbcbc; cursor: default; }
+
+/* Keyboard (as on Add a word) */
+.keyboard { margin: 16px 0 0; padding: 12px; background: #e9eff0; border-radius: var(--radius); user-select: none; -webkit-user-select: none; }
+.kb-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 6px; flex-wrap: wrap; }
+.kb-row:last-child { margin-bottom: 0; }
+.kb-key {
+  flex: 1 1 0; min-width: 40px; max-width: 66px; height: 54px; font-size: 22px; font-family: var(--font);
+  border-radius: 8px; border: 1px solid #c9d6d8; background: #fff; color: var(--text); cursor: pointer; padding: 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .12);
+}
+.kb-key:active { background: var(--teal-light); }
+.kb-row-special .kb-key { background: var(--gold-light); border-color: #e3cf86; }
+.kb-mark { font-size: 24px; }
+.kb-toggle { flex: 0 0 auto; min-width: 70px; max-width: none; padding: 0 12px; font-size: 14px; font-weight: 700; color: var(--teal-dark); }
+.kb-wide { max-width: 100px; flex: 1.6 1 0; font-size: 22px; }
+.kb-shift.active { background: var(--teal); color: #fff; }
+.kb-space { max-width: 520px; flex: 8 1 0; font-size: 15px; color: var(--muted); }
+.kb-compact .kb-key { height: 46px; min-width: 36px; font-size: 19px; }
+
+/* Consent (as on Add a word) */
+.consent { border-left: 5px solid var(--gold); margin: 16px 0; }
+#consentSlotLang .consent { margin-top: 0; }
+.consent h3 { margin: 0 0 6px; color: var(--teal-dark); font-size: 17px; }
+.consent p { margin: 0 0 10px; font-size: 15px; }
+.check { display: flex; gap: 12px; align-items: flex-start; font-weight: 600; font-size: 16px; cursor: pointer; }
+.check input { width: 28px; height: 28px; flex: 0 0 auto; accent-color: var(--teal); margin: 0; }
+.consent-done { font-size: 15px; color: var(--muted); margin-top: 12px; }
+
+/* Result */
+.result { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; }
+.result h2 { margin-top: 0; }
+.you { font-size: 18px; font-weight: 600; margin: 0 0 14px; }
+.others h3, .collection h3 { font-size: 16px; color: var(--teal-dark); margin: 16px 0 8px; }
+.tally { display: flex; height: 18px; border-radius: 99px; overflow: hidden; background: #eef3f3; }
+.tally .r { background: var(--teal); } .tally .x { background: var(--coral); } .tally .n { background: #b9c4c8; }
+.tally-text { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; font-size: 15px; }
+.tally-text span::before { content: ''; display: inline-block; width: .8em; height: .8em; border-radius: 2px; margin-right: .35em; vertical-align: -.05em; }
+.tally-text .r::before { background: var(--teal); } .tally-text .x::before { background: var(--coral); } .tally-text .n::before { background: #b9c4c8; }
+.verdict { margin: 10px 0 0; font-size: 16px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips span { background: var(--gold-light); border: 1px solid #e3cf86; border-radius: 18px; padding: 6px 14px; font-weight: 700; font-size: 18px; }
+.confidence { color: var(--muted); font-size: 15px; margin: 14px 0 0; }
+.end { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; text-align: center; }
+.end p { font-size: 20px; }
+.end .actions { justify-content: center; }
+.queue-info { font-size: 13px; color: var(--muted); }
+
+@media (min-width: 900px) {
+  .game { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: start; }
+  .game-pic { position: sticky; top: 76px; }
+}
+@media (max-width: 560px) {
+  .ai-word .word { font-size: 36px; }
+  .answers { grid-template-columns: 1fr; }
+  .answer { min-height: 56px; }
+  .game-pic img { width: min(100%, 260px); }
+}
+</style>
+</head>
+<body data-title="ai.name">
+
+<header class="fair-header">
+  <a class="brand" href="index.html"><span class="logo">LILIEMA</span></a>
+  <div class="lang-toggle" role="group" data-t-aria="fair.langs">
+    <button type="button" class="lang-btn" data-lang="fi" lang="fi">Suomi</button>
+    <button type="button" class="lang-btn" data-lang="sv" lang="sv">Svenska</button>
+    <button type="button" class="lang-btn" data-lang="en" lang="en">English</button>
+    <button type="button" class="lang-btn" data-lang="fr" lang="fr">Français</button>
+  </div>
+</header>
+
+<main class="app wide">
+  <section>
+    <h1 class="page-title" data-t="ai.name"></h1>
+    <p class="page-intro" data-t="chk.intro"></p>
+  </section>
+
+  <!-- 1 language -->
+  <section class="step" id="stepLang">
+    <p class="notice" id="loading" data-t="chk.loading"></p>
+    <div id="soon" class="not-in" hidden>
+      <p data-t="chk.soon"></p>
+      <a class="link-btn" href="add.html" data-t="chk.addlink"></a>
+    </div>
+    <div id="langPick" hidden>
+      <div id="consentSlotLang">
+        <div class="card consent" id="consentBox">
+          <h3 data-t="consent.title"></h3>
+          <p data-t="consent.text"></p>
+          <label class="check"><input type="checkbox" id="consentCheck"> <span data-t="consent.box"></span></label>
+        </div>
+      </div>
+      <h2 data-t="chk.lang.q"></h2>
+      <input type="text" class="text-input" id="langInput" data-t-placeholder="chk.lang.ph" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="60">
+      <div class="suggest" id="langSuggest"></div>
+      <div class="not-in" id="notIn" hidden>
+        <p id="notInText"></p>
+        <a class="link-btn" href="add.html" data-t="chk.addlink"></a>
+      </div>
+      <div class="lang-grid" id="langGrid"></div>
+    </div>
+  </section>
+
+  <!-- 2 the AI's word -->
+  <section class="step" id="stepWord" hidden>
+    <div class="game-bar">
+      <strong id="barLang"></strong>
+      <span class="count" id="barCount"></span>
+      <button type="button" class="link-btn" id="changeLang" data-t="chk.change.lang"></button>
+    </div>
+    <div class="game">
+      <div class="game-pic">
+        <img id="gamePic" src="" alt="">
+        <div class="concept" id="gameConcept"></div>
+      </div>
+      <div>
+        <div class="ai-word">
+          <span class="ai-tag" data-t="chk.ai.tag"></span>
+          <div class="word" id="aiWord" lang=""></div>
+          <p class="ai-norm" id="aiNorm" hidden></p>
+          <p class="question" id="question"></p>
+          <div class="answers">
+            <button type="button" class="answer right" data-j="right"><span class="mark" aria-hidden="true">✓</span><span data-t="chk.right"></span></button>
+            <button type="button" class="answer wrong" data-j="wrong"><span class="mark" aria-hidden="true">✗</span><span data-t="chk.wrong"></span></button>
+            <button type="button" class="answer notsure" data-j="not_sure"><span class="mark" aria-hidden="true">?</span><span data-t="chk.notsure"></span></button>
+          </div>
+          <div class="fix" id="fix" hidden>
+            <label class="field-label" for="fixInput" id="fixLabel"></label>
+            <input type="text" class="text-input big" id="fixInput" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <div class="keyboard" id="keyboard"></div>
+            <p class="notice" data-t="notice.entry"></p>
+            <div class="actions">
+              <button type="button" class="btn" id="fixSkip" data-t="chk.fix.skip"></button>
+              <button type="button" class="btn primary" id="fixSend" data-t="chk.fix.send"></button>
+            </div>
+          </div>
+        </div>
+        <div id="consentSlotGame"></div>
+        <div class="consent-done" id="consentDone" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 what speakers said -->
+  <section class="step" id="stepResult" hidden>
+    <div class="game">
+      <div class="game-pic">
+        <img id="resPic" src="" alt="">
+        <div class="concept" id="resConcept"></div>
+      </div>
+      <div class="result">
+        <h2 data-t="chk.thanks"></h2>
+        <p class="you" id="resYou"></p>
+        <p class="notice" id="resYourWord" hidden></p>
+        <div class="others">
+          <h3 data-t="chk.others"></h3>
+          <div class="tally" id="tally" aria-hidden="true"></div>
+          <div class="tally-text" id="tallyText"></div>
+          <p class="verdict" id="verdict"></p>
+        </div>
+        <div class="collection" id="collection" hidden>
+          <h3 data-t="chk.collection"></h3>
+          <div class="chips" id="chips" lang=""></div>
+        </div>
+        <p class="confidence" id="confidence"></p>
+        <div class="actions">
+          <button type="button" class="btn primary" id="nextWord" data-t="chk.next"></button>
+          <button type="button" class="btn" id="nextVisitor" data-t="chk.nextvisitor"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 all words done -->
+  <section class="step" id="stepEnd" hidden>
+    <div class="end">
+      <p id="endText"></p>
+      <div class="actions">
+        <button type="button" class="btn primary" id="endLang" data-t="chk.otherlang"></button>
+        <button type="button" class="btn" id="endVisitor" data-t="chk.nextvisitor"></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fair-footer">
+  <div class="inner">
+    <p data-t="ai.text"></p>
+    <p id="aiCredit"></p>
+    <p id="picCredit" hidden></p>
+    <p data-t="credit.tools"></p>
+    <p class="queue-info" id="queueInfo" hidden></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair, D = window.FAIR_DATA, S = window.FairScores, V = window.FairVisit;
+
+  // ------------------------------------------------------------ settings
+  var IDLE_RESET_MS = 24 * 60 * 60 * 1000;   // filming copy: no reset during takes
+  var REFRESH_MS = 30 * 1000;   // filming copy      // drafts, scores and the word collection are fetched again every 2 minutes
+  var CACHE_KEY = 'liliema-film-check';
+
+  var JUDGEMENTS = {
+    fi: { right: 'oikein', wrong: 'väärin', not_sure: 'en ole varma' },
+    sv: { right: 'rätt', wrong: 'fel', not_sure: 'vet inte' },
+    en: { right: 'right', wrong: 'wrong', not_sure: 'not sure' },
+    fr: { right: 'juste', wrong: 'faux', not_sure: 'je ne sais pas' }
+  };
+  var CONFIDENCE = {
+    fi: { high: 'varma', medium: 'melko varma', low: 'epävarma' },
+    sv: { high: 'säker', medium: 'ganska säker', low: 'osäker' },
+    en: { high: 'sure', medium: 'fairly sure', low: 'unsure' },
+    fr: { high: 'sûre', medium: 'assez sûre', low: 'incertaine' }
+  };
+
+  F.add({
+    fi: {
+      'chk.intro': 'Tekoäly (Anthropicin Claude) on kirjoittanut näille kuville sanat afrikkalaisilla kielillä. Valitse jokin kielistäsi ja kerro, ovatko ne oikein. Muut kielesi voit tarkistaa sen jälkeen.',
+      'chk.loading': 'Haetaan sanoja…',
+      'chk.soon': 'Peli avautuu pian. Sillä välin voit lisätä sanoja omilla kielilläsi.',
+      'chk.addlink': 'Siirry sivulle Lisää sana',
+      'chk.lang.q': 'Millä kielistäsi haluat aloittaa?',
+      'chk.lang.ph': 'Kirjoita kielen nimi tai valitse alta',
+      'chk.lang.words': function (n) { return n === 1 ? '1 sana' : n + ' sanaa'; },
+      'chk.lang.notin': function (name) { return 'Kieli ”' + name + '” ei ole vielä mukana pelissä. Voit lisätä sanoja omilla kielilläsi sivulla Lisää sana.'; },
+      'chk.change.lang': 'Vaihda kieli',
+      'chk.progress': function (i, n) { return 'Sana ' + i + '/' + n; },
+      'chk.ai.tag': 'Tekoälyn sana · tarkistamaton',
+      'chk.q': function (name) { return 'Onko tämä oikea sana kielellä ' + name + '?'; },
+      'chk.right': 'Oikein', 'chk.wrong': 'Väärin', 'chk.notsure': 'En ole varma',
+      'chk.fix.q': function (name) { return 'Miten se sanotaan kielellä ' + name + '? (vapaaehtoinen)'; },
+      'chk.fix.send': 'Lähetä', 'chk.fix.skip': 'Ohita',
+      'chk.consent.yes': 'Olet antanut suostumuksesi tutkimus- ja opetuskäyttöön.',
+      'chk.consent.no': 'Et ole antanut suostumusta tutkimus- ja opetuskäyttöön.',
+      'chk.consent.change': 'Muuta',
+      'chk.thanks': 'Kiitos!',
+      'chk.you': function (j) { return 'Vastasit: ' + j + '.'; },
+      'chk.yourword': function (w) { return 'Sanasi ”' + w + '” on lisätty sanoihin.'; },
+      'chk.others': 'Mitä puhujat ovat vastanneet',
+      'chk.lbl.right': 'Oikein', 'chk.lbl.wrong': 'Väärin', 'chk.lbl.notsure': 'Ei varma',
+      'chk.verdict.right': 'Useimmat puhujat pitävät sanaa oikeana.',
+      'chk.verdict.wrong': 'Useimmat puhujat pitävät sanaa vääränä.',
+      'chk.verdict.split': 'Puhujat ovat eri mieltä: kielissä on usein monta tapaa sanoa sama asia.',
+      'chk.verdict.few': function (min) { return 'Vastauksia on vielä alle ' + min + ', joten on liian aikaista sanoa.'; },
+      'chk.collection': 'Sanakokoelmassa tälle kuvalle:',
+      'chk.confidence': function (c) { return 'Tekoälyn oma arvio sanasta: ' + c + '.'; },
+      'chk.next': 'Seuraava sana', 'chk.nextvisitor': 'Olen valmis',
+      'chk.end': function (n, name) { return 'Olet tarkistanut kaikki ' + n + ' sanaa kielellä ' + name + '. Kiitos!'; },
+      'chk.otherlang': 'Valitse toinen kielesi',
+      'chk.queue': function (n) { return n === 1 ? '1 vastaus odottaa lähetystä.' : n + ' vastausta odottaa lähetystä.'; }
+    },
+    sv: {
+      'chk.intro': 'En AI (Claude, från Anthropic) har skrivit ord för de här bilderna på afrikanska språk. Välj ett av dina språk och berätta om de stämmer. Dina andra språk kan du granska efteråt.',
+      'chk.loading': 'Hämtar ord…',
+      'chk.soon': 'Spelet öppnar snart. Under tiden kan du lägga till ord på dina språk.',
+      'chk.addlink': 'Gå till Lägg till ett ord',
+      'chk.lang.q': 'Vilket av dina språk vill du börja med?',
+      'chk.lang.ph': 'Skriv språkets namn eller välj nedan',
+      'chk.lang.words': function (n) { return n + ' ord'; },
+      'chk.lang.notin': function (name) { return 'Språket ”' + name + '” är inte med i spelet ännu. Du kan lägga till ord på dina språk på sidan Lägg till ett ord.'; },
+      'chk.change.lang': 'Byt språk',
+      'chk.progress': function (i, n) { return 'Ord ' + i + ' av ' + n; },
+      'chk.ai.tag': 'AI:ns ord · ogranskat',
+      'chk.q': function (name) { return 'Är det här rätt ord på ' + name + '?'; },
+      'chk.right': 'Rätt', 'chk.wrong': 'Fel', 'chk.notsure': 'Vet inte',
+      'chk.fix.q': function (name) { return 'Hur säger man det på ' + name + '? (frivilligt)'; },
+      'chk.fix.send': 'Skicka', 'chk.fix.skip': 'Hoppa över',
+      'chk.consent.yes': 'Du har gett ditt samtycke till användning i forskning och undervisning.',
+      'chk.consent.no': 'Du har inte gett ditt samtycke till användning i forskning och undervisning.',
+      'chk.consent.change': 'Ändra',
+      'chk.thanks': 'Tack!',
+      'chk.you': function (j) { return 'Ditt svar: ' + j + '.'; },
+      'chk.yourword': function (w) { return 'Ditt ord ”' + w + '” har lagts till bland orden.'; },
+      'chk.others': 'Vad talarna har svarat',
+      'chk.lbl.right': 'Rätt', 'chk.lbl.wrong': 'Fel', 'chk.lbl.notsure': 'Vet inte',
+      'chk.verdict.right': 'De flesta talare anser att ordet är rätt.',
+      'chk.verdict.wrong': 'De flesta talare anser att ordet är fel.',
+      'chk.verdict.split': 'Talarna är oense: språk har ofta flera sätt att säga samma sak.',
+      'chk.verdict.few': function (min) { return 'Det finns ännu färre än ' + min + ' svar, så det är för tidigt att säga.'; },
+      'chk.collection': 'I ordsamlingen för den här bilden:',
+      'chk.confidence': function (c) { return 'AI:ns egen bedömning av ordet: ' + c + '.'; },
+      'chk.next': 'Nästa ord', 'chk.nextvisitor': 'Jag är klar',
+      'chk.end': function (n, name) { return 'Du har granskat alla ' + n + ' ord på ' + name + '. Tack!'; },
+      'chk.otherlang': 'Välj ett annat av dina språk',
+      'chk.queue': function (n) { return n + ' svar väntar på att skickas.'; }
+    },
+    en: {
+      'chk.intro': 'An AI (Claude, made by Anthropic) has written words for these pictures in African languages. Choose one of your languages and tell us whether they are right. You can check your other languages afterwards.',
+      'chk.loading': 'Fetching words…',
+      'chk.soon': 'The game opens soon. Meanwhile, you can add words in your languages.',
+      'chk.addlink': 'Go to Add a word',
+      'chk.lang.q': 'Which of your languages would you like to start with?',
+      'chk.lang.ph': 'Type the name of the language or choose below',
+      'chk.lang.words': function (n) { return n === 1 ? '1 word' : n + ' words'; },
+      'chk.lang.notin': function (name) { return 'The language “' + name + '” is not in the game yet. You can add words in your languages on the Add a word page.'; },
+      'chk.change.lang': 'Change language',
+      'chk.progress': function (i, n) { return 'Word ' + i + ' of ' + n; },
+      'chk.ai.tag': 'The AI’s word · unchecked',
+      'chk.q': function (name) { return 'Is this the right word in ' + name + '?'; },
+      'chk.right': 'Right', 'chk.wrong': 'Wrong', 'chk.notsure': 'Not sure',
+      'chk.fix.q': function (name) { return 'How do you say it in ' + name + '? (optional)'; },
+      'chk.fix.send': 'Send', 'chk.fix.skip': 'Skip',
+      'chk.consent.yes': 'You have agreed to use in research and teaching.',
+      'chk.consent.no': 'You have not agreed to use in research and teaching.',
+      'chk.consent.change': 'Change',
+      'chk.thanks': 'Thank you!',
+      'chk.you': function (j) { return 'Your answer: ' + j + '.'; },
+      'chk.yourword': function (w) { return 'Your word “' + w + '” has been added to the words.'; },
+      'chk.others': 'What speakers have answered',
+      'chk.lbl.right': 'Right', 'chk.lbl.wrong': 'Wrong', 'chk.lbl.notsure': 'Not sure',
+      'chk.verdict.right': 'Most speakers say the word is right.',
+      'chk.verdict.wrong': 'Most speakers say the word is wrong.',
+      'chk.verdict.split': 'Speakers disagree: languages often have several ways of saying the same thing.',
+      'chk.verdict.few': function (min) { return 'Fewer than ' + min + ' answers so far, so it is too early to tell.'; },
+      'chk.collection': 'In the word collection for this picture:',
+      'chk.confidence': function (c) { return 'The AI’s own estimate for this word: ' + c + '.'; },
+      'chk.next': 'Next word', 'chk.nextvisitor': 'I’m done',
+      'chk.end': function (n, name) { return 'You have checked all ' + n + ' words in ' + name + '. Thank you!'; },
+      'chk.otherlang': 'Choose another of your languages',
+      'chk.queue': function (n) { return n + (n === 1 ? ' answer is' : ' answers are') + ' waiting to be sent.'; }
+    },
+    fr: {
+      'chk.intro': 'Une IA (Claude, créée par Anthropic) a écrit des mots pour ces images dans des langues africaines. Choisissez l’une de vos langues et dites-nous s’ils sont justes. Vous pourrez vérifier vos autres langues ensuite.',
+      'chk.loading': 'Chargement des mots…',
+      'chk.soon': 'Le jeu ouvre bientôt. En attendant, vous pouvez ajouter des mots dans vos langues.',
+      'chk.addlink': 'Aller à Ajoutez un mot',
+      'chk.lang.q': 'Par laquelle de vos langues voulez-vous commencer ?',
+      'chk.lang.ph': 'Tapez le nom de la langue ou choisissez ci-dessous',
+      'chk.lang.words': function (n) { return n > 1 ? n + ' mots' : n + ' mot'; },
+      'chk.lang.notin': function (name) { return 'La langue « ' + name + ' » n’est pas encore dans le jeu. Vous pouvez ajouter des mots dans vos langues sur la page Ajoutez un mot.'; },
+      'chk.change.lang': 'Changer de langue',
+      'chk.progress': function (i, n) { return 'Mot ' + i + ' sur ' + n; },
+      'chk.ai.tag': 'Le mot de l’IA · non vérifié',
+      'chk.q': function (name) { return 'Est-ce le bon mot en ' + name + ' ?'; },
+      'chk.right': 'Juste', 'chk.wrong': 'Faux', 'chk.notsure': 'Je ne sais pas',
+      'chk.fix.q': function (name) { return 'Comment le dit-on en ' + name + ' ? (facultatif)'; },
+      'chk.fix.send': 'Envoyer', 'chk.fix.skip': 'Passer',
+      'chk.consent.yes': 'Vous avez accepté l’utilisation dans la recherche et l’enseignement.',
+      'chk.consent.no': 'Vous n’avez pas accepté l’utilisation dans la recherche et l’enseignement.',
+      'chk.consent.change': 'Modifier',
+      'chk.thanks': 'Merci !',
+      'chk.you': function (j) { return 'Votre réponse : ' + j + '.'; },
+      'chk.yourword': function (w) { return 'Votre mot « ' + w + ' » a été ajouté aux mots.'; },
+      'chk.others': 'Ce que les locuteurs ont répondu',
+      'chk.lbl.right': 'Juste', 'chk.lbl.wrong': 'Faux', 'chk.lbl.notsure': 'Ne sait pas',
+      'chk.verdict.right': 'La plupart des locuteurs disent que le mot est juste.',
+      'chk.verdict.wrong': 'La plupart des locuteurs disent que le mot est faux.',
+      'chk.verdict.split': 'Les locuteurs ne sont pas d’accord : une langue a souvent plusieurs façons de dire la même chose.',
+      'chk.verdict.few': function (min) { return 'Moins de ' + min + ' réponses pour l’instant : il est trop tôt pour conclure.'; },
+      'chk.collection': 'Dans la collection de mots pour cette image :',
+      'chk.confidence': function (c) { return 'L’estimation de l’IA elle-même pour ce mot : ' + c + '.'; },
+      'chk.next': 'Mot suivant', 'chk.nextvisitor': 'J’ai terminé',
+      'chk.end': function (n, name) { return 'Vous avez vérifié les ' + n + ' mots en ' + name + '. Merci !'; },
+      'chk.otherlang': 'Choisir une autre de vos langues',
+      'chk.queue': function (n) { return n + (n > 1 ? ' réponses attendent' : ' réponse attend') + ' d’être envoyée' + (n > 1 ? 's.' : '.'); }
+    }
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var langBySlug = {}, conceptBySlug = {};
+  D.languages.forEach(function (l) { langBySlug[l.slug] = l; });
+  D.concepts.forEach(function (c) { conceptBySlug[c.slug] = c; });
+  function label(c) { return c[F.lang] || c.en; }
+  function countryNames(l) {
+    return l.countries.map(function (k) { var c = D.countries[k]; return c ? c[F.lang] : k; }).join(', ');
+  }
+
+  // ------------------------------------------------------------ data: screened drafts, scores, approved words
+  var drafts = [], scoresById = {}, entries = [], loaded = false;
+  var byLang = {};   // language slug -> drafts in the game (concepts with a picture)
+
+  function index() {
+    byLang = {};
+    drafts.forEach(function (d) {
+      var c = conceptBySlug[d.concept_slug];
+      if (!c || !c.picture || !langBySlug[d.language_slug]) return;
+      (byLang[d.language_slug] = byLang[d.language_slug] || []).push(d);
+    });
+  }
+
+  function saveCache() {
+    try { window.localStorage.setItem(CACHE_KEY, JSON.stringify({ drafts: drafts, scores: scoresList, entries: entries })); }
+    catch (e) { /* storage full or unavailable */ }
+  }
+  var scoresList = [];
+  function setScores(list) {
+    scoresList = list || [];
+    scoresById = {};
+    scoresList.forEach(function (r) { scoresById[r.draft_id] = r; });
+  }
+  function loadCache() {
+    try {
+      var c = JSON.parse(window.localStorage.getItem(CACHE_KEY) || 'null');
+      if (c) { drafts = c.drafts || []; setScores(c.scores); entries = c.entries || []; index(); }
+    } catch (e) { /* ignore */ }
+  }
+
+  function refresh() {
+    return Promise.all([
+      window.FairDB.selectAll('ai_drafts', 'select=id,concept_slug,language_slug,draft,confidence&order=id'),
+      S.fetch(),
+      window.FairDB.selectAll('entries', 'select=concept_slug,language_slug,headword&status=eq.approved&order=id')
+    ]).then(function (r) {
+      drafts = r[0]; setScores(r[1]); entries = r[2];
+      index(); saveCache();
+    }, function (err) {
+      if (window.console) console.warn('[LILIEMA] Check the AI: could not fetch new data:', err && err.message);
+    }).then(function () {
+      loaded = true;
+      if (!$('stepLang').hidden) renderLanguageStep();
+    });
+  }
+
+  // ------------------------------------------------------------ the visitor
+  var visitor, local;   // local: this device's answers not yet in the fetched scores
+  function newVisitor() {   // the research answer is part of the visit (visit.js), shared with Add a word
+    visitor = { langSlug: null, langLabel: '', queue: [], pos: 0, current: null, done: {} };
+  }
+  newVisitor();
+  local = {};
+
+  function showStep(id) {
+    ['stepLang', 'stepWord', 'stepResult', 'stepEnd'].forEach(function (s) { $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+
+  function langName() { var l = langBySlug[visitor.langSlug]; return l ? l.name : visitor.langLabel; }
+
+  // ------------------------------------------------------------ step 1: language
+  var langIndex = D.languages.map(function (l) {
+    return { lang: l, names: [l.name].concat(l.aliases).map(function (n) { return { text: n, f: F.fold(n).trim() }; }) };
+  });
+
+  function renderLanguageStep() {
+    var playable = Object.keys(byLang);
+    $('loading').hidden = loaded || playable.length > 0;
+    $('soon').hidden = !loaded || playable.length > 0;
+    $('langPick').hidden = playable.length === 0;
+    renderLanguages();
+    renderSuggestions();
+  }
+
+  function renderLanguages() {
+    var grid = $('langGrid');
+    grid.innerHTML = '';
+    Object.keys(byLang).map(function (s) { return langBySlug[s]; })
+      .sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); })
+      .forEach(function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'lang-chip';
+        var all = byLang[l.slug], finished = all.every(function (d) { return visitor.done[d.id]; });
+        b.innerHTML = F.esc(l.name) + (finished ? ' ✓' : '') + '<small>' + F.esc(countryNames(l)) + ' · ' + F.esc(F.t('chk.lang.words', all.length)) + '</small>';
+        b.addEventListener('click', function () { startLanguage(l.slug, l.name); });
+        grid.appendChild(b);
+      });
+  }
+
+  function renderSuggestions() {
+    var box = $('langSuggest');
+    box.innerHTML = '';
+    $('notIn').hidden = true;
+    var typed = $('langInput').value.trim(), q = F.fold(typed).trim();
+    if (!q) return;
+    var hits = [], known = false;
+    langIndex.forEach(function (li) {
+      var best = null;
+      li.names.forEach(function (n) {
+        if (n.f === q) { best = n; known = true; }
+        else if (!best && (n.f.indexOf(q) === 0 || (q.length >= 3 && n.f.indexOf(q) >= 0))) best = n;
+      });
+      if (best) hits.push({ lang: li.lang, name: best.text });
+    });
+    var playableHits = hits.filter(function (h) { return byLang[h.lang.slug]; });
+    playableHits.slice(0, 6).forEach(function (h) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = h.name === h.lang.name ? h.lang.name : h.name + ' (' + h.lang.name + ')';
+      b.addEventListener('click', function () { startLanguage(h.lang.slug, h.name); });
+      box.appendChild(b);
+    });
+    // a language that is not in the game (yet): point to Add a word
+    if (!playableHits.length && (known || q.length >= 3)) {
+      var exact = hits.filter(function (h) { return F.fold(h.name).trim() === q; })[0];
+      $('notInText').textContent = F.t('chk.lang.notin', exact ? exact.lang.name : typed);
+      $('notIn').hidden = false;
+    }
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  // the answer to the research question is taken from the box only while the visitor can see it
+  function takeConsent() {
+    if (!V.current()) return false;   // the visit shown here ended meanwhile: the page has started again
+    if (V.consent() !== null) return true;
+    if ($('consentBox').hidden) { renderConsent(); return false; }
+    V.setConsent($('consentCheck').checked);
+    renderConsent();
+    return true;
+  }
+
+  function startLanguage(slug, name) {
+    if (!takeConsent()) return;
+    visitor.langSlug = slug;
+    visitor.langLabel = String(name).normalize('NFC').trim().slice(0, 60);
+    visitor.queue = shuffle((byLang[slug] || []).filter(function (d) { return !visitor.done[d.id]; }).slice());
+    visitor.total = (byLang[slug] || []).length;
+    visitor.pos = 0;
+    kb.setLetters(langBySlug[slug] ? langBySlug[slug].letters : []);
+    nextWord();
+  }
+
+  // ------------------------------------------------------------ step 2: the AI's word
+  var kb = new window.LiliemaKeyboard($('keyboard'), {});
+  kb.attach($('fixInput'));
+  function keyboardLabels() {
+    kb.opts.labels = { space: F.t('kb.space'), all: F.t('kb.all'), lang: F.t('kb.lang'), shift: F.t('kb.shift'), backspace: F.t('kb.backspace') };
+  }
+
+  function nextWord() {
+    var d = visitor.queue[visitor.pos];
+    if (!d) { showEnd(); return; }
+    visitor.current = d;
+    renderWord();
+    $('fix').hidden = true;
+    $('fixInput').value = '';
+    setAnswersEnabled(true);
+    showStep('stepWord');
+    renderConsent();
+  }
+
+  function renderWord() {
+    var d = visitor.current, c = conceptBySlug[d.concept_slug];
+    $('barLang').textContent = visitor.langLabel === langName() ? langName() : visitor.langLabel + ' (' + langName() + ')';
+    $('barCount').textContent = F.t('chk.progress', Object.keys(visitor.done).filter(function (id) { return visitor.done[id] === visitor.langSlug; }).length + 1, visitor.total);
+    $('gamePic').src = c.picture;
+    $('gameConcept').textContent = label(c);
+    $('aiWord').textContent = d.draft;
+    var l = langBySlug[visitor.langSlug], norm = l && l.ai_note ? l.ai_note[F.lang] : '';
+    $('aiNorm').textContent = norm || '';
+    $('aiNorm').hidden = !norm;
+    $('question').textContent = F.t('chk.q', langName());
+    $('fixLabel').textContent = F.t('chk.fix.q', langName());
+  }
+
+  function setAnswersEnabled(on) {
+    document.querySelectorAll('.answer').forEach(function (b) { b.disabled = !on; });
+  }
+
+  function renderConsent() {
+    var consent = V.consent(), asked = consent !== null;
+    var slot = $('stepWord').hidden ? $('consentSlotLang') : $('consentSlotGame');
+    if ($('consentBox').parentNode !== slot) slot.appendChild($('consentBox'));
+    $('consentBox').hidden = asked;
+    $('consentDone').hidden = !asked;
+    $('consentCheck').checked = false;   // never ticked in advance for a new visitor; a tick is used once
+    if (!asked) return;
+    $('consentDone').innerHTML = F.esc(F.t(consent ? 'chk.consent.yes' : 'chk.consent.no')) +
+      ' <button type="button" class="link-btn" id="consentChange">' + F.esc(F.t('chk.consent.change')) + '</button>' +
+      ' <button type="button" class="link-btn" id="consentNotYou">' + F.esc(F.t('visit.notyou')) + '</button>';
+    $('consentChange').addEventListener('click', function () { V.setConsent(null); renderConsent(); });
+    $('consentNotYou').addEventListener('click', function () { V.end(); });
+  }
+
+  function answer(j) {
+    if (!takeConsent()) return;
+    if (j === 'wrong') {
+      setAnswersEnabled(false);
+      renderConsent();
+      $('fix').hidden = false;
+      kb.target = $('fixInput');
+      keyboardLabels();
+      kb.render();
+      $('fixInput').focus({ preventScroll: true });
+      $('fix').scrollIntoView({ block: 'nearest' });
+      return;
+    }
+    record(j, '');
+  }
+
+  function record(j, suggested) {
+    if (!V.current()) return;
+    var d = visitor.current;
+    // research_consent, and the visit number only with consent; the visitor's own name for the language
+    var check = { draft_id: d.id, judgement: j, language_label: visitor.langLabel || null };
+    if (suggested) check.suggested = suggested;
+    send('ai_checks', V.stamp(check));
+    if (suggested) {
+      send('entries', V.stamp({
+        concept_slug: d.concept_slug, language_slug: d.language_slug, language_label: visitor.langLabel,
+        headword: suggested, example_phrase: null, source: 'check_the_ai'
+      }));
+    }
+    var l = local[d.id] || (local[d.id] = { right: 0, wrong: 0, not_sure: 0 });
+    l[j]++;
+    visitor.done[d.id] = visitor.langSlug;
+    visitor.pos++;
+    showResult(d, j, suggested);
+  }
+
+  function send(table, row) {
+    window.FairDB.add(table, row).then(updateQueue, function (err) {
+      if (window.console) console.warn('[LILIEMA] not stored (' + table + '):', err && err.message);
+    });
+  }
+
+  // ------------------------------------------------------------ step 3: what speakers said
+  function counts(d) {
+    var r = scoresById[d.id] || {}, l = local[d.id] || {};
+    return {
+      right: (Number(r.n_right) || 0) + (l.right || 0),
+      wrong: (Number(r.n_wrong) || 0) + (l.wrong || 0),
+      not_sure: (Number(r.n_not_sure) || 0) + (l.not_sure || 0)
+    };
+  }
+
+  function showResult(d, j, suggested) {
+    var c = conceptBySlug[d.concept_slug];
+    $('resPic').src = c.picture;
+    $('resConcept').textContent = label(c) + ' · ' + d.draft;
+    $('resYou').textContent = F.t('chk.you', JUDGEMENTS[F.lang][j]);
+    $('resYourWord').hidden = !suggested;
+    $('resYourWord').textContent = suggested ? F.t('chk.yourword', suggested) : '';
+    var n = counts(d), total = n.right + n.wrong + n.not_sure;
+    var pct = function (x) { return (100 * x / Math.max(1, total)).toFixed(2) + '%'; };
+    $('tally').innerHTML = '<span class="r" style="width:' + pct(n.right) + '"></span><span class="x" style="width:' + pct(n.wrong) +
+      '"></span><span class="n" style="width:' + pct(n.not_sure) + '"></span>';
+    $('tallyText').innerHTML = '<span class="r">' + F.esc(F.t('chk.lbl.right')) + ' ' + n.right + '</span><span class="x">' +
+      F.esc(F.t('chk.lbl.wrong')) + ' ' + n.wrong + '</span><span class="n">' + F.esc(F.t('chk.lbl.notsure')) + ' ' + n.not_sure + '</span>';
+    var v = total < S.MIN ? F.t('chk.verdict.few', S.MIN) :
+      n.right * 2 > total ? F.t('chk.verdict.right') : n.wrong * 2 > total ? F.t('chk.verdict.wrong') : F.t('chk.verdict.split');
+    $('verdict').textContent = v;
+    var seen = {}, words = [];
+    entries.forEach(function (e) {
+      if (e.concept_slug !== d.concept_slug || e.language_slug !== d.language_slug) return;
+      var k = String(e.headword).normalize('NFC').toLowerCase();
+      if (!seen[k]) { seen[k] = 1; words.push(e.headword); }
+    });
+    $('collection').hidden = !words.length;
+    $('chips').innerHTML = words.map(function (w) { return '<span>' + F.esc(w) + '</span>'; }).join('');
+    $('confidence').textContent = d.confidence ? F.t('chk.confidence', CONFIDENCE[F.lang][d.confidence]) : '';
+    visitor.last = { d: d, j: j, suggested: suggested };
+    showStep('stepResult');
+    $('nextWord').focus({ preventScroll: true });
+  }
+
+  // ------------------------------------------------------------ step 4: all words done
+  function showEnd() {
+    $('endText').textContent = F.t('chk.end', visitor.total, langName());
+    showStep('stepEnd');
+  }
+
+  function goLanguage() {
+    $('langInput').value = '';
+    renderLanguageStep();
+    showStep('stepLang');
+    renderConsent();
+  }
+
+  // the page starts again for the next visitor; also when the visit ends elsewhere ("No, I'm new here", another tab)
+  function resetPage() {
+    newVisitor();
+    goLanguage();
+  }
+  function resetVisitor() { V.end(); resetPage(); }
+  V.onEnd(resetPage);
+
+  // ------------------------------------------------------------ queue info and credits
+  function updateQueue() {
+    var q = window.FairDB.queued();
+    $('queueInfo').hidden = q === 0;
+    if (q) $('queueInfo').textContent = F.t('chk.queue', q);
+  }
+  window.FairDB.onQueue(updateQueue);
+
+  function renderCredits() {
+    $('aiCredit').textContent = F.t('credit.ai', S.MODEL, S.date(S.DRAFTED_ON));
+    var pc = F.pictureCredit();
+    $('picCredit').textContent = pc;
+    $('picCredit').hidden = !pc;
+  }
+
+  // ------------------------------------------------------------ idle reset for the next visitor
+  var idleTimer = null;
+  function resetIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () {
+      if (V.active() || visitor.langSlug) resetVisitor();
+    }, IDLE_RESET_MS);
+  }
+  ['pointerdown', 'keydown', 'touchstart', 'input', 'wheel'].forEach(function (ev) {
+    window.addEventListener(ev, resetIdle, { passive: true });
+  });
+  // a box ticked but never used is unticked after 45 seconds without use, so the next person does not find it ticked
+  V.onPause(function () { if (V.consent() === null) $('consentCheck').checked = false; });
+
+  // ------------------------------------------------------------ start
+  F.initHeader();
+  F.onLang(function () {
+    var ticked = $('consentCheck').checked;   // a box ticked before switching the language stays ticked
+    renderCredits();
+    updateQueue();
+    if (!$('stepLang').hidden) { renderLanguageStep(); renderConsent(); }
+    if (!$('stepWord').hidden) { renderWord(); renderConsent(); keyboardLabels(); kb.render(); }
+    if (V.consent() === null) $('consentCheck').checked = ticked;
+    if (!$('stepResult').hidden && visitor.last) showResult(visitor.last.d, visitor.last.j, visitor.last.suggested);
+    if (!$('stepEnd').hidden) showEnd();
+  });
+  F.apply();
+  keyboardLabels();
+  renderCredits();
+  updateQueue();
+  loadCache();
+  renderLanguageStep();
+  renderConsent();
+  refresh();
+  setInterval(function () { refresh().then(function () { local = {}; }); }, REFRESH_MS);
+
+  document.querySelectorAll('.answer').forEach(function (b) {
+    b.addEventListener('click', function () { answer(b.getAttribute('data-j')); });
+  });
+  $('langInput').addEventListener('input', renderSuggestions);
+  $('langInput').addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    var first = $('langSuggest').querySelector('button');
+    if (first) first.click();
+  });
+  $('changeLang').addEventListener('click', goLanguage);
+  $('fixSend').addEventListener('click', function () {
+    var w = $('fixInput').value.normalize('NFC').trim().replace(/\s+/g, ' ');
+    record('wrong', w);
+  });
+  $('fixInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('fixSend').click(); });
+  $('fixSkip').addEventListener('click', function () { record('wrong', ''); });
+  $('nextWord').addEventListener('click', nextWord);
+  $('nextVisitor').addEventListener('click', function () { V.done(); resetPage(); });
+  $('endLang').addEventListener('click', goLanguage);
+  $('endVisitor').addEventListener('click', function () { V.done(); resetPage(); });
+  resetIdle();
+  V.guard();
+})();
+</script>
+</body>
+</html>
