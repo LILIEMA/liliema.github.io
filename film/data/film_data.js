@@ -1029,6 +1029,327 @@ window.FAIR_DATA = {
     "ó"
    ],
    "ai_note": null
+  },
+  {
+   "slug": "pulaar",
+   "name": "Pulaar",
+   "iso": "fuc",
+   "countries": [
+    "Senegal",
+    "Mauritania",
+    "The Gambia",
+    "Guinea-Bissau",
+    "Guinea",
+    "Mali"
+   ],
+   "aliases": [
+    "Fula",
+    "Fulfulde",
+    "Peul",
+    "Peulh",
+    "Fulani",
+    "Haalpulaar",
+    "Halpulaar",
+    "Pulaar du Nord",
+    "Toucouleur",
+    "Tukuloor",
+    "Fulakunda",
+    "Fula Kunda"
+   ],
+   "letters": [
+    "ɓ",
+    "ɗ",
+    "ñ",
+    "ŋ",
+    "ƴ",
+    "ʼ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "seereer",
+   "name": "Seereer",
+   "iso": "srr",
+   "countries": [
+    "Senegal",
+    "The Gambia"
+   ],
+   "aliases": [
+    "Serer",
+    "Sereer",
+    "Sérère",
+    "Serere",
+    "Serer-Sine",
+    "Seereer Siin",
+    "Sereer Siin"
+   ],
+   "letters": [
+    "ë",
+    "ɓ",
+    "ɗ",
+    "ñ",
+    "ŋ",
+    "ƴ",
+    "ʼ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "soninke",
+   "name": "Soninke",
+   "iso": "snk",
+   "countries": [
+    "Mali",
+    "Senegal",
+    "Mauritania",
+    "The Gambia"
+   ],
+   "aliases": [
+    "Soninké",
+    "Sarakhole",
+    "Sarakhule",
+    "Sarakolé",
+    "Sarakole",
+    "Saraxole",
+    "Serahule"
+   ],
+   "letters": [
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "joola-fogny",
+   "name": "Joola Fogny",
+   "iso": "dyo",
+   "countries": [
+    "Senegal",
+    "The Gambia"
+   ],
+   "aliases": [
+    "Jola-Fonyi",
+    "Jola Fonyi",
+    "Jola Fogny",
+    "Joola Foñi",
+    "Jóola Fóoñi",
+    "Diola-Fogny",
+    "Diola Fogny",
+    "Fogny",
+    "Foñi",
+    "Kujamaat",
+    "Kujamaat Joola"
+   ],
+   "letters": [
+    "ë",
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "kriolu",
+   "name": "Kriolu",
+   "iso": "pov",
+   "countries": [
+    "Guinea-Bissau",
+    "Senegal",
+    "The Gambia"
+   ],
+   "aliases": [
+    "Kriol",
+    "Kriyol",
+    "Kiriol",
+    "Crioulo",
+    "Creole",
+    "Créole",
+    "Casamance Creole",
+    "Portuguese Creole",
+    "Créole portugais",
+    "Guinea-Bissau Creole",
+    "Upper Guinea Creole"
+   ],
+   "letters": [
+    "ñ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "manjaku",
+   "name": "Manjaku",
+   "iso": "mfv",
+   "countries": [
+    "Guinea-Bissau",
+    "Senegal",
+    "The Gambia"
+   ],
+   "aliases": [
+    "Manjak",
+    "Manjaque",
+    "Mandjak",
+    "Mandjaque",
+    "Manjaco",
+    "Manjacu"
+   ],
+   "letters": [
+    "ë",
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "mankanya",
+   "name": "Mankanya",
+   "iso": "knf",
+   "countries": [
+    "Guinea-Bissau",
+    "Senegal"
+   ],
+   "aliases": [
+    "Mankañ",
+    "Mankagne",
+    "Mancagne",
+    "Mancanha",
+    "Mankanha",
+    "Brame"
+   ],
+   "letters": [
+    "ë",
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "balanta-ganja",
+   "name": "Balanta-Ganja",
+   "iso": "bjt",
+   "countries": [
+    "Senegal",
+    "Guinea-Bissau"
+   ],
+   "aliases": [
+    "Balanta",
+    "Balante",
+    "Balanta Ganja",
+    "Ganja"
+   ],
+   "letters": [
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "joola-eegimaa",
+   "name": "Joola Eegimaa",
+   "iso": "bqj",
+   "countries": [
+    "Senegal"
+   ],
+   "aliases": [
+    "Eegimaa",
+    "Banjal",
+    "Bandial",
+    "Jola-Bandial",
+    "Joola Banjal",
+    "Joola Bandial",
+    "Diola Bandial"
+   ],
+   "letters": [
+    "ë",
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "joola-kwaatay",
+   "name": "Joola Kwaatay",
+   "iso": "cwt",
+   "countries": [
+    "Senegal"
+   ],
+   "aliases": [
+    "Kwaatay",
+    "Kuwaataay",
+    "Kwatay",
+    "Jola Kwaatay",
+    "Joola Kuwaataay",
+    "Diola Kwatay"
+   ],
+   "letters": [
+    "ë",
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "joola-kujireray",
+   "name": "Joola Kujireray",
+   "iso": "",
+   "countries": [
+    "Senegal"
+   ],
+   "aliases": [
+    "Kujireray",
+    "Jola Kujireray",
+    "Diola Kujireray"
+   ],
+   "letters": [
+    "ë",
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "joola-gusilay",
+   "name": "Joola Gusilay",
+   "iso": "gsl",
+   "countries": [
+    "Senegal"
+   ],
+   "aliases": [
+    "Gusilay",
+    "Kusilay",
+    "Jola Gusilay",
+    "Joola Kusilay",
+    "Diola Gusilay"
+   ],
+   "letters": [
+    "ë",
+    "ñ",
+    "ŋ"
+   ],
+   "ai_note": null
+  },
+  {
+   "slug": "gubeeher",
+   "name": "Baïnounk Gubëeher",
+   "iso": "",
+   "countries": [
+    "Senegal"
+   ],
+   "aliases": [
+    "Gubëeher",
+    "Gubeeher",
+    "Baïnounk Gubeeher",
+    "Bainouk Gubëeher",
+    "Bainouk Gubeeher",
+    "Bainunk Gubëeher",
+    "Baynunk Gubëeher"
+   ],
+   "letters": [
+    "ë",
+    "ŋ",
+    "ñ",
+    "é",
+    "ó"
+   ],
+   "ai_note": null
   }
  ],
  "countries": {
@@ -1115,6 +1436,30 @@ window.FAIR_DATA = {
    "fi": "Gambia",
    "sv": "Gambia",
    "fr": "Gambie"
+  },
+  "Guinea-Bissau": {
+   "en": "Guinea-Bissau",
+   "fi": "Guinea-Bissau",
+   "sv": "Guinea-Bissau",
+   "fr": "Guinée-Bissau"
+  },
+  "Mauritania": {
+   "en": "Mauritania",
+   "fi": "Mauritania",
+   "sv": "Mauretanien",
+   "fr": "Mauritanie"
+  },
+  "Mali": {
+   "en": "Mali",
+   "fi": "Mali",
+   "sv": "Mali",
+   "fr": "Mali"
+  },
+  "Guinea": {
+   "en": "Guinea",
+   "fi": "Guinea",
+   "sv": "Guinea",
+   "fr": "Guinée"
   }
  },
  "picture_credit": {
