@@ -153,6 +153,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   <section>
     <h1 class="page-title" data-t="lw.title">LILIEMA-sanat</h1>
     <p class="page-intro" data-t="lw.intro"></p>
+    <p class="page-intro" id="fullNote" data-t="lw.full" hidden></p>
     <p class="page-intro"><span data-t="site.label"></span> <a href="https://liliema.wordpress.com/" target="_blank" rel="noopener">liliema.wordpress.com</a></p>
   </section>
 
@@ -255,6 +256,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.empty.sub': 'Kokeile toista kirjoitusasua tai kieltä.',
       'lw.splash.title': 'Haetaan sanoja…',
       'lw.splash.sub': '',
+      'lw.full': 'Tällä tietokoneella sanalistassa on myös sanoja julkaistuista sanakirjoista.',
       'lw.unit': 'Yksikkö',
       'lw.example': 'Esimerkki:',
       'lw.pos': 'Sanaluokka:',
@@ -269,6 +271,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Poista sanalista tältä laitteelta',
       'lw.remove.confirm': 'Vahvista: poista sanalista',
       'lw.removed': 'Sanalista poistettiin tältä laitteelta.',
+      'lw.dbname': 'LILIEMAn julkaistavat sanat (tietokanta)',
       'lw.error': 'Tiedostoa ei voitu lukea: ',
       'lw.nodata': 'Tiedostosta ei löytynyt sanoja (sarakkeet Headword, Language, French, English).',
       'lw.privacy': 'Sanalistaa ei lähetetä minnekään: selain lukee sen tältä laitteelta ja säilyttää sen vain tällä laitteella.',
@@ -314,6 +317,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.empty.sub': 'Pröva en annan stavning eller ett annat språk.',
       'lw.splash.title': 'Hämtar ord…',
       'lw.splash.sub': '',
+      'lw.full': 'På den här datorn innehåller ordlistan också ord ur publicerade ordböcker.',
       'lw.unit': 'Enhet',
       'lw.example': 'Exempel:',
       'lw.pos': 'Ordklass:',
@@ -328,6 +332,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Ta bort ordlistan från den här enheten',
       'lw.remove.confirm': 'Bekräfta: ta bort ordlistan',
       'lw.removed': 'Ordlistan togs bort från den här enheten.',
+      'lw.dbname': 'LILIEMAs publicerbara ord (databasen)',
       'lw.error': 'Filen kunde inte läsas: ',
       'lw.nodata': 'Inga ord hittades i filen (kolumnerna Headword, Language, French, English).',
       'lw.privacy': 'Ordlistan skickas ingenstans: webbläsaren läser den från den här enheten och sparar den bara här.',
@@ -373,6 +378,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.empty.sub': 'Try a different spelling or another language.',
       'lw.splash.title': 'Loading the words…',
       'lw.splash.sub': '',
+      'lw.full': 'On this computer the wordlist also includes words from published dictionaries.',
       'lw.unit': 'Unit',
       'lw.example': 'Example:',
       'lw.pos': 'Part of speech:',
@@ -387,6 +393,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Remove the wordlist from this device',
       'lw.remove.confirm': 'Confirm: remove the wordlist',
       'lw.removed': 'The wordlist was removed from this device.',
+      'lw.dbname': 'LILIEMA’s publishable words (database)',
       'lw.error': 'Could not read the file: ',
       'lw.nodata': 'No words found in the file (columns Headword, Language, French, English).',
       'lw.privacy': 'The wordlist is not sent anywhere: the browser reads it from this device and keeps it only on this device.',
@@ -419,6 +426,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.empty.sub': 'Essayez une autre orthographe ou une autre langue.',
       'lw.splash.title': 'Chargement des mots…',
       'lw.splash.sub': '',
+      'lw.full': 'Sur cet ordinateur, la liste comprend aussi des mots tirés de dictionnaires publiés.',
       'lw.unit': 'Unité',
       'lw.example': 'Exemple :',
       'lw.pos': 'Catégorie :',
@@ -433,6 +441,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Retirer la liste de cet appareil',
       'lw.remove.confirm': 'Confirmer : retirer la liste',
       'lw.removed': 'La liste a été retirée de cet appareil.',
+      'lw.dbname': 'Les mots publiables de LILIEMA (base de données)',
       'lw.error': 'Impossible de lire le fichier : ',
       'lw.nodata': 'Aucun mot trouvé dans le fichier (colonnes Headword, Language, French, English).',
       'lw.privacy': 'La liste n’est envoyée nulle part : le navigateur la lit sur cet appareil et la garde uniquement sur cet appareil.',
@@ -501,6 +510,8 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   var query = '';
   var visible = PAGE_SIZE;
   var noGloss = 0;
+  var fromFile = false;   // the full wordlist file opened on this computer (the stall), or LILIEMA's words from the database
+  var dbFailed = false;
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -593,9 +604,40 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     if (!list.length) throw new Error(F.t('lw.nodata'));
     words = list;
     fileName = name;
+    fromFile = true;
     noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;
     activeLangs.clear(); activeDomain = ''; activeUnit = 0; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
     showData();
+  }
+
+  // LILIEMA's publishable words from the database (the Gujaher lexicon and the workshop words), on every phone
+  function fromRows(rows) {
+    return rows.map(function (r) {
+      var w = { headword: String(r.headword).normalize('NFC'), language: r.language, domain: r.domain || '',
+        english: r.english || '', french: r.french || '', finnish: r.finnish || '', fiOk: !!r.fi_ok,
+        swedish: r.swedish || '', svOk: !!r.sv_ok, unit: r.unit || 0, pos: r.pos || '', example: r.example || '' };
+      w.f = [F.fold(w.headword), F.fold(w.finnish), F.fold(w.swedish), F.fold(w.english), F.fold(w.french)];
+      return w;
+    });
+  }
+  function loadWords() {
+    window.FairDB.selectAll('words', 'select=headword,language,domain,english,french,finnish,fi_ok,swedish,sv_ok,unit,pos,example&order=id')
+      .then(function (rows) {
+        if (fromFile) return;   // the full file was opened meanwhile
+        if (!rows.length) throw new Error('no words');
+        words = fromRows(rows);
+        fileName = '';
+        dbFailed = false;
+        noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;
+        activeLangs.clear(); activeDomain = ''; activeUnit = 0; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
+        showData();
+      })
+      .catch(function () {   // no connection yet: try again; the stall team can open the file meanwhile
+        if (fromFile) return;
+        dbFailed = true;
+        showData();
+        setTimeout(loadWords, 5000);
+      });
   }
 
   function readFile(file) {
@@ -620,8 +662,9 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
 
   function removeData() {
     Store.del().catch(function () { /* nothing stored */ });
-    words = []; fileName = ''; noGloss = 0;
+    words = []; fileName = ''; noGloss = 0; fromFile = false;
     showData();
+    loadWords();
     $('loadedInfo').hidden = false;
     $('loadedInfo').textContent = F.t('lw.removed');
   }
@@ -793,12 +836,13 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     $('filterCard').hidden = !has;
     $('resultsSection').hidden = !has;
     $('emptyState').hidden = true;
-    $('staffButtons').hidden = !has;
-    $('staff').hidden = has && !STAFF;
+    $('staffButtons').hidden = !(has && fromFile);
+    $('staff').hidden = !STAFF && (has || !dbFailed);   // the file is for the stall computer (?staff), or when the database cannot be reached
+    $('fullNote').hidden = !(has && fromFile);
     if (has) {
       var langs = new Set(words.map(function (w) { return w.language; })).size;
       $('loadedInfo').hidden = false;
-      $('loadedInfo').textContent = F.t('lw.loaded', fileName, words.length, langs) + ' ' + F.t('lw.nogloss', noGloss);
+      $('loadedInfo').textContent = F.t('lw.loaded', fromFile ? fileName : F.t('lw.dbname'), words.length, langs) + ' ' + F.t('lw.nogloss', noGloss);
       buildUnitTabs();
       buildChips();
       render();
@@ -867,27 +911,6 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   });
 
   // filming copy: LILIEMA's own words from the filming database (no Excel file, no storage on the device)
-  function fromRows(rows) {
-    return rows.map(function (r) {
-      var w = { headword: String(r.headword).normalize('NFC'), language: r.language, domain: r.domain || '',
-        english: r.english || '', french: r.french || '', finnish: r.finnish || '', fiOk: !!r.fi_ok,
-        swedish: r.swedish || '', svOk: !!r.sv_ok, unit: r.unit || 0, pos: r.pos || '', example: r.example || '' };
-      w.f = [F.fold(w.headword), F.fold(w.finnish), F.fold(w.swedish), F.fold(w.english), F.fold(w.french)];
-      return w;
-    });
-  }
-  function loadWords() {
-    window.FairDB.selectAll('words', 'select=headword,language,domain,english,french,finnish,fi_ok,swedish,sv_ok,unit,pos,example&order=id')
-      .then(function (rows) {
-        if (!rows.length) throw new Error('no words');
-        words = fromRows(rows);
-        fileName = '';
-        noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;
-        activeLangs.clear(); activeDomain = ''; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
-        showData();
-      })
-      .catch(function () { setTimeout(loadWords, 5000); });   // no connection yet: try again
-  }
   showData();
   loadWords();
   resetIdle();

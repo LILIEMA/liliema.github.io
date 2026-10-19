@@ -499,7 +499,8 @@
       all('ai_drafts?select=id,concept_slug,language_slug,draft,confidence,withheld&order=id'),
       all('ai_checks?select=id,draft_id,judgement,suggested,language_label,research_consent,created_at,visit_id&order=id')
     ]).then(function (r) {
-      entries = r[0]; drafts = r[1]; checks = r[2]; lastLoad = new Date();
+      // LILIEMA's own words under the pictures (source liliema_list) are the list, not visitors' words: not reviewed, not exported
+      entries = r[0].filter(function (e) { return e.source !== 'liliema_list'; }); drafts = r[1]; checks = r[2]; lastLoad = new Date();
       $('appError').hidden = true;
       render();
       return true;
@@ -789,7 +790,8 @@
         ['No names or contact details of visitors are collected. Times are in UTC and are the times the database received each row (rows that waited on a device without a network arrive later).'],
         ['Visits: rows with the same visit_id come from one visit, from the research question until “I’m done”, “No, I’m new here”, “Someone else? Start afresh” or two minutes without use.'],
         ['Visit numbers exist only for visitors who agreed to research use. One person may appear as several visits, and a visit may include more than one person if no new visit was started between people.'],
-        ['The labels V1, V2 ... are numbered by first appearance in each export; use visit_id to match visits across exports. n_languages counts languages, not names (Twi and Akan are one language). Words not yet approved are marked draft or rejected.']
+        ['The labels V1, V2 ... are numbered by first appearance in each export; use visit_id to match visits across exports. n_languages counts languages, not names (Twi and Akan are one language). Words not yet approved are marked draft or rejected.'],
+        ['LILIEMA’s own words under the pictures (source liliema_list, from 19 October 2026) are not included: they are LILIEMA’s wordlist, not visitors’ words.']
       ]), 'About');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(entries.map(function (e) {
         return {

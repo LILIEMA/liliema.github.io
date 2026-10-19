@@ -99,6 +99,7 @@
 .thanks .word { font-size: 34px; font-weight: 700; color: var(--teal-dark); margin: 6px 0; }
 .thanks .actions { justify-content: center; margin-top: 18px; }
 .thanks .variation { display: inline-block; text-align: left; margin-top: 10px; }
+.add-var { margin-top: 10px; max-width: 60ch; }
 .queue-info { font-size: 13px; color: var(--muted); }
 .app.wide > section:first-child, .steps { max-width: 880px; }
 @media (min-width: 1100px) {
@@ -128,6 +129,7 @@
   <section>
     <h1 class="page-title" data-t="add.title"></h1>
     <p class="page-intro" data-t="add.intro"></p>
+    <p class="variation add-var" data-t="add.var.note"></p>
   </section>
 
   <ol class="steps" aria-hidden="true">
@@ -241,6 +243,7 @@
       'add.samepic': 'Sama kuva toisella kielelläsi',
       'add.next': 'Olen valmis',
       'add.variation': 'Sanotko tai kirjoitatko sen myös toisin? Lisää sekin versio!',
+      'add.var.note': 'Omat sanasi voivat olla erilaisia kuin jo olemassa olevat. Lisää oma versiosi!',
       'add.samelang': 'Toinen versio samalla kielellä',
       'add.queue': function (n) { return n === 1 ? '1 sana odottaa lähetystä.' : n + ' sanaa odottaa lähetystä.'; }
     },
@@ -271,6 +274,7 @@
       'add.samepic': 'Samma bild på ett annat av dina språk',
       'add.next': 'Jag är klar',
       'add.variation': 'Säger eller skriver du det också på ett annat sätt? Lägg till den versionen också!',
+      'add.var.note': 'Dina ord kan vara annorlunda än de som redan finns. Lägg till din egen version!',
       'add.samelang': 'En annan version på samma språk',
       'add.queue': function (n) { return n + ' ord väntar på att skickas.'; }
     },
@@ -301,6 +305,7 @@
       'add.samepic': 'This picture in another of your languages',
       'add.next': 'I’m done',
       'add.variation': 'Do you also say or write it another way? Add that version too!',
+      'add.var.note': 'Your words may be different from the ones that already exist. Please add your own version!',
       'add.samelang': 'Another version in this language',
       'add.queue': function (n) { return n + (n === 1 ? ' word is' : ' words are') + ' waiting to be sent.'; }
     },
@@ -331,6 +336,7 @@
       'add.samepic': 'Cette image dans une autre de vos langues',
       'add.next': 'J’ai terminé',
       'add.variation': 'Le dites-vous ou l’écrivez-vous aussi autrement ? Ajoutez aussi cette version !',
+      'add.var.note': 'Vos mots peuvent être différents de ceux qui existent déjà. Ajoutez votre propre version !',
       'add.samelang': 'Une autre version dans cette langue',
       'add.queue': function (n) { return n + (n > 1 ? ' mots attendent' : ' mot attend') + ' d’être envoyé' + (n > 1 ? 's.' : '.'); }
     }

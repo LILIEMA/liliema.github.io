@@ -10,6 +10,8 @@
 <script src="assets/vendor/xlsx-0.18.5.full.min.js"></script>
 <script src="assets/fair.js"></script>
 <script src="assets/visit.js"></script>
+<script src="data/fair_data.js"></script>
+<script src="assets/db.js"></script>
 <script src="data/liliema_glosses.js"></script>
 <style>
 /* Search */
@@ -150,6 +152,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   <section>
     <h1 class="page-title" data-t="lw.title">LILIEMA-sanat</h1>
     <p class="page-intro" data-t="lw.intro"></p>
+    <p class="page-intro" id="fullNote" data-t="lw.full" hidden></p>
     <p class="page-intro"><span data-t="site.label"></span> <a href="https://liliema.wordpress.com/" target="_blank" rel="noopener">liliema.wordpress.com</a></p>
   </section>
 
@@ -237,7 +240,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   F.add({
     fi: {
       'lw.title': 'LILIEMA-sanat',
-      'lw.intro': 'Sanoja Senegalin ja Gambian kielistä LILIEMAn työpajoista, kenttätyöstä ja julkaistuista sanakirjoista. LILIEMA opettaa lukemaan ja kirjoittamaan kaikilla oppijan kielillä, Senegalin kansalliskielten yhteisellä aakkostolla.',
+      'lw.intro': 'Sanoja Senegalin ja Gambian kielistä LILIEMAn työpajoista ja kenttätyöstä. LILIEMA opettaa lukemaan ja kirjoittamaan kaikilla oppijan kielillä, Senegalin kansalliskielten yhteisellä aakkostolla.',
       'lw.search': 'Hae sanaa tai merkitystä millä tahansa kielellä',
       'lw.search.aria': 'Haku',
       'lw.clear': 'Tyhjennä haku',
@@ -250,8 +253,9 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.more': function (k) { return 'Näytä ' + k + ' lisää'; },
       'lw.empty.title': 'Ei osumia',
       'lw.empty.sub': 'Kokeile toista kirjoitusasua tai kieltä.',
-      'lw.splash.title': 'Sanalista on osaston tietokoneella',
-      'lw.splash.sub': 'LILIEMA-sanoja voi selata messuosastolla.',
+      'lw.splash.title': 'Haetaan sanoja…',
+      'lw.splash.sub': '',
+      'lw.full': 'Tällä tietokoneella sanalistassa on myös sanoja julkaistuista sanakirjoista.',
       'lw.unit': 'Yksikkö',
       'lw.example': 'Esimerkki:',
       'lw.pos': 'Sanaluokka:',
@@ -266,6 +270,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Poista sanalista tältä laitteelta',
       'lw.remove.confirm': 'Vahvista: poista sanalista',
       'lw.removed': 'Sanalista poistettiin tältä laitteelta.',
+      'lw.dbname': 'LILIEMAn julkaistavat sanat (tietokanta)',
       'lw.error': 'Tiedostoa ei voitu lukea: ',
       'lw.nodata': 'Tiedostosta ei löytynyt sanoja (sarakkeet Headword, Language, French, English).',
       'lw.privacy': 'Sanalistaa ei lähetetä minnekään: selain lukee sen tältä laitteelta ja säilyttää sen vain tällä laitteella.',
@@ -296,7 +301,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     },
     sv: {
       'lw.title': 'LILIEMA-ord',
-      'lw.intro': 'Ord på språk i Senegal och Gambia, från LILIEMAs workshoppar, fältarbete och publicerade ordböcker. LILIEMA lär ut läsning och skrivning på alla språk som eleven talar, med det gemensamma alfabetet för Senegals nationalspråk.',
+      'lw.intro': 'Ord på språk i Senegal och Gambia, från LILIEMAs workshoppar och fältarbete. LILIEMA lär ut läsning och skrivning på alla språk som eleven talar, med det gemensamma alfabetet för Senegals nationalspråk.',
       'lw.search': 'Sök ett ord eller en betydelse på vilket språk som helst',
       'lw.search.aria': 'Sök',
       'lw.clear': 'Töm sökningen',
@@ -309,8 +314,9 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.more': function (k) { return 'Visa ' + k + ' till'; },
       'lw.empty.title': 'Inga träffar',
       'lw.empty.sub': 'Pröva en annan stavning eller ett annat språk.',
-      'lw.splash.title': 'Ordlistan finns på datorn i montern',
-      'lw.splash.sub': 'Du kan bläddra bland LILIEMAs ord i montern.',
+      'lw.splash.title': 'Hämtar ord…',
+      'lw.splash.sub': '',
+      'lw.full': 'På den här datorn innehåller ordlistan också ord ur publicerade ordböcker.',
       'lw.unit': 'Enhet',
       'lw.example': 'Exempel:',
       'lw.pos': 'Ordklass:',
@@ -325,6 +331,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Ta bort ordlistan från den här enheten',
       'lw.remove.confirm': 'Bekräfta: ta bort ordlistan',
       'lw.removed': 'Ordlistan togs bort från den här enheten.',
+      'lw.dbname': 'LILIEMAs publicerbara ord (databasen)',
       'lw.error': 'Filen kunde inte läsas: ',
       'lw.nodata': 'Inga ord hittades i filen (kolumnerna Headword, Language, French, English).',
       'lw.privacy': 'Ordlistan skickas ingenstans: webbläsaren läser den från den här enheten och sparar den bara här.',
@@ -355,7 +362,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     },
     en: {
       'lw.title': 'LILIEMA words',
-      'lw.intro': 'Words in languages of Senegal and The Gambia, from LILIEMA workshops, fieldwork and published dictionaries. LILIEMA teaches reading and writing in all of a learner’s languages, with the shared alphabet of Senegal’s national languages.',
+      'lw.intro': 'Words in languages of Senegal and The Gambia, from LILIEMA workshops and fieldwork. LILIEMA teaches reading and writing in all of a learner’s languages, with the shared alphabet of Senegal’s national languages.',
       'lw.search': 'Search a word or a meaning in any language',
       'lw.search.aria': 'Search',
       'lw.clear': 'Clear the search',
@@ -368,8 +375,9 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.more': function (k) { return 'Show ' + k + ' more'; },
       'lw.empty.title': 'No results',
       'lw.empty.sub': 'Try a different spelling or another language.',
-      'lw.splash.title': 'The wordlist is on the stall computer',
-      'lw.splash.sub': 'You can browse LILIEMA’s words at the stall.',
+      'lw.splash.title': 'Loading the words…',
+      'lw.splash.sub': '',
+      'lw.full': 'On this computer the wordlist also includes words from published dictionaries.',
       'lw.unit': 'Unit',
       'lw.example': 'Example:',
       'lw.pos': 'Part of speech:',
@@ -384,6 +392,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Remove the wordlist from this device',
       'lw.remove.confirm': 'Confirm: remove the wordlist',
       'lw.removed': 'The wordlist was removed from this device.',
+      'lw.dbname': 'LILIEMA’s publishable words (database)',
       'lw.error': 'Could not read the file: ',
       'lw.nodata': 'No words found in the file (columns Headword, Language, French, English).',
       'lw.privacy': 'The wordlist is not sent anywhere: the browser reads it from this device and keeps it only on this device.',
@@ -401,7 +410,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     },
     fr: {
       'lw.title': 'Mots LILIEMA',
-      'lw.intro': 'Des mots des langues du Sénégal et de la Gambie, issus des ateliers LILIEMA, du travail de terrain et de dictionnaires publiés. LILIEMA est une méthode pour la libre pratique de l’écrit dans toutes les langues de l’apprenant, avec l’alphabet commun des langues nationales du Sénégal.',
+      'lw.intro': 'Des mots des langues du Sénégal et de la Gambie, issus des ateliers LILIEMA et du travail de terrain. LILIEMA est une méthode pour la libre pratique de l’écrit dans toutes les langues de l’apprenant, avec l’alphabet commun des langues nationales du Sénégal.',
       'lw.search': 'Cherchez un mot ou un sens dans n’importe quelle langue',
       'lw.search.aria': 'Recherche',
       'lw.clear': 'Effacer la recherche',
@@ -414,8 +423,9 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.more': function (k) { return 'Afficher ' + k + ' de plus'; },
       'lw.empty.title': 'Aucun résultat',
       'lw.empty.sub': 'Essayez une autre orthographe ou une autre langue.',
-      'lw.splash.title': 'La liste de mots est sur l’ordinateur du stand',
-      'lw.splash.sub': 'Les mots LILIEMA sont consultables au stand.',
+      'lw.splash.title': 'Chargement des mots…',
+      'lw.splash.sub': '',
+      'lw.full': 'Sur cet ordinateur, la liste comprend aussi des mots tirés de dictionnaires publiés.',
       'lw.unit': 'Unité',
       'lw.example': 'Exemple :',
       'lw.pos': 'Catégorie :',
@@ -430,6 +440,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.remove': 'Retirer la liste de cet appareil',
       'lw.remove.confirm': 'Confirmer : retirer la liste',
       'lw.removed': 'La liste a été retirée de cet appareil.',
+      'lw.dbname': 'Les mots publiables de LILIEMA (base de données)',
       'lw.error': 'Impossible de lire le fichier : ',
       'lw.nodata': 'Aucun mot trouvé dans le fichier (colonnes Headword, Language, French, English).',
       'lw.privacy': 'La liste n’est envoyée nulle part : le navigateur la lit sur cet appareil et la garde uniquement sur cet appareil.',
@@ -498,6 +509,8 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   var query = '';
   var visible = PAGE_SIZE;
   var noGloss = 0;
+  var fromFile = false;   // the full wordlist file opened on this computer (the stall), or LILIEMA's words from the database
+  var dbFailed = false;
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -590,9 +603,40 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     if (!list.length) throw new Error(F.t('lw.nodata'));
     words = list;
     fileName = name;
+    fromFile = true;
     noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;
     activeLangs.clear(); activeDomain = ''; activeUnit = 0; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
     showData();
+  }
+
+  // LILIEMA's publishable words from the database (the Gujaher lexicon and the workshop words), on every phone
+  function fromRows(rows) {
+    return rows.map(function (r) {
+      var w = { headword: String(r.headword).normalize('NFC'), language: r.language, domain: r.domain || '',
+        english: r.english || '', french: r.french || '', finnish: r.finnish || '', fiOk: !!r.fi_ok,
+        swedish: r.swedish || '', svOk: !!r.sv_ok, unit: r.unit || 0, pos: r.pos || '', example: r.example || '' };
+      w.f = [F.fold(w.headword), F.fold(w.finnish), F.fold(w.swedish), F.fold(w.english), F.fold(w.french)];
+      return w;
+    });
+  }
+  function loadWords() {
+    window.FairDB.selectAll('words', 'select=headword,language,domain,english,french,finnish,fi_ok,swedish,sv_ok,unit,pos,example&order=id')
+      .then(function (rows) {
+        if (fromFile) return;   // the full file was opened meanwhile
+        if (!rows.length) throw new Error('no words');
+        words = fromRows(rows);
+        fileName = '';
+        dbFailed = false;
+        noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;
+        activeLangs.clear(); activeDomain = ''; activeUnit = 0; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
+        showData();
+      })
+      .catch(function () {   // no connection yet: try again; the stall team can open the file meanwhile
+        if (fromFile) return;
+        dbFailed = true;
+        showData();
+        setTimeout(loadWords, 5000);
+      });
   }
 
   function readFile(file) {
@@ -617,8 +661,9 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
 
   function removeData() {
     Store.del().catch(function () { /* nothing stored */ });
-    words = []; fileName = ''; noGloss = 0;
+    words = []; fileName = ''; noGloss = 0; fromFile = false;
     showData();
+    loadWords();
     $('loadedInfo').hidden = false;
     $('loadedInfo').textContent = F.t('lw.removed');
   }
@@ -790,12 +835,13 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     $('filterCard').hidden = !has;
     $('resultsSection').hidden = !has;
     $('emptyState').hidden = true;
-    $('staffButtons').hidden = !has;
-    $('staff').hidden = has && !STAFF;
+    $('staffButtons').hidden = !(has && fromFile);
+    $('staff').hidden = !STAFF && (has || !dbFailed);   // the file is for the stall computer (?staff), or when the database cannot be reached
+    $('fullNote').hidden = !(has && fromFile);
     if (has) {
       var langs = new Set(words.map(function (w) { return w.language; })).size;
       $('loadedInfo').hidden = false;
-      $('loadedInfo').textContent = F.t('lw.loaded', fileName, words.length, langs) + ' ' + F.t('lw.nogloss', noGloss);
+      $('loadedInfo').textContent = F.t('lw.loaded', fromFile ? fileName : F.t('lw.dbname'), words.length, langs) + ' ' + F.t('lw.nogloss', noGloss);
       buildUnitTabs();
       buildChips();
       render();
@@ -863,13 +909,15 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     if (now) now.focus();
   });
 
+  // the full wordlist file kept on this computer (the stall), otherwise LILIEMA's words from the database
+  showData();
   Store.get().then(function (rec) {
     if (rec && rec.buf) {
-      try { useData(rec.buf, rec.name || ''); } catch (e) { showData(); }
+      try { useData(rec.buf, rec.name || ''); } catch (e) { loadWords(); }
     } else {
-      showData();
+      loadWords();
     }
-  }).catch(function () { showData(); });
+  }).catch(function () { loadWords(); });
   resetIdle();
 })();
 </script>
