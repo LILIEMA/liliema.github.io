@@ -215,7 +215,7 @@ window.FAIR_DATA = {
    "fi": "kissa",
    "sv": "katt",
    "core": false,
-   "picture": null
+   "picture": "pictures/cat.png"
   },
   {
    "slug": "sheep",
@@ -565,7 +565,7 @@ window.FAIR_DATA = {
    "fi": "kameli",
    "sv": "kamel",
    "core": false,
-   "picture": null
+   "picture": "pictures/camel.png"
   },
   {
    "slug": "yam",
@@ -578,6 +578,16 @@ window.FAIR_DATA = {
    "picture": null
   },
   {
+   "slug": "sweet_potato",
+   "domain": "food",
+   "en": "sweet potato",
+   "fr": "patate douce",
+   "fi": "bataatti",
+   "sv": "sötpotatis",
+   "core": false,
+   "picture": "pictures/sweet_potato.png"
+  },
+  {
    "slug": "maize",
    "domain": "food",
    "en": "maize",
@@ -585,7 +595,7 @@ window.FAIR_DATA = {
    "fi": "maissi",
    "sv": "majs",
    "core": false,
-   "picture": null
+   "picture": "pictures/maize.png"
   },
   {
    "slug": "book",
@@ -595,7 +605,7 @@ window.FAIR_DATA = {
    "fi": "kirja",
    "sv": "bok",
    "core": false,
-   "picture": null
+   "picture": "pictures/book.png"
   }
  ],
  "languages": [

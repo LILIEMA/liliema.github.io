@@ -33,8 +33,8 @@
 
   window.FairScores = {
     MIN: MIN,
-    MODEL: 'claude-opus-5-5',     // the model and date of the drafts in bookfair_ai_drafts.sql
-    DRAFTED_ON: '2026-10-08',
+    MODEL: 'claude-opus-5-5',     // the model and dates of the drafts in bookfair_ai_drafts.sql
+    DRAFTED_ON: ['2026-10-08', '2026-10-19'],   // sweet potato on 19 October 2026
     total: total,
     status: status,
     byLanguage: byLanguage,
@@ -72,10 +72,21 @@
     }
   });
 
-  /* The drafting date in the interface language */
+  /* The drafting date or dates in the interface language: '8 and 19 October 2026', '8. ja 19.10.2026' */
   window.FairScores.date = function (iso) {
-    var d = iso ? new Date(iso + 'T12:00:00') : null;
-    if (!d || isNaN(d)) return '';
-    return d.toLocaleDateString(window.Fair.locale(), { day: 'numeric', month: window.Fair.lang === 'fi' ? 'numeric' : 'long', year: 'numeric' });
+    var L = window.Fair.lang;
+    var list = [].concat(iso || []).map(function (s) { return new Date(s + 'T12:00:00'); })
+      .filter(function (d) { return !isNaN(d); });
+    if (!list.length) return '';
+    var full = function (d) {
+      return d.toLocaleDateString(window.Fair.locale(), { day: 'numeric', month: L === 'fi' ? 'numeric' : 'long', year: 'numeric' });
+    };
+    var last = list[list.length - 1];
+    if (list.length === 1) return full(last);
+    var sameMonth = list.every(function (d) { return d.getMonth() === last.getMonth() && d.getFullYear() === last.getFullYear(); });
+    var and = { fi: ' ja ', sv: ' och ', en: ' and ', fr: ' et ' }[L] || ' and ';
+    return list.slice(0, -1).map(function (d) {
+      return sameMonth ? d.getDate() + (L === 'fi' ? '.' : '') : full(d);
+    }).join(', ') + and + full(last);
   };
 })();
