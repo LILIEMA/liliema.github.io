@@ -42,6 +42,13 @@
 .filter-block + .filter-block { margin-top: 14px; }
 .chips-label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .chips-row { display: flex; flex-wrap: wrap; gap: 8px; }
+/* units of the learning materials: one tab each */
+.unit-tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 2px solid var(--border); margin-bottom: 12px; scrollbar-width: thin; }
+.unit-tab { flex: 0 0 auto; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; padding: 10px 14px; min-height: 44px;
+  font: inherit; font-size: 16px; font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.unit-tab .n { margin-left: 6px; font-size: 12px; font-weight: 400; }
+.unit-tab:hover { color: var(--teal-dark); }
+.unit-tab[aria-selected="true"] { color: var(--teal-dark); border-bottom-color: var(--gold); }
 .chip {
   padding: 8px 14px; min-height: 40px;
   border: 1.5px solid var(--border); border-radius: 20px;
@@ -59,6 +66,7 @@
 .results-count { font-size: 14px; color: var(--muted); }
 .results-count strong { font-size: 22px; color: var(--teal-dark); margin-right: 4px; }
 #resultsGrid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+#variation { margin-top: 10px; }
 .result-card {
   background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius);
   padding: 16px 20px; box-shadow: 0 1px 6px rgba(0, 100, 100, .07);
@@ -167,8 +175,10 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       </section>
     </aside>
     <div class="results-col">
+      <div class="unit-tabs" id="unitTabs" role="tablist" data-t-aria="lw.units" hidden></div>
       <section id="resultsSection" hidden>
         <div class="results-count" id="resultsCount" aria-live="polite"></div>
+        <div class="variation" id="variation"><span data-t="var.note"></span> <a href="add.html" data-t="var.link"></a></div>
         <div id="resultsGrid"></div>
         <button type="button" class="load-more-btn" id="loadMoreBtn" hidden></button>
       </section>
@@ -238,6 +248,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.domains': 'Aihepiiri',
       'lw.all.langs': 'Kaikki kielet',
       'lw.all.domains': 'Kaikki aihepiirit',
+      'lw.units': 'Yksiköt', 'lw.all.units': 'Kaikki yksiköt',
       'lw.count': function (n) { return n === 1 ? '<strong>1</strong> sana' : '<strong>' + F.number(n) + '</strong> sanaa'; },
       'lw.more': function (k) { return 'Näytä ' + k + ' lisää'; },
       'lw.empty.title': 'Ei osumia',
@@ -296,6 +307,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.domains': 'Tema',
       'lw.all.langs': 'Alla språk',
       'lw.all.domains': 'Alla teman',
+      'lw.units': 'Enheter', 'lw.all.units': 'Alla enheter',
       'lw.count': function (n) { return '<strong>' + F.number(n) + '</strong> ord'; },
       'lw.more': function (k) { return 'Visa ' + k + ' till'; },
       'lw.empty.title': 'Inga träffar',
@@ -354,6 +366,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.domains': 'Theme',
       'lw.all.langs': 'All languages',
       'lw.all.domains': 'All themes',
+      'lw.units': 'Units', 'lw.all.units': 'All units',
       'lw.count': function (n) { return '<strong>' + F.number(n) + '</strong> ' + (n === 1 ? 'word' : 'words'); },
       'lw.more': function (k) { return 'Show ' + k + ' more'; },
       'lw.empty.title': 'No results',
@@ -399,6 +412,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       'lw.domains': 'Thème',
       'lw.all.langs': 'Toutes les langues',
       'lw.all.domains': 'Tous les thèmes',
+      'lw.units': 'Unités', 'lw.all.units': 'Toutes les unités',
       'lw.count': function (n) { return '<strong>' + F.number(n) + '</strong> ' + (n > 1 ? 'mots' : 'mot'); },
       'lw.more': function (k) { return 'Afficher ' + k + ' de plus'; },
       'lw.empty.title': 'Aucun résultat',
@@ -482,6 +496,8 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   var fileName = '';
   var activeLangs = new Set();
   var activeDomain = '';
+  var activeUnit = 0;   // 0: all units; ?unit=3 in the address opens unit 3
+  var askedUnit = parseInt(new URLSearchParams(window.location.search).get('unit'), 10) || 0;
   var query = '';
   var visible = PAGE_SIZE;
   var noGloss = 0;
@@ -578,7 +594,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     words = list;
     fileName = name;
     noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;
-    activeLangs.clear(); activeDomain = ''; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
+    activeLangs.clear(); activeDomain = ''; activeUnit = 0; query = ''; $('searchInput').value = ''; visible = PAGE_SIZE;
     showData();
   }
 
@@ -611,9 +627,11 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   }
 
   // ------------------------------------------------------------ filters
+  function inUnit(w) { return !activeUnit || w.unit === activeUnit; }
+
   function buildChips() {
     var counts = new Map();
-    words.forEach(function (w) { counts.set(w.language, (counts.get(w.language) || 0) + 1); });
+    words.forEach(function (w) { if (!counts.has(w.language)) counts.set(w.language, 0); if (inUnit(w)) counts.set(w.language, counts.get(w.language) + 1); });
     var langs = Array.from(counts.keys()).filter(Boolean)
       .sort(function (a, b) { return langName(a).localeCompare(langName(b), F.lang); });
     var row = $('langChips');
@@ -637,6 +655,35 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     });
   }
 
+  // Tabs for the units of the learning materials (shown when the list has words of two units or more)
+  function buildUnitTabs() {
+    var units = Array.from(new Set(words.map(function (w) { return w.unit; }).filter(Boolean))).sort(function (a, b) { return a - b; });
+    if (askedUnit && units.indexOf(askedUnit) >= 0) { activeUnit = askedUnit; askedUnit = 0; }
+    if (activeUnit && units.indexOf(activeUnit) < 0) activeUnit = 0;
+    var box = $('unitTabs');
+    box.innerHTML = '';
+    box.hidden = units.length < 2;
+    if (box.hidden) return;
+    var base = words.filter(function (w) { return (activeLangs.size === 0 || activeLangs.has(w.language)) && (!activeDomain || w.domain === activeDomain); });
+    var counts = new Map();
+    base.forEach(function (w) { if (w.unit) counts.set(w.unit, (counts.get(w.unit) || 0) + 1); });
+    var tab = function (unit, text, n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'unit-tab';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', activeUnit === unit ? 'true' : 'false');
+      b.setAttribute('aria-controls', 'resultsSection');
+      b.tabIndex = activeUnit === unit ? 0 : -1;
+      b.setAttribute('data-unit', String(unit));
+      b.innerHTML = F.esc(text) + '<span class="n">' + F.number(n) + '</span>';
+      b.addEventListener('click', function () { activeUnit = unit; refresh(); });
+      box.appendChild(b);
+    };
+    tab(0, F.t('lw.all.units'), base.length);
+    units.forEach(function (u) { tab(u, F.t('lw.unit') + ' ' + u, counts.get(u) || 0); });
+  }
+
   function chip(label, n, on, onclick, isAll) {
     var b = document.createElement('button');
     b.type = 'button';
@@ -647,7 +694,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     return b;
   }
 
-  function refresh() { visible = PAGE_SIZE; buildChips(); render(); }
+  function refresh() { visible = PAGE_SIZE; buildChips(); buildUnitTabs(); render(); }
 
   // ------------------------------------------------------------ search
   var qre = null;
@@ -681,7 +728,7 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     var fq = F.fold(query).trim();
     if (!collator || collatorLang !== F.lang) { collator = new Intl.Collator(F.locale(), { sensitivity: 'base' }); collatorLang = F.lang; }
     return words
-      .filter(function (w) { return (activeLangs.size === 0 || activeLangs.has(w.language)) && (!activeDomain || w.domain === activeDomain); })
+      .filter(function (w) { return (activeLangs.size === 0 || activeLangs.has(w.language)) && (!activeDomain || w.domain === activeDomain) && inUnit(w); })
       .map(function (w) { return { w: w, s: score(w, fq) }; })
       .filter(function (x) { return x.s > 0; })
       .sort(function (a, b) { return b.s - a.s || collator.compare(a.w.headword, b.w.headword); })
@@ -752,9 +799,11 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       var langs = new Set(words.map(function (w) { return w.language; })).size;
       $('loadedInfo').hidden = false;
       $('loadedInfo').textContent = F.t('lw.loaded', fileName, words.length, langs) + ' ' + F.t('lw.nogloss', noGloss);
+      buildUnitTabs();
       buildChips();
       render();
     } else {
+      $('unitTabs').hidden = true;
       $('staff').open = true;
     }
   }
@@ -775,9 +824,10 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
     idleTimer = setTimeout(function () {
       if (!words.length) return;
       $('searchInput').value = '';
-      activeLangs.clear(); activeDomain = '';
+      activeLangs.clear(); activeDomain = ''; activeUnit = 0;
       setQuery('');
       buildChips();
+      buildUnitTabs();
       window.scrollTo(0, 0);
     }, IDLE_RESET_MS);
   }
@@ -804,6 +854,17 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
   $('searchInput').addEventListener('input', function () { setQuery(this.value); });
   $('clearBtn').addEventListener('click', function () { $('searchInput').value = ''; setQuery(''); $('searchInput').focus(); });
   $('loadMoreBtn').addEventListener('click', function () { visible += PAGE_SIZE; render(); });
+  // the arrow keys move between the unit tabs
+  $('unitTabs').addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') return;
+    var tabs = Array.prototype.slice.call(this.querySelectorAll('.unit-tab')), i = tabs.indexOf(document.activeElement);
+    if (i < 0) return;
+    e.preventDefault();
+    var j = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[j].click();
+    var now = this.querySelector('.unit-tab[aria-selected="true"]');
+    if (now) now.focus();
+  });
 
   // filming copy: LILIEMA's own words from the filming database (no Excel file, no storage on the device)
   function fromRows(rows) {

@@ -100,6 +100,7 @@
 .thanks img { width: 160px; height: 160px; object-fit: contain; }
 .thanks .word { font-size: 34px; font-weight: 700; color: var(--teal-dark); margin: 6px 0; }
 .thanks .actions { justify-content: center; margin-top: 18px; }
+.thanks .variation { display: inline-block; text-align: left; margin-top: 10px; }
 .queue-info { font-size: 13px; color: var(--muted); }
 .app.wide > section:first-child, .steps { max-width: 880px; }
 @media (min-width: 1100px) {
@@ -188,8 +189,10 @@
       <div id="doneWhat"></div>
       <p data-t="add.thanks.text"></p>
       <p class="notice" id="queuedNote" data-t="add.thanks.queued" hidden></p>
+      <p class="variation" id="variation" data-t="add.variation"></p>
       <div class="actions">
         <button type="button" class="btn primary" id="samePicBtn" data-t="add.samepic"></button>
+        <button type="button" class="btn" id="sameLangBtn" data-t="add.samelang"></button>
         <button type="button" class="btn" id="anotherBtn" data-t="add.another"></button>
         <button type="button" class="btn" id="nextBtn" data-t="add.next"></button>
       </div>
@@ -239,6 +242,8 @@
       'add.another': 'Toinen kuva',
       'add.samepic': 'Sama kuva toisella kielelläsi',
       'add.next': 'Olen valmis',
+      'add.variation': 'Sanotko tai kirjoitatko sen myös toisin? Lisää sekin versio!',
+      'add.samelang': 'Toinen versio samalla kielellä',
       'add.queue': function (n) { return n === 1 ? '1 sana odottaa lähetystä.' : n + ' sanaa odottaa lähetystä.'; }
     },
     sv: {
@@ -267,6 +272,8 @@
       'add.another': 'En annan bild',
       'add.samepic': 'Samma bild på ett annat av dina språk',
       'add.next': 'Jag är klar',
+      'add.variation': 'Säger eller skriver du det också på ett annat sätt? Lägg till den versionen också!',
+      'add.samelang': 'En annan version på samma språk',
       'add.queue': function (n) { return n + ' ord väntar på att skickas.'; }
     },
     en: {
@@ -295,6 +302,8 @@
       'add.another': 'Another picture',
       'add.samepic': 'This picture in another of your languages',
       'add.next': 'I’m done',
+      'add.variation': 'Do you also say or write it another way? Add that version too!',
+      'add.samelang': 'Another version in this language',
       'add.queue': function (n) { return n + (n === 1 ? ' word is' : ' words are') + ' waiting to be sent.'; }
     },
     fr: {
@@ -323,6 +332,8 @@
       'add.another': 'Une autre image',
       'add.samepic': 'Cette image dans une autre de vos langues',
       'add.next': 'J’ai terminé',
+      'add.variation': 'Le dites-vous ou l’écrivez-vous aussi autrement ? Ajoutez aussi cette version !',
+      'add.samelang': 'Une autre version dans cette langue',
       'add.queue': function (n) { return n + (n > 1 ? ' mots attendent' : ' mot attend') + ' d’être envoyé' + (n > 1 ? 's.' : '.'); }
     }
   });
@@ -599,6 +610,7 @@
   $('sendBtn').addEventListener('click', send);
   $('wordInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
   $('samePicBtn').addEventListener('click', function () { goLanguage(); });
+  $('sameLangBtn').addEventListener('click', function () { goWord(); });   // words vary: another version, same picture and language
   $('anotherBtn').addEventListener('click', function () { current.concept = null; showStep(1); });
   $('nextBtn').addEventListener('click', function () { V.done(); resetPage(); });
   showStep(1);

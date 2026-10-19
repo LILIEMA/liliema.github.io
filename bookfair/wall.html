@@ -60,6 +60,7 @@ body.wall-page { height: 100vh; overflow: hidden; }
 .word-list.s-s  { --wsize: clamp(15px, 4.3cqh, 60px); grid-template-columns: 1fr 1fr; }
 .word-list.s-xs { --wsize: clamp(13px, 3.3cqh, 46px); grid-template-columns: 1fr 1fr 1fr; }
 .more { margin: 2cqh 0 0; color: var(--muted); font-size: clamp(12px, 2.8cqh, 36px); }
+.words .variation { margin-top: 3cqh; padding: 1.2cqh 1.4cqw; border-left-width: max(3px, .7cqh); font-size: clamp(12px, 2.8cqh, 36px); align-self: flex-start; }
 .empty-cta { margin: 0; font-family: var(--font-display); color: var(--teal-dark); font-size: clamp(20px, 7cqh, 96px); line-height: 1.2; }
 .empty-cta::after { content: ' →'; color: var(--gold); }
 .no-slides { margin: auto; padding: 4cqh; font-size: clamp(18px, 6cqh, 80px); color: var(--muted); text-align: center; }
@@ -407,6 +408,7 @@ body.wall-page { height: 100vh; overflow: hidden; }
         }).join('<span class="sep">\u00a0· </span>') + '</span><span class="ln">' + F.esc(g.name + (g.labels.length ? ' (' + g.labels.slice(0, 3).join(', ') + ')' : '')) + '</span></li>';
       });
       html += '</ul>';
+      html += '<p class="variation">' + F.esc(F.t('var.note')) + '</p>';   // words vary: every version is welcome
     }
     return html + '</div>';
   }

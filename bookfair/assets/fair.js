@@ -153,15 +153,19 @@
 
   Fair.add({
     fi: { 'fair.name': 'Helsingin kirjamessut 2026', 'fair.langs': 'Kieli', 'site.label': 'LILIEMAn verkkosivut:',
+      'var.note': 'Omat sanasi voivat olla erilaisia kuin tässä näkyvät. Lisää oma versiosi!', 'var.link': 'Siirry sivulle Lisää sana',
       'credit.tools': 'LILIEMA-työkalut: tekninen kehitys Friederike Lüpke, kehitetty yhdessä vuoden 2026 LILIEMA-työpajojen osallistujien kanssa.',
       'credit.pictures': function (name, licence) { return 'Kuvat: ' + name + ' (LILIEMA)' + (licence ? ', ' + licence + ' (muokattu verkkoon)' : '') + '.'; } },
     sv: { 'fair.name': 'Helsingfors bokmässa 2026', 'fair.langs': 'Språk', 'site.label': 'LILIEMAs webbplats:',
+      'var.note': 'Dina ord kan vara annorlunda än de som visas här. Lägg till din egen version!', 'var.link': 'Gå till Lägg till ett ord',
       'credit.tools': 'LILIEMAs verktyg: teknisk utveckling Friederike Lüpke, utvecklade tillsammans med deltagarna i LILIEMAs workshoppar 2026.',
       'credit.pictures': function (name, licence) { return 'Bilder: ' + name + ' (LILIEMA)' + (licence ? ', ' + licence + ' (bearbetade för webben)' : '') + '.'; } },
     en: { 'fair.name': 'Helsinki Book Fair 2026', 'fair.langs': 'Language', 'site.label': 'LILIEMA website:',
+      'var.note': 'Your words may be different from the ones shown here. Please add your own version!', 'var.link': 'Go to Add a word',
       'credit.tools': 'LILIEMA tools: technical development by Friederike Lüpke, co-developed with the participants in the 2026 LILIEMA workshops.',
       'credit.pictures': function (name, licence) { return 'Pictures: ' + name + ' for LILIEMA' + (licence ? ', ' + licence + ' (adapted for the web)' : '') + '.'; } },
     fr: { 'fair.name': 'Salon du livre d’Helsinki 2026', 'fair.langs': 'Langue', 'site.label': 'Site web de LILIEMA :',
+      'var.note': 'Vos mots peuvent être différents de ceux affichés ici. Ajoutez votre propre version !', 'var.link': 'Aller à Ajoutez un mot',
       'credit.tools': 'Outils LILIEMA : développement technique par Friederike Lüpke, co-développés avec les participants aux ateliers LILIEMA de 2026.',
       'credit.pictures': function (name, licence) { return 'Images : ' + name + ' pour LILIEMA' + (licence ? ', ' + licence + ' (adaptées pour le web)' : '') + '.'; } }
   });

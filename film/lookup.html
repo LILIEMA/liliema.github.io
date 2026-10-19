@@ -65,6 +65,7 @@
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend .w { font-size: 13px; padding: 1px 8px; }
 .cards { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+#variation { margin-top: 10px; }
 .lu-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: 0 1px 6px rgba(0, 100, 100, .07); }
 .lu-head { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
 .lu-pic { width: 96px; height: 96px; flex: 0 0 auto; object-fit: contain; background: #fff; border: 1px solid var(--border); border-radius: 8px; }
@@ -170,6 +171,7 @@ mark { background: #f6e08e; color: inherit; border-radius: 3px; padding: 0 1px; 
           <div class="results-count" id="count" aria-live="polite"></div>
           <div class="legend" id="legend"></div>
         </div>
+        <div class="variation" id="variation" hidden><span data-t="var.note"></span> <a href="add.html" data-t="var.link"></a></div>
         <div class="cards" id="cards"></div>
         <button type="button" class="more-btn" id="moreBtn" hidden></button>
         <div class="empty" id="empty" hidden>
@@ -463,6 +465,7 @@ mark { background: #f6e08e; color: inherit; border-radius: 3px; padding: 0 1px; 
     $('count').innerHTML = selected && !query.trim() ? '' : F.t('lu.count', list.length);
     $('legend').innerHTML = list.length ? legend() : '';
     $('empty').hidden = list.length > 0;
+    $('variation').hidden = !list.length;   // words vary: an invitation to add one's own version
     $('emptyTitle').textContent = W.loaded ? F.t('lu.none') : W.statusText();   // the words have not arrived yet
     $('emptySub').hidden = $('emptyLink').hidden = !W.loaded;
     $('cards').innerHTML = list.slice(0, visible).map(function (r) { return card(r.concept, r.hits.length ? r : null); }).join('');

@@ -67,6 +67,7 @@
 .result-head { font-size: 26px; font-weight: 700; margin: 0; }
 .result-head.right { color: var(--teal); } .result-head.wrong { color: var(--coral); }
 .result-lang { font-size: 19px; margin: 4px 0 14px; }
+#variation { margin: 0 0 14px; font-size: 15px; }
 .meaning { display: flex; gap: 16px; align-items: center; margin: 0 0 14px; }
 .meaning img { width: 120px; height: 120px; flex: 0 0 auto; object-fit: contain; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
 .meaning .label { font-family: var(--font-display); color: var(--teal-dark); font-size: 28px; line-height: 1.15; }
@@ -143,6 +144,7 @@
         <p class="result-lang" id="resultLang"></p>
         <div class="meaning" id="meaning"></div>
         <ul class="facts" id="facts"></ul>
+        <div class="variation" id="variation"><span data-t="var.note"></span> <a href="add.html" data-t="var.link"></a></div>
         <button type="button" class="btn primary" id="nextBtn"></button>
       </div>
     </div>

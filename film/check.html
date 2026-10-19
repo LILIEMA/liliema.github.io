@@ -114,6 +114,8 @@ a.link-btn { display: inline-flex; align-items: center; }
 .tally-text .r::before { background: var(--teal); } .tally-text .x::before { background: var(--coral); } .tally-text .n::before { background: #b9c4c8; }
 .verdict { margin: 10px 0 0; font-size: 16px; }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+#variantBox { margin-top: 16px; }
+#variantBox .btn { margin-top: 10px; }
 .chips span { background: var(--gold-light); border: 1px solid #e3cf86; border-radius: 18px; padding: 6px 14px; font-weight: 700; font-size: 18px; }
 .confidence { color: var(--muted); font-size: 15px; margin: 14px 0 0; }
 .end { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; text-align: center; }
@@ -238,6 +240,10 @@ a.link-btn { display: inline-flex; align-items: center; }
           <h3 data-t="chk.collection"></h3>
           <div class="chips" id="chips" lang=""></div>
         </div>
+        <div class="variation" id="variantBox" hidden>
+          <p data-t="var.note"></p>
+          <button type="button" class="btn" id="variantBtn" data-t="chk.var.add"></button>
+        </div>
         <p class="confidence" id="confidence"></p>
         <div class="actions">
           <button type="button" class="btn primary" id="nextWord" data-t="chk.next"></button>
@@ -322,6 +328,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.split': 'Puhujat ovat eri mieltä: kielissä on usein monta tapaa sanoa sama asia.',
       'chk.verdict.few': function (min) { return 'Vastauksia on vielä alle ' + min + ', joten on liian aikaista sanoa.'; },
       'chk.collection': 'Sanakokoelmassa tälle kuvalle:',
+      'chk.var.add': 'Lisää oma versiosi',
       'chk.confidence': function (c) { return 'Tekoälyn oma arvio sanasta: ' + c + '.'; },
       'chk.next': 'Seuraava sana', 'chk.nextvisitor': 'Olen valmis',
       'chk.end': function (n, name) { return 'Olet tarkistanut kaikki ' + n + ' sanaa kielellä ' + name + '. Kiitos!'; },
@@ -357,6 +364,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.split': 'Talarna är oense: språk har ofta flera sätt att säga samma sak.',
       'chk.verdict.few': function (min) { return 'Det finns ännu färre än ' + min + ' svar, så det är för tidigt att säga.'; },
       'chk.collection': 'I ordsamlingen för den här bilden:',
+      'chk.var.add': 'Lägg till din version',
       'chk.confidence': function (c) { return 'AI:ns egen bedömning av ordet: ' + c + '.'; },
       'chk.next': 'Nästa ord', 'chk.nextvisitor': 'Jag är klar',
       'chk.end': function (n, name) { return 'Du har granskat alla ' + n + ' ord på ' + name + '. Tack!'; },
@@ -392,6 +400,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.split': 'Speakers disagree: languages often have several ways of saying the same thing.',
       'chk.verdict.few': function (min) { return 'Fewer than ' + min + ' answers so far, so it is too early to tell.'; },
       'chk.collection': 'In the word collection for this picture:',
+      'chk.var.add': 'Add your version',
       'chk.confidence': function (c) { return 'The AI’s own estimate for this word: ' + c + '.'; },
       'chk.next': 'Next word', 'chk.nextvisitor': 'I’m done',
       'chk.end': function (n, name) { return 'You have checked all ' + n + ' words in ' + name + '. Thank you!'; },
@@ -427,6 +436,7 @@ a.link-btn { display: inline-flex; align-items: center; }
       'chk.verdict.split': 'Les locuteurs ne sont pas d’accord : une langue a souvent plusieurs façons de dire la même chose.',
       'chk.verdict.few': function (min) { return 'Moins de ' + min + ' réponses pour l’instant : il est trop tôt pour conclure.'; },
       'chk.collection': 'Dans la collection de mots pour cette image :',
+      'chk.var.add': 'Ajoutez votre version',
       'chk.confidence': function (c) { return 'L’estimation de l’IA elle-même pour ce mot : ' + c + '.'; },
       'chk.next': 'Mot suivant', 'chk.nextvisitor': 'J’ai terminé',
       'chk.end': function (n, name) { return 'Vous avez vérifié les ' + n + ' mots en ' + name + '. Merci !'; },
@@ -494,6 +504,7 @@ a.link-btn { display: inline-flex; align-items: center; }
   var visitor, local;   // local: this device's answers not yet in the fetched scores
   function newVisitor() {   // the research answer is part of the visit (visit.js), shared with Add a word
     visitor = { langSlug: null, langLabel: '', queue: [], pos: 0, current: null, done: {} };
+    variantMode = false;
   }
   newVisitor();
   local = {};
@@ -600,6 +611,7 @@ a.link-btn { display: inline-flex; align-items: center; }
   }
 
   function nextWord() {
+    variantMode = false;
     var d = visitor.queue[visitor.pos];
     if (!d) { showEnd(); return; }
     visitor.current = d;
@@ -703,6 +715,7 @@ a.link-btn { display: inline-flex; align-items: center; }
     $('resYou').textContent = F.t('chk.you', JUDGEMENTS[F.lang][j]);
     $('resYourWord').hidden = !suggested;
     $('resYourWord').textContent = suggested ? F.t('chk.yourword', suggested) : '';
+    $('variantBox').hidden = !!suggested;   // words vary: without a word of their own yet, the visitor can add their version
     var n = counts(d), total = n.right + n.wrong + n.not_sure;
     var pct = function (x) { return (100 * x / Math.max(1, total)).toFixed(2) + '%'; };
     $('tally').innerHTML = '<span class="r" style="width:' + pct(n.right) + '"></span><span class="x" style="width:' + pct(n.wrong) +
@@ -724,6 +737,41 @@ a.link-btn { display: inline-flex; align-items: center; }
     visitor.last = { d: d, j: j, suggested: suggested };
     showStep('stepResult');
     $('nextWord').focus({ preventScroll: true });
+  }
+
+  // ------------------------------------------------------------ the visitor's own version (words vary)
+  // After any answer, also 'right': the word field opens again for this AI word. The version is stored as a word of
+  // the collection (source check_the_ai), like a word given after 'wrong'; the answer already sent stays as it is.
+  var variantMode = false;
+  function openVariant() {
+    if (!visitor.last || !V.current()) return;
+    variantMode = true;
+    showStep('stepWord');
+    setAnswersEnabled(false);
+    $('fixInput').value = '';
+    $('fix').hidden = false;
+    kb.target = $('fixInput');
+    keyboardLabels();
+    kb.render();
+    $('fixInput').focus({ preventScroll: true });
+    $('fix').scrollIntoView({ block: 'nearest' });
+  }
+  function closeVariant(word) {
+    var last = visitor.last;
+    variantMode = false;
+    $('fix').hidden = true;
+    setAnswersEnabled(true);
+    showResult(last.d, last.j, word || last.suggested);
+  }
+  function sendVariant(w) {
+    var last = visitor.last;
+    if (!w) { closeVariant(''); return; }
+    if (!V.current()) return;
+    send('entries', V.stamp({
+      concept_slug: last.d.concept_slug, language_slug: last.d.language_slug, language_label: visitor.langLabel,
+      headword: w, example_phrase: null, source: 'check_the_ai'
+    }));
+    closeVariant(w);
   }
 
   // ------------------------------------------------------------ step 4: all words done
@@ -810,10 +858,12 @@ a.link-btn { display: inline-flex; align-items: center; }
   $('changeLang').addEventListener('click', goLanguage);
   $('fixSend').addEventListener('click', function () {
     var w = $('fixInput').value.normalize('NFC').trim().replace(/\s+/g, ' ');
+    if (variantMode) { sendVariant(w); return; }
     record('wrong', w);
   });
   $('fixInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('fixSend').click(); });
-  $('fixSkip').addEventListener('click', function () { record('wrong', ''); });
+  $('fixSkip').addEventListener('click', function () { if (variantMode) closeVariant(''); else record('wrong', ''); });
+  $('variantBtn').addEventListener('click', openVariant);
   $('nextWord').addEventListener('click', nextWord);
   $('nextVisitor').addEventListener('click', function () { V.done(); resetPage(); });
   $('endLang').addEventListener('click', goLanguage);
