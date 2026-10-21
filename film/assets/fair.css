@@ -106,3 +106,8 @@ button, input, select { font: inherit; }
 /* ------------------------------------------------------------------ filming copy (28 October 2026)
    No research question or visit question, and no staff section on LILIEMA words. */
 #consentBox, #consentDone, #visitAsk, #visitThanks, #staff { display: none !important; }
+
+/* Arabic script: Noto Sans Arabic after Noto Sans; a word or a language name in Arabic script runs right to left
+   inside its own box, so that the dots and brackets around it stay in place */
+:root { --font: 'Noto Sans', 'Noto Sans Arabic', 'Segoe UI', system-ui, -apple-system, sans-serif; }
+.w .t, .word-list .w, .word-list .ln, .word, #chips span { unicode-bidi: plaintext; }

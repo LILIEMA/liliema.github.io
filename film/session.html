@@ -1,0 +1,697 @@
+<!-- FILMING COPY (filming day 28 October 2026): the session wall, built by make_film_pages.py from liliema-ops/film/session_wall.html. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session wall · LILIEMA</title>
+<link rel="stylesheet" href="../bookfair/assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fonts/arabic.css">
+<script src="data/film_data.js"></script>
+<script src="assets/fair.js"></script>
+<style>
+/* The session wall: a full-screen view for a projector. It starts empty when it is started and shows every word
+   added with Add a word from then on, in tiles that keep their place and size. Sizes are taken from the tile
+   (container units), so the wall looks the same on any screen. Latin script with LILIEMA's special letters in
+   Noto Sans, Arabic script (with Ajami, Persian and Urdu letters) in Noto Sans Arabic, right to left; other scripts
+   fall back to the computer's own fonts. */
+:root {
+  --bg: #022424; --tile: #08393a; --line: #1d5656; --text: #ffffff; --lang: #9fd9d6; --gold: #e9c548;
+  --glow: rgba(233, 197, 72, .55); --muted: #8fb3b1;
+  --font: 'Noto Sans', 'Noto Sans Arabic', system-ui, 'Segoe UI', sans-serif; --display: 'Noto Serif', Georgia, serif;
+}
+:root[data-theme="light"] {
+  --bg: #eef3f3; --tile: #ffffff; --line: #c3dcdc; --text: #0f1414; --lang: #005a5a; --gold: #b38d12;
+  --glow: rgba(179, 141, 18, .35); --muted: #56606b;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; -webkit-user-select: none; user-select: none; }
+body.running, body.running * { cursor: none !important; }
+[hidden] { display: none !important; }
+.brand { font-family: var(--display); font-weight: 700; color: var(--gold); letter-spacing: .1em; }
+
+/* start screen, for the person who sets up the wall */
+.intro { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 4vh 5vw; }
+.intro-card { max-width: 1000px; text-align: center; }
+.intro .brand { margin: 0 0 1.6vh; font-size: clamp(18px, 3vh, 34px); }
+.intro h1 { margin: 0 0 2.6vh; font-family: var(--display); font-size: clamp(30px, 6vh, 72px); line-height: 1.1; }
+.intro p { margin: 0 0 2.6vh; font-size: clamp(16px, 2.6vh, 30px); line-height: 1.45; color: var(--lang); }
+.intro .start {
+  margin: 1vh 0 3.4vh; padding: 1.6vh 3.4vw; border: 0; border-radius: 999px; cursor: pointer;
+  font: 700 clamp(18px, 3vh, 34px) var(--font); color: #10201f; background: var(--gold);
+}
+.intro .start:focus-visible { outline: 4px solid var(--text); outline-offset: 4px; }
+.intro .small { font-size: clamp(14px, 2vh, 24px); color: var(--muted); }
+
+/* the wall: a band with the title, then a fixed grid of tiles */
+.wall { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 1.4vh; padding: 1.8vh 1.4vw; }
+.band { flex: 0 0 6.2vh; min-height: 0; display: flex; align-items: center; gap: 1.4vw; }
+.band .brand { font-size: 3vh; }
+.band h1 { margin: 0; min-width: 0; font-family: var(--display); font-weight: 700; font-size: 4.2vh; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dots { margin-left: auto; display: flex; gap: .8vw; }
+.dots span { width: 1.5vh; height: 1.5vh; border-radius: 50%; border: .25vh solid var(--muted); }
+.dots span.on { background: var(--gold); border-color: var(--gold); }
+.grid {
+  flex: 1 1 auto; min-height: 0; display: grid; gap: 1.3vh .9vw;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+}
+.tile {
+  position: relative; min-width: 0; min-height: 0; container-type: size; overflow: hidden;
+  background: var(--tile); border: max(2px, .3vh) solid var(--line); border-radius: 1.4vh;
+}
+.tile .in { position: absolute; inset: 0; padding: 0 6cqw; display: grid; grid-template-rows: 13% 38% 16% 2% 22% 9%; text-align: center; }
+.tile .w { grid-row: 2; align-self: end; font-weight: 700; line-height: 1.12; white-space: nowrap; }
+.tile .w.wrap { white-space: normal; overflow-wrap: anywhere; line-height: 1.08; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.tile .l { grid-row: 3; align-self: start; padding-top: 1.5cqh; font-weight: 600; color: var(--lang); line-height: 1.2; white-space: nowrap; overflow: clip; overflow-clip-margin: .45em; text-overflow: ellipsis; }
+.tile .eq { grid-row: 5; align-self: center; line-height: 1.15; white-space: nowrap; overflow: clip; overflow-clip-margin: .45em; text-overflow: ellipsis; }
+.tile .eq::before { content: ''; display: block; width: 18cqw; height: max(2px, 1.1cqh); margin: 0 auto 2.2cqh; border-radius: 9px; background: var(--gold); }
+.tile .eq .ew { font-weight: 700; }
+.tile .eq .el { margin-left: .45em; font-weight: 600; color: var(--lang); }
+/* Arabic script reaches further below the line than Latin: the word sits a little higher, clear of its language */
+.tile .w.ar { margin-bottom: .3em; }
+/* a new word fades in in half a second and is briefly outlined in gold; so is a tile that gets its second line */
+.tile.fresh { z-index: 1; animation: tile-in .5s ease-out both, tile-glow 3.2s ease-out both; }
+.tile.eq-fresh { z-index: 1; animation: tile-glow 3.2s ease-out both; }
+.tile .eq.fresh { animation: tile-in .5s ease-out both; }
+@keyframes tile-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tile-glow {
+  0%, 20% { border-color: var(--gold); box-shadow: 0 0 0 max(2px, .35vh) var(--gold), 0 0 2.8vh var(--glow); }
+  100% { border-color: var(--line); box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
+}
+
+/* the code: a block of tiles in the bottom right corner, white in both themes so that phones read it well.
+   Side by side on wide screens; on a nearly square block (4:3 screens) the code above the invitation. */
+.qr-panel {
+  position: relative; z-index: 2; min-width: 0; min-height: 0; container-type: size;
+  background: #ffffff; color: #0d2626; border-radius: 1.4vh; box-shadow: 0 0 0 max(2px, .3vh) var(--gold);
+}
+.qr-inner {
+  position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+  column-gap: 4cqw; padding: 6cqh 4.5cqw;
+}
+.qr-inner img { display: block; width: min(86cqh, 56cqw); height: auto; aspect-ratio: 1; }
+.qr-text { min-width: 0; }
+.qr-call { margin: 0 0 4cqh; font-family: var(--display); font-weight: 700; font-size: min(8.6cqh, 5.2cqw); line-height: 1.15; }
+.qr-scan { margin: 0 0 3cqh; font-weight: 700; font-size: min(6.6cqh, 4cqw); color: #8a6d12; }
+.qr-addr { margin: 0; font-weight: 600; font-size: min(5cqh, 3.1cqw); color: #005a5a; }
+@container (aspect-ratio < 29/20) {
+  .qr-inner { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; justify-items: center; align-content: center; row-gap: 2.5cqh; padding: 4cqh 4cqw; text-align: center; }
+  .qr-inner img { grid-row: 1; width: min(70cqh, 88cqw); }
+  .qr-text { grid-row: 2; }
+  .qr-call { margin: 0; font-size: min(5.6cqh, 4.9cqw); }
+  .qr-scan, .qr-addr { display: none; }
+}
+.qr-panel.small .qr-inner { grid-template-columns: 1fr; justify-items: center; padding: 5cqh; }
+.qr-panel.small .qr-text { display: none; }
+.qr-panel.small .qr-inner img { width: min(90cqh, 90cqw); }
+
+.fs-hint { position: fixed; left: 0; right: 0; bottom: .5vh; margin: 0; text-align: center; font-size: clamp(12px, 1.7vh, 20px); color: var(--muted); pointer-events: none; }
+.toast {
+  position: fixed; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 11; padding: 1.2vh 2.4vw; white-space: nowrap;
+  background: var(--tile); color: var(--text); border: .25vh solid var(--gold); border-radius: 999px; font-size: clamp(14px, 2.2vh, 28px);
+}
+.help { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, .72); }
+.help-card {
+  max-width: 92vw; max-height: 92vh; overflow: auto; padding: 3vh 3vw; font-size: clamp(14px, 2.1vh, 28px); line-height: 1.4;
+  background: var(--tile); color: var(--text); border: .3vh solid var(--gold); border-radius: 2vh;
+}
+.help-card h2 { margin: 0 0 2vh; font-family: var(--display); }
+.help-card dl { display: grid; grid-template-columns: auto 1fr; gap: .9vh 2vw; margin: 0 0 2.2vh; }
+.help-card dt { font-weight: 700; color: var(--gold); white-space: nowrap; }
+.help-card dd { margin: 0; }
+.help-card p { margin: 1vh 0 0; color: var(--lang); }
+.help-card code { font-family: ui-monospace, Consolas, monospace; color: var(--text); }
+@media (prefers-reduced-motion: reduce) {
+  .tile.fresh, .tile .eq.fresh { animation: tile-in .5s linear both; }
+  .tile.eq-fresh { animation: none; }
+}
+</style>
+</head>
+<body data-title="sw.title">
+<main id="intro" class="intro">
+  <div class="intro-card">
+    <p class="brand">LILIEMA</p>
+    <h1 data-t="sw.title"></h1>
+    <p data-t="sw.intro.text"></p>
+    <button type="button" class="start" id="startBtn" data-t="sw.start"></button>
+    <p class="small" data-t="sw.intro.keys"></p>
+    <p class="small" id="introWait" data-t="sw.wait" hidden></p>
+  </div>
+</main>
+
+<div id="wall" class="wall" hidden>
+  <header class="band"><span class="brand">LILIEMA</span><h1 data-t="sw.heading"></h1><span class="dots" id="dots"></span></header>
+  <div class="grid" id="grid">
+    <aside class="qr-panel" id="qrPanel">
+      <div class="qr-inner">
+        <div class="qr-text">
+          <p class="qr-call" data-t="sw.qr.call"></p>
+          <p class="qr-scan" data-t="sw.qr.scan"></p>
+          <p class="qr-addr">liliema.github.io/<wbr>film</p>
+        </div>
+        <img id="qrImg" src="assets/qr-session-en.svg" alt="">
+      </div>
+    </aside>
+  </div>
+  <p class="fs-hint" id="fsHint" data-t="sw.hint" hidden></p>
+</div>
+
+<div class="help" id="help" hidden><div class="help-card" id="helpCard"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  var F = window.Fair, D = window.FAIR_DATA || {}, cfg = D.supabase || {};
+
+  F.add({
+    fi: {
+      'sw.title': 'Tilaisuuden sanaseinä', 'sw.heading': 'Sanoja kielillämme',
+      'sw.qr.call': 'Lisää sana jollakin kielistäsi', 'sw.qr.scan': 'Skannaa koodi',
+      'sw.intro.text': 'Seinä on aluksi tyhjä. Se näyttää jokaisen Lisää sana -sivulla lisätyn sanan siitä hetkestä, kun käynnistät sen.',
+      'sw.start': 'Käynnistä (Enter)', 'sw.intro.keys': 'Seinä avautuu koko näytön tilassa. Seinällä ? näyttää kaikki näppäimet.',
+      'sw.wait': 'Odotetaan yhteyttä…', 'sw.hint': 'F: koko näyttö · ?: näppäimet',
+      'sw.n.again': 'Paina N uudelleen, niin alkaa uusi kierros (seinä tyhjenee)', 'sw.new': 'Uusi kierros',
+      'sw.demo.on': 'Esittely: mallisanoja, ei tallenneta (D lopettaa)', 'sw.demo.off': 'Esittely päättyi',
+      'sw.help.title': 'Näppäimet', 'sw.k.enter': 'käynnistä seinä koko näytön tilassa', 'sw.k.f': 'koko näyttö päälle tai pois',
+      'sw.k.q': 'näytä tai piilota koodi', 'sw.k.arrows': 'edellinen tai seuraava sivu (kun seinä on täynnä)',
+      'sw.k.back': 'piilota uusin sana', 'sw.k.n': 'uusi kierros: seinä alkaa taas tyhjänä (sanat jäävät tietokantaan)',
+      'sw.k.d': 'mallisanoja näytön tarkistamiseen (ei tallenneta)', 'sw.k.l': 'vaalea tai tumma tausta', 'sw.k.help': 'tämä ohje',
+      'sw.help.db': 'Tietokannan voi tyhjentää testin jälkeen ajamalla kuvausprojektin SQL Editorissa:',
+      'sw.help.status': function (time, n) { return 'Päivitetty viimeksi ' + time + ' · sanoja seinällä: ' + n; },
+      'sw.help.offline': 'Ei yhteyttä: yritetään uudelleen', 'sw.help.never': 'Ei vielä päivitetty'
+    },
+    sv: {
+      'sw.title': 'Ordvägg för passet', 'sw.heading': 'Ord på våra språk',
+      'sw.qr.call': 'Lägg till ett ord på ett av dina språk', 'sw.qr.scan': 'Skanna koden',
+      'sw.intro.text': 'Väggen är tom i början. Den visar varje ord som läggs till på sidan Lägg till ett ord från det ögonblick du startar den.',
+      'sw.start': 'Starta (Enter)', 'sw.intro.keys': 'Väggen öppnas i helskärm. På väggen visar ? alla tangenter.',
+      'sw.wait': 'Väntar på anslutning…', 'sw.hint': 'F: helskärm · ?: tangenter',
+      'sw.n.again': 'Tryck N igen för en ny omgång (väggen töms)', 'sw.new': 'Ny omgång',
+      'sw.demo.on': 'Demo: exempelord, sparas inte (D avslutar)', 'sw.demo.off': 'Demon är slut',
+      'sw.help.title': 'Tangenter', 'sw.k.enter': 'starta väggen i helskärm', 'sw.k.f': 'helskärm på eller av',
+      'sw.k.q': 'visa eller dölj koden', 'sw.k.arrows': 'föregående eller nästa sida (när väggen är full)',
+      'sw.k.back': 'dölj det senaste ordet', 'sw.k.n': 'ny omgång: väggen börjar tom igen (orden finns kvar i databasen)',
+      'sw.k.d': 'exempelord för att kontrollera skärmen (sparas inte)', 'sw.k.l': 'ljus eller mörk bakgrund', 'sw.k.help': 'den här hjälpen',
+      'sw.help.db': 'Töm databasen efter ett test genom att köra detta i filmprojektets SQL Editor:',
+      'sw.help.status': function (time, n) { return 'Senast uppdaterad ' + time + ' · ord på väggen: ' + n; },
+      'sw.help.offline': 'Ingen anslutning: försöker igen', 'sw.help.never': 'Inte uppdaterad ännu'
+    },
+    en: {
+      'sw.title': 'Session wall', 'sw.heading': 'Words in our languages',
+      'sw.qr.call': 'Add a word in one of your languages', 'sw.qr.scan': 'Scan the code',
+      'sw.intro.text': 'The wall starts empty and shows every word added with Add a word from the moment you start it.',
+      'sw.start': 'Start (Enter)', 'sw.intro.keys': 'The wall opens in full screen. On the wall, ? shows all keys.',
+      'sw.wait': 'Waiting for the connection…', 'sw.hint': 'F: full screen · ?: keys',
+      'sw.n.again': 'Press N again for a new round (the wall empties)', 'sw.new': 'New round',
+      'sw.demo.on': 'Demo: sample words, not saved (D ends it)', 'sw.demo.off': 'Demo ended',
+      'sw.help.title': 'Keys', 'sw.k.enter': 'start the wall in full screen', 'sw.k.f': 'full screen on or off',
+      'sw.k.q': 'show or hide the code', 'sw.k.arrows': 'earlier or later page (when the wall is full)',
+      'sw.k.back': 'hide the newest word', 'sw.k.n': 'new round: the wall starts empty again (the words stay in the database)',
+      'sw.k.d': 'sample words to check the screen (not saved)', 'sw.k.l': 'light or dark background', 'sw.k.help': 'this help',
+      'sw.help.db': 'To empty the database after a test, run this in the SQL Editor of the filming project:',
+      'sw.help.status': function (time, n) { return 'Last update ' + time + ' · words on the wall: ' + n; },
+      'sw.help.offline': 'No connection: retrying', 'sw.help.never': 'Not updated yet'
+    },
+    fr: {
+      'sw.title': 'Mur de mots de la séance', 'sw.heading': 'Des mots dans nos langues',
+      'sw.qr.call': 'Ajoutez un mot dans l’une de vos langues', 'sw.qr.scan': 'Scannez le code',
+      'sw.intro.text': 'Le mur est vide au départ. Il affiche chaque mot ajouté avec Ajoutez un mot à partir du moment où vous le lancez.',
+      'sw.start': 'Lancer (Entrée)', 'sw.intro.keys': 'Le mur s’ouvre en plein écran. Sur le mur, ? affiche toutes les touches.',
+      'sw.wait': 'En attente de connexion…', 'sw.hint': 'F : plein écran · ? : touches',
+      'sw.n.again': 'Appuyez encore sur N pour un nouveau tour (le mur se vide)', 'sw.new': 'Nouveau tour',
+      'sw.demo.on': 'Démo : mots d’exemple, non enregistrés (D pour arrêter)', 'sw.demo.off': 'Démo terminée',
+      'sw.help.title': 'Touches', 'sw.k.enter': 'lancer le mur en plein écran', 'sw.k.f': 'plein écran ou non',
+      'sw.k.q': 'afficher ou masquer le code', 'sw.k.arrows': 'page précédente ou suivante (quand le mur est plein)',
+      'sw.k.back': 'masquer le mot le plus récent', 'sw.k.n': 'nouveau tour : le mur repart à vide (les mots restent dans la base de données)',
+      'sw.k.d': 'mots d’exemple pour vérifier l’écran (non enregistrés)', 'sw.k.l': 'fond clair ou sombre', 'sw.k.help': 'cette aide',
+      'sw.help.db': 'Pour vider la base de données après un test, exécutez ceci dans le SQL Editor du projet de tournage :',
+      'sw.help.status': function (time, n) { return 'Dernière mise à jour ' + time + ' · mots sur le mur : ' + n; },
+      'sw.help.offline': 'Pas de connexion : nouvelle tentative', 'sw.help.never': 'Pas encore mis à jour'
+    }
+  });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var params = new URLSearchParams(window.location.search);
+  function num(name, def, lo, hi) { var v = parseInt(params.get(name), 10); return isNaN(v) ? def : Math.max(lo, Math.min(hi, v)); }
+  // the grid: 6 x 5 = 30 tiles unless the address says otherwise (?cols=5&rows=4); the code covers a block of 2 x 2
+  var COLS = num('cols', 6, 2, 12), ROWS = num('rows', 5, 2, 10), PER = COLS * ROWS;
+  var QS = COLS >= 4 && ROWS >= 3 ? 2 : 1, QR_CELLS = [];
+  for (var qr = ROWS - QS; qr < ROWS; qr++) for (var qc = COLS - QS; qc < COLS; qc++) QR_CELLS.push(qr * COLS + qc);
+  var POLL_MS = 2000, TIMEOUT_MS = 8000, LIMIT = 1000;
+  var STATE_KEY = 'liliema-film-session', THEME_KEY = 'liliema-film-session-theme', MAX_AGE_MS = 8 * 3600 * 1000;
+  var FONT = '"Noto Sans", "Noto Sans Arabic", system-ui, "Segoe UI", sans-serif';
+  var ARABIC = /[\u0600-\u06FF\u0750-\u077F\u0870-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  function arabic(text) { return ARABIC.test(text); }
+
+  // ------------------------------------------------------------ the session
+  // { v, cols, rows, startId, startedAt, qr, view, items, byId, seen }
+  //   startId: the highest word number when the session started; only words with a higher number are shown
+  //   items: the tiles in the order they were placed: { id, cell, f: sizes, eq: { id, f } or null, hidden }
+  //   byId: word number -> [word, language, language slug, word group] (kept, so that a reload works offline too)
+  //   seen: every word number already handled (shown, used as a second line or hidden), so that none comes back
+  var S = null, cur = null, demo = null, busy = false;
+  function newState(startId) {
+    return { v: 1, cols: COLS, rows: ROWS, startId: startId, startedAt: Date.now(), qr: true, view: 0, items: [], byId: {}, seen: {} };
+  }
+  function save() {
+    if (!S) return;
+    try { window.localStorage.setItem(STATE_KEY, JSON.stringify(S)); } catch (e) { /* kept for this page only */ }
+  }
+  function load() {
+    try {
+      var s = JSON.parse(window.localStorage.getItem(STATE_KEY) || 'null');
+      if (s && s.v === 1 && s.cols === COLS && s.rows === ROWS && s.byId && typeof s.startId === 'number' && Date.now() - s.startedAt < MAX_AGE_MS) return s;
+    } catch (e) { /* none */ }
+    return null;
+  }
+  function forget() { try { window.localStorage.removeItem(STATE_KEY); } catch (e) { /* none */ } }
+
+  // ------------------------------------------------------------ the database (read only)
+  function api(path) {
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, TIMEOUT_MS) : null;
+    return fetch(cfg.url + '/rest/v1/' + path, {
+      headers: { apikey: cfg.key, Accept: 'application/json' }, cache: 'no-store', signal: ctl ? ctl.signal : undefined
+    }).then(function (r) {
+      clearTimeout(timer);
+      if (!r.ok) { var err = new Error('HTTP ' + r.status); err.status = r.status; throw err; }
+      return r.json();
+    }, function (err) { clearTimeout(timer); throw err; });
+  }
+  // the words of the session, in the order of their numbers (all of them each time: a word saved a moment late
+  // under a lower number is not missed); without the word group if the database does not have it yet
+  var noGroups = false;
+  function fetchSession(after) {
+    var cols = 'id,language_slug,language_label,headword' + (noGroups ? '' : ',word_group'), rows = [];
+    function page(offset) {
+      return api('entries?select=' + cols + '&status=eq.approved&source=eq.visitor&id=gt.' + after + '&order=id&limit=' + LIMIT + '&offset=' + offset)
+        .then(function (batch) { rows = rows.concat(batch || []); return batch && batch.length === LIMIT ? page(offset + LIMIT) : rows; });
+    }
+    return page(0).catch(function (err) {
+      if (!noGroups && err.status >= 400 && err.status < 500 && err.status !== 429) { noGroups = true; return fetchSession(after); }
+      throw err;
+    });
+  }
+
+  // ------------------------------------------------------------ sizes: fitted once, when a word arrives
+  var ctx = document.createElement('canvas').getContext('2d');
+  function perPx(text, weight) { ctx.font = weight + ' 100px ' + FONT; return ctx.measureText(text).width / 100; }
+  function tileBox() {
+    var g = $('grid'), cs = window.getComputedStyle(g);
+    var cg = parseFloat(cs.columnGap) || 0, rg = parseFloat(cs.rowGap) || 0, b = Math.max(2, 0.003 * window.innerHeight);
+    var w = (g.clientWidth - cg * (COLS - 1)) / COLS - 2 * b, h = (g.clientHeight - rg * (ROWS - 1)) / ROWS - 2 * b;
+    return { w: Math.max(w, 1), h: Math.max(h, 1), text: Math.max(w, 1) * 0.88 * 0.96 };
+  }
+  function pct(px, base) { return Math.round(px / base * 10000) / 100; }
+  function fitMain(row) {
+    var t = tileBox(), a = perPx(row[0], 700), wrap = false;
+    var s = Math.min((arabic(row[0]) ? 0.31 : 0.33) * t.h, a ? t.text / a : Infinity);
+    if (s < 0.15 * t.h) {   // a long word or phrase: two lines
+      var s2 = Math.min(0.17 * t.h, a ? 1.8 * t.text / a : Infinity);
+      if (s2 > s) { s = s2; wrap = true; }
+    }
+    var b = perPx(row[1], 600), sl = Math.max(0.07 * t.h, Math.min(0.12 * t.h, b ? t.text / b : Infinity));
+    return [pct(s, t.h), pct(s, t.w), pct(sl, t.h), pct(sl, t.w), wrap ? 1 : 0];
+  }
+  function fitEq(row) {
+    var t = tileBox(), a = perPx(row[0], 700), b = perPx(row[1], 600);
+    var sw = 0.155 * t.h, sl = 0.095 * t.h, need = a * sw + b * sl + 0.45 * sl;
+    var k = need > t.text ? Math.max(0.45, t.text / need) : 1;
+    return [pct(sw * k, t.h), pct(sw * k, t.w), pct(sl * k, t.h), pct(sl * k, t.w)];
+  }
+  function fontsFor(text) {
+    if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    return Promise.race([
+      Promise.all(['700 100px "Noto Sans"', '600 100px "Noto Sans"', '700 100px "Noto Sans Arabic"', '600 100px "Noto Sans Arabic"']
+        .map(function (f) { return document.fonts.load(f, text); })),
+      new Promise(function (resolve) { setTimeout(resolve, 1500); })   // never wait long: offline, the computer's fonts measure
+    ]).catch(function () { /* measured with what there is */ });
+  }
+
+  // ------------------------------------------------------------ placing the words
+  function pageOf(cell) { return Math.floor(cell / PER); }
+  function lastPage(st) { var p = 0; st.items.forEach(function (it) { if (!it.hidden) p = Math.max(p, pageOf(it.cell)); }); return p; }
+  function freeCell(st) {   // the first free place on the last page in reading order, then on a new page
+    for (var p = lastPage(st); ; p++) {
+      var used = {};
+      st.items.forEach(function (it) { if (!it.hidden && pageOf(it.cell) === p) used[it.cell - p * PER] = true; });
+      for (var c = 0; c < PER; c++) {
+        if (used[c] || (st.qr && QR_CELLS.indexOf(c) >= 0)) continue;
+        return p * PER + c;
+      }
+    }
+  }
+  function langName(slug) { var l = (D.languages || []).filter(function (x) { return x.slug === slug; })[0]; return l ? l.name : ''; }
+  function langKey(row) { return row[2] ? 's:' + row[2] : 'o:' + F.fold(row[1]).trim(); }
+  function sameKind(a, b) { return langKey(a) === langKey(b) && arabic(a[0]) === arabic(b[0]); }
+  function addRow(st, e) {
+    st.seen[e.id] = 1;
+    var row = [String(e.headword || '').normalize('NFC'), String(e.language_label || langName(e.language_slug)).normalize('NFC'),
+      e.language_slug || null, e.word_group || null];
+    st.byId[e.id] = row;
+    // the same person's word for the same picture in another language, or in the same language in another script
+    // (Wolof in Latin letters and in Ajami): the second line of their first word
+    if (row[3]) {
+      for (var i = 0; i < st.items.length; i++) {
+        var it = st.items[i], main = st.byId[it.id];
+        if (!it.hidden && !it.eq && main[3] === row[3] && !sameKind(main, row)) {
+          it.eq = { id: e.id, f: fitEq(row) };
+          return { item: it, eq: true };
+        }
+      }
+    }
+    var item = { id: e.id, cell: freeCell(st), f: fitMain(row), eq: null, hidden: false };
+    st.items.push(item);
+    return { item: item, eq: false };
+  }
+  var chain = Promise.resolve();
+  function insert(st, e) {
+    if (st.seen[e.id]) return;
+    chain = chain.then(function () { return fontsFor(e.headword + ' ' + (e.language_label || '')); }).then(function () {
+      if (st.seen[e.id] || (st !== S && st !== demo)) return;   // handled meanwhile, or a session that has ended
+      var wasLast = st.view >= lastPage(st);
+      var res = addRow(st, e);
+      if (st === S) save();
+      display(st, res, wasLast);
+    }).catch(function (err) { if (window.console) console.warn('[LILIEMA] session wall:', err && err.message); });
+  }
+
+  // ------------------------------------------------------------ drawing
+  function size(a, b) { return 'min(' + a + 'cqh, ' + b + 'cqw)'; }
+  function textEl(tag, cls, text, a, b) {
+    var el = document.createElement(tag);
+    el.className = cls + (arabic(text) ? ' ar' : ''); el.dir = 'auto'; el.textContent = text; el.style.fontSize = size(a, b);
+    return el;
+  }
+  function eqEl(st, eq, fresh) {
+    var row = st.byId[eq.id], d = document.createElement('div');
+    d.className = 'eq' + (fresh ? ' fresh' : '');
+    d.appendChild(textEl('span', 'ew', row[0], eq.f[0], eq.f[1]));
+    d.appendChild(textEl('span', 'el', row[1], eq.f[2], eq.f[3]));
+    return d;
+  }
+  function tileEl(st, it, fresh) {
+    var row = st.byId[it.id], c = it.cell % PER, el = document.createElement('div'), inner = document.createElement('div');
+    el.className = 'tile' + (fresh ? ' fresh' : '');
+    el.setAttribute('data-id', it.id);
+    el.style.gridColumn = String(c % COLS + 1);
+    el.style.gridRow = String(Math.floor(c / COLS) + 1);
+    inner.className = 'in';
+    inner.appendChild(textEl('div', 'w' + (it.f[4] ? ' wrap' : ''), row[0], it.f[0], it.f[1]));
+    inner.appendChild(textEl('div', 'l', row[1], it.f[2], it.f[3]));
+    if (it.eq) inner.appendChild(eqEl(st, it.eq, false));
+    el.appendChild(inner);
+    return el;
+  }
+  function tileOf(id) { return $('grid').querySelector('.tile[data-id="' + id + '"]'); }
+  function render() {
+    var g = $('grid'), st = cur;
+    Array.prototype.slice.call(g.querySelectorAll('.tile')).forEach(function (t) { g.removeChild(t); });
+    if (st) st.items.forEach(function (it) { if (!it.hidden && pageOf(it.cell) === st.view) g.appendChild(tileEl(st, it, false)); });
+    $('qrPanel').hidden = !(st && st.qr);
+    renderDots();
+  }
+  function display(st, res, wasLast) {
+    if (st !== cur) return;
+    var it = res.item, p = pageOf(it.cell);
+    if (res.eq) {
+      var t = p === st.view && tileOf(it.id);
+      if (!t) return;
+      t.querySelector('.in').appendChild(eqEl(st, it.eq, true));
+      t.classList.remove('fresh', 'eq-fresh');
+      void t.offsetWidth;   // restart the outline
+      t.classList.add('eq-fresh');
+      return;
+    }
+    if (p !== st.view) {
+      if (!wasLast) { renderDots(); return; }   // someone is looking at an earlier page: it stays
+      st.view = p;
+      if (st === S) save();
+      render();
+      var nt = tileOf(it.id);
+      if (nt) nt.classList.add('fresh');
+      return;
+    }
+    $('grid').appendChild(tileEl(st, it, true));
+    renderDots();
+  }
+  function renderDots() {
+    var box = $('dots'), st = cur, n = st ? Math.max(lastPage(st), st.view) + 1 : 1;
+    box.innerHTML = '';
+    if (n < 2) return;
+    for (var i = 0; i < n; i++) { var s = document.createElement('span'); if (i === st.view) s.className = 'on'; box.appendChild(s); }
+  }
+  function words(st) { var n = 0; st.items.forEach(function (it) { if (!it.hidden) n += it.eq ? 2 : 1; }); return n; }
+
+  // ------------------------------------------------------------ screens
+  function running() { return !$('wall').hidden; }
+  function showWall() {
+    $('intro').hidden = true;
+    $('wall').hidden = false;
+    document.body.classList.add('running');
+    hint();
+  }
+  function showIntro() {
+    $('wall').hidden = true;
+    $('intro').hidden = false;
+    document.body.classList.remove('running');
+    hint();
+  }
+  function hint() { $('fsHint').hidden = !running() || !!document.fullscreenElement; }
+  function fullscreen(on) {
+    var d = document.documentElement;
+    if (on && !document.fullscreenElement && d.requestFullscreen) d.requestFullscreen({ navigationUI: 'hide' }).catch(function () { /* not allowed */ });
+    else if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () { /* not allowed */ });
+  }
+  var toastTimer = null;
+  function toast(text) {
+    var t = $('toast');
+    t.textContent = text;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 2600);
+  }
+
+  // ------------------------------------------------------------ starting, polling, a new round
+  var lastOk = 0, lastErr = 0, waitTimer = null;
+  function startSession() {   // the highest word number now is the start: the wall shows only the words after it
+    if (busy) return;
+    busy = true;
+    forget();
+    S = null;
+    if (!demo) { cur = newState(0); render(); }   // empty at once; words come once the start is known
+    clearTimeout(waitTimer);
+    (function attempt() {
+      api('entries?select=id&order=id.desc&limit=1').then(function (rows) {
+        busy = false;
+        $('introWait').hidden = true;
+        S = newState(rows && rows.length ? rows[0].id : 0);
+        save();
+        if (!demo) { cur = S; showWall(); render(); }
+        lastOk = Date.now();
+        poll();
+      }, function () {
+        lastErr = Date.now();
+        $('introWait').hidden = running();
+        waitTimer = setTimeout(attempt, POLL_MS);
+      });
+    })();
+  }
+  var polling = false;
+  function poll() {
+    if (polling || busy || !S) return;
+    polling = true;
+    var st = S;
+    fetchSession(st.startId).then(function (rows) {
+      lastOk = Date.now();
+      if (st === S) rows.forEach(function (e) { insert(st, e); });
+    }, function (err) {
+      lastErr = Date.now();   // silent: the wall keeps its words and tries again
+      if (window.console) console.warn('[LILIEMA] session wall: no update (' + (err && err.message) + ')');
+    }).then(function () { polling = false; });
+  }
+  setInterval(poll, POLL_MS);
+
+  // ------------------------------------------------------------ the operator's keys
+  function toggleQr() {
+    if (!cur) return;
+    cur.qr = !cur.qr;
+    $('qrPanel').hidden = !cur.qr;
+    if (cur === S) save();
+  }
+  function go(d) {
+    if (!cur) return;
+    var v = Math.max(0, Math.min(Math.max(lastPage(cur), cur.view), cur.view + d));
+    if (v === cur.view) return;
+    cur.view = v;
+    if (cur === S) save();
+    render();
+  }
+  function hideNewest() {   // the newest word on the wall (a tile or a second line) disappears
+    var st = cur, best = null;
+    if (!st) return;
+    st.items.forEach(function (it) {
+      if (it.hidden) return;
+      if (!best || it.id > best.id) best = { id: it.id, it: it, eq: false };
+      if (it.eq && it.eq.id > best.id) best = { id: it.eq.id, it: it, eq: true };
+    });
+    if (!best) return;
+    if (best.eq) best.it.eq = null; else best.it.hidden = true;
+    var lp = lastPage(st);
+    if (st.view > lp) st.view = lp;
+    if (st === S) save();
+    render();
+  }
+  var theme = 'dark';
+  try { theme = window.localStorage.getItem(THEME_KEY) || theme; } catch (e) { /* default */ }
+  if (params.get('theme') === 'light' || params.get('theme') === 'dark') theme = params.get('theme');
+  function setTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    try { window.localStorage.setItem(THEME_KEY, t); } catch (e) { /* this page only */ }
+  }
+
+  // sample words for checking the screen (Monday walkthrough): LILIEMA's own words and words in other languages,
+  // in Latin script with special letters and marks and in Arabic script; never sent anywhere
+  var DEMO = [
+    ['cigil', 'Baïnounk Gujaher', 'a'], ['عين', 'العربية'], ['silmä', 'suomi', 'b'], ['guñaakin', 'Baïnounk Gujaher'],
+    ['bët', 'Wolof', 'a'], ['öga', 'svenska', 'b'], ['mắt', 'Tiếng Việt'], ['damaŋal', 'Pulaar'], ['كتاب', 'العربية', 'e'],
+    ['\u1ecdw\u1ecd\u0301', 'Yorùbá'], ['kitabu', 'Kiswahili', 'e'], ['sindëy', 'Joola'], ['œil', 'français'], ['چشم', 'فارسی'],
+    ['ŋkú', 'Eʋegbe'], ['bulimindëŋ', 'Baïnounk Gujaher'], ['ƙafa', 'Hausa'], ['آنکھ', 'اردو'], ['kasa', 'Creole'],
+    ['čalbmi', 'davvisámegiella'], ['cilax', 'Baïnounk Gujaher', 'c'], ['yaŋ', 'Joola Eegimaa'], ['loxo', 'Wolof', 'c'],
+    ['بيت', 'Arabic'], ['książka', 'polski'], ['Fuß', 'Deutsch'], ['ñint', 'Mankañ'], ['déšť', 'čeština'],
+    ['diin', 'Baïnounk Gujaher', 'd'], ['eső', 'magyar'], ['taw', 'Wolof', 'd'], ['مطر', 'Arabic'], ['kajandaak', 'Joola Fogny'],
+    ['mão', 'português'], ['yağmur', 'Türkçe'], ['jaréém', 'Baïnounk Gujaher'], ['liso', 'Lingála'], ['kõrv', 'eesti'],
+    ['maïs', 'français'], ['hönd', 'íslenska'], ['fumangu', 'Joola Kujireray'], ['udikaam', 'Baïnounk Gujaher']
+  ];
+  var demoTimer = null;
+  function startDemo() {
+    demo = newState(0);
+    cur = demo;
+    showWall();
+    render();
+    toast(F.t('sw.demo.on'));
+    var room = PER - (demo.qr ? QR_CELLS.length : 0), tiles = 0, groups = {}, list = [];
+    DEMO.forEach(function (d) {   // as many as fill one page
+      var second = d[2] && groups[d[2]];
+      if (!second && tiles >= room) return;
+      if (!second) { tiles++; if (d[2]) groups[d[2]] = true; }
+      list.push(d);
+    });
+    var i = 0;
+    (function next() {
+      if (cur !== demo || i >= list.length) return;
+      var d = list[i++];
+      insert(demo, { id: i, headword: d[0].normalize('NFC'), language_label: d[1], language_slug: null, word_group: d[2] ? 'demo-' + d[2] : null });
+      demoTimer = setTimeout(next, i < 3 ? 600 : 1100);
+    })();
+  }
+  function stopDemo() {
+    clearTimeout(demoTimer);
+    demo = null;
+    toast(F.t('sw.demo.off'));
+    if (S) { cur = S; render(); }
+    else if (busy) { cur = newState(0); render(); }
+    else { cur = null; showIntro(); }
+  }
+  function renderHelp() {
+    var keys = [['Enter', 'sw.k.enter'], ['F', 'sw.k.f'], ['Q', 'sw.k.q'], ['← →', 'sw.k.arrows'], ['Backspace', 'sw.k.back'],
+      ['N N', 'sw.k.n'], ['D', 'sw.k.d'], ['L', 'sw.k.l'], ['?', 'sw.k.help']];
+    var c = $('helpCard'), h = document.createElement('h2'), dl = document.createElement('dl');
+    c.innerHTML = '';
+    h.textContent = F.t('sw.help.title');
+    c.appendChild(h);
+    keys.forEach(function (k) {
+      var dt = document.createElement('dt'), dd = document.createElement('dd');
+      dt.textContent = k[0]; dd.textContent = F.t(k[1]);
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+    c.appendChild(dl);
+    var st = document.createElement('p'), time = lastOk ? new Date(lastOk).toLocaleTimeString(F.locale()) : '';
+    st.textContent = lastErr > lastOk ? F.t('sw.help.offline') + (lastOk ? ' · ' + F.t('sw.help.status', time, S ? words(S) : 0) : '')
+      : lastOk ? F.t('sw.help.status', time, S ? words(S) : 0) : F.t('sw.help.never');
+    c.appendChild(st);
+    var db = document.createElement('p'), code = document.createElement('code');
+    db.textContent = F.t('sw.help.db') + ' ';
+    code.textContent = 'select * from clear_film_words();';
+    db.appendChild(code);
+    c.appendChild(db);
+  }
+  function toggleHelp(show) {
+    var h = $('help');
+    if (show === undefined) show = h.hidden;
+    if (show) renderHelp();
+    h.hidden = !show;
+  }
+
+  var nAt = 0;
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'Enter') { e.preventDefault(); fullscreen(true); if (!running() && !busy) startSession(); return; }
+    if (k === '?' || k === 'h' || k === 'H') { toggleHelp(); return; }
+    if (k === 'Escape') { toggleHelp(false); return; }
+    if (e.repeat) { if (k === 'Backspace' || k === 'Delete') e.preventDefault(); return; }   // held down: one press only
+    if (k === 'd' || k === 'D') { if (demo) stopDemo(); else startDemo(); return; }
+    if (k === 'l' || k === 'L') { setTheme(theme === 'dark' ? 'light' : 'dark'); return; }
+    if (k === 'f' || k === 'F') { fullscreen(!document.fullscreenElement); return; }
+    if (!running()) return;
+    if (k === 'q' || k === 'Q') toggleQr();
+    else if (k === 'ArrowRight' || k === 'PageDown') go(1);
+    else if (k === 'ArrowLeft' || k === 'PageUp') go(-1);
+    else if (k === 'Backspace' || k === 'Delete') { e.preventDefault(); hideNewest(); }
+    else if (k === 'n' || k === 'N') {
+      if (Date.now() - nAt < 4000) {
+        nAt = 0;
+        if (demo) { clearTimeout(demoTimer); demo = null; }
+        toast(F.t('sw.new'));
+        startSession();
+      } else { nAt = Date.now(); toast(F.t('sw.n.again')); }
+    }
+  });
+  $('startBtn').addEventListener('click', function () { fullscreen(true); startSession(); });
+  document.addEventListener('click', function (e) { if (running() && !e.target.closest('.help')) fullscreen(true); });
+  document.addEventListener('fullscreenchange', hint);
+
+  // Keep the screen on while the wall is shown (Screen Wake Lock), asked again when the page is visible and every minute
+  var wakeLock = null, wakePending = false;
+  function keepScreenOn() {
+    if (wakeLock && wakeLock.released) wakeLock = null;
+    if (!('wakeLock' in navigator) || wakeLock || wakePending || document.visibilityState !== 'visible') return;
+    wakePending = true;
+    navigator.wakeLock.request('screen').then(function (lock) {
+      wakeLock = lock;
+      lock.addEventListener('release', function () { wakeLock = null; });
+    }).catch(function () { /* refused: the power settings decide */ }).then(function () { wakePending = false; });
+  }
+  document.addEventListener('visibilitychange', keepScreenOn);
+  setInterval(keepScreenOn, 60000);
+
+  // ------------------------------------------------------------ start
+  setTheme(theme);
+  $('grid').style.setProperty('--cols', COLS);
+  $('grid').style.setProperty('--rows', ROWS);
+  var qp = $('qrPanel');
+  qp.style.gridColumn = (COLS - QS + 1) + ' / span ' + QS;
+  qp.style.gridRow = (ROWS - QS + 1) + ' / span ' + QS;
+  qp.classList.toggle('small', QS === 1);
+  $('qrImg').src = 'assets/qr-session-' + F.lang + '.svg';
+  F.apply();
+  keepScreenOn();
+  if (document.fonts && document.fonts.load) {   // LILIEMA's letters ready before the first word is measured
+    ['400', '600', '700'].forEach(function (w) {
+      document.fonts.load(w + ' 40px "Noto Sans"', 'aɓɗŋñëéƴ ọ́ ắ');
+      document.fonts.load(w + ' 40px "Noto Sans Arabic"', 'عربي');
+    });
+    document.fonts.load('700 40px "Noto Serif"', 'LILIEMA');
+  }
+  S = load();
+  if (S) { cur = S; showWall(); render(); poll(); }   // a reload during a session: the same wall, and the words since
+  else showIntro();
+})();
+</script>
+</body>
+</html>

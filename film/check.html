@@ -8,6 +8,7 @@
 <meta name="robots" content="noindex">
 <title>Tarkista tekoäly · LILIEMA</title>
 <link rel="stylesheet" href="../bookfair/assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fonts/arabic.css">
 <link rel="stylesheet" href="assets/fair.css">
 <script src="data/film_data.js"></script>
 <script src="assets/fair.js"></script>
@@ -169,7 +170,7 @@ a.link-btn { display: inline-flex; align-items: center; }
         </div>
       </div>
       <h2 data-t="chk.lang.q"></h2>
-      <input type="text" class="text-input" id="langInput" data-t-placeholder="chk.lang.ph" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="60">
+      <input type="text" class="text-input" id="langInput" dir="auto" data-t-placeholder="chk.lang.ph" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="60">
       <div class="suggest" id="langSuggest"></div>
       <div class="not-in" id="notIn" hidden>
         <p id="notInText"></p>
@@ -204,7 +205,7 @@ a.link-btn { display: inline-flex; align-items: center; }
           </div>
           <div class="fix" id="fix" hidden>
             <label class="field-label" for="fixInput" id="fixLabel"></label>
-            <input type="text" class="text-input big" id="fixInput" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <input type="text" class="text-input big" id="fixInput" dir="auto" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <div class="keyboard" id="keyboard"></div>
             <p class="notice" data-t="notice.entry"></p>
             <div class="actions">

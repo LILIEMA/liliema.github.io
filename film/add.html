@@ -8,6 +8,7 @@
 <meta name="robots" content="noindex">
 <title>Lisää sana · LILIEMA</title>
 <link rel="stylesheet" href="../bookfair/assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/fonts/arabic.css">
 <link rel="stylesheet" href="assets/fair.css">
 <script src="data/film_data.js"></script>
 <script src="assets/fair.js"></script>
@@ -149,7 +150,7 @@
   <section class="step" id="step2" hidden>
     <div class="chosen" id="chosen2"></div>
     <h2 data-t="add.lang.q"></h2>
-    <input type="text" class="text-input" id="langInput" data-t-placeholder="add.lang.ph" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="60">
+    <input type="text" class="text-input" id="langInput" dir="auto" data-t-placeholder="add.lang.ph" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="60">
     <div class="suggest" id="langSuggest"></div>
     <div class="lang-grid" id="langGrid"></div>
   </section>
@@ -159,12 +160,12 @@
     <div class="word-main">
     <div class="chosen" id="chosen3"></div>
     <label class="field-label" for="wordInput" data-t="add.word.q"></label>
-    <input type="text" class="text-input big" id="wordInput" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-t-aria="add.word.q">
+    <input type="text" class="text-input big" id="wordInput" dir="auto" maxlength="80" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-t-aria="add.word.q">
     <div class="example-toggle">
       <button type="button" class="link-btn" id="exampleToggle" data-t="add.example"></button>
     </div>
     <div id="exampleWrap" hidden>
-      <input type="text" class="text-input" id="exampleInput" maxlength="200" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-t-placeholder="add.example.ph" data-t-aria="add.example">
+      <input type="text" class="text-input" id="exampleInput" dir="auto" maxlength="200" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-t-placeholder="add.example.ph" data-t-aria="add.example">
     </div>
     <div class="keyboard" id="keyboard"></div>
     </div>
@@ -355,7 +356,7 @@
 
   // ------------------------------------------------------------ visitor session
   // consent is asked once per visit and shared with the other pages (visit.js); the language is kept for the next word
-  var visitor = { langSlug: null, langLabel: '', used: {} };   // used: picture -> languages already sent
+  var visitor = { langSlug: null, langLabel: '', used: {}, groups: {} };   // used: picture -> languages already sent; groups: see wordGroup()
   var current = { concept: null };
   function langKey(slug, labelText) { return slug ? 's:' + slug : 'o:' + F.fold(labelText).trim(); }
 
@@ -506,6 +507,31 @@
     $('consentNotYou').addEventListener('click', function () { V.end(); });
   }
 
+  // filming copy: one random number for all the words this person adds for the same picture (word_group)
+  function wordGroup(slug) {
+    if (!visitor.groups[slug]) {
+      var c = window.crypto, id = null;
+      if (c && c.randomUUID) id = c.randomUUID();
+      else if (c && c.getRandomValues) {
+        var b = c.getRandomValues(new Uint8Array(16));
+        b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+        var h = Array.prototype.map.call(b, function (x) { return (x + 256).toString(16).slice(1); }).join('');
+        id = h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
+      }
+      visitor.groups[slug] = id;
+    }
+    return visitor.groups[slug];
+  }
+  // filming copy: a database without the column word_group refuses the word; it is then sent without it
+  function addEntry(row) {
+    return window.FairDB.add('entries', row).catch(function (err) {
+      if (!row.word_group || !err || !err.status || err.status === 429 || err.status >= 500) throw err;
+      var plain = {};
+      Object.keys(row).forEach(function (k) { if (k !== 'word_group') plain[k] = row[k]; });
+      return window.FairDB.add('entries', plain);
+    });
+  }
+
   var sending = false;
   function send() {
     if (sending) return;
@@ -526,9 +552,11 @@
       example_phrase: example || null,
       source: 'visitor'
     });
+    var group = wordGroup(current.concept.slug);   // filming copy
+    if (group) row.word_group = group;
     sending = true;
     $('sendBtn').disabled = true;
-    window.FairDB.add('entries', row).then(function (status) {
+    addEntry(row).then(function (status) {
       var u = visitor.used[current.concept.slug] || (visitor.used[current.concept.slug] = {});
       u[langKey(visitor.langSlug, visitor.langLabel)] = true;
       showDone(word, status === 'queued');
@@ -542,7 +570,7 @@
 
   function showDone(word, queued) {
     var c = current.concept;
-    $('doneWhat').innerHTML = '<img src="' + F.esc(c.picture) + '" alt=""><div class="word" lang="">' + F.esc(word) +
+    $('doneWhat').innerHTML = '<img src="' + F.esc(c.picture) + '" alt=""><div class="word" lang="" dir="auto">' + F.esc(word) +
       '</div><div class="notice">' + F.esc(visitor.langLabel) + ' · ' + F.esc(label(c)) + '</div>';
     $('queuedNote').hidden = !queued;
     showStep(4);
@@ -550,7 +578,7 @@
 
   // the page starts again for the next visitor; also when the visit ends elsewhere ("No, I'm new here", another tab)
   function resetPage() {
-    visitor = { langSlug: null, langLabel: '', used: {} };
+    visitor = { langSlug: null, langLabel: '', used: {}, groups: {} };
     current = { concept: null };
     showStep(1);
   }

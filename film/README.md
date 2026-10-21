@@ -8,6 +8,16 @@ Technical development: Friederike Lüpke. Co-developed with the participants of 
 
 The copy is also used for a teaching demo in November 2026. After that, it is replaced by a page that forwards to https://liliema.wordpress.com, and the Supabase project is deleted.
 
+## Session wall (scene 4)
+
+`session.html` is a full-screen word wall for one session. It is empty when it is started (Enter) and then shows every word added with Add a word: the word in large type with its language underneath, and a word that the same person adds for the same picture in another language as a second line (column `word_group`, see `film_session_wall.sql` in liliema-ops). Up to 30 tiles (26 while the code is shown) on a grid of 6 by 5; `?cols=5&rows=4` gives a smaller grid with larger words. Address for the shoot: https://liliema.github.io/film/session.html?lang=en
+
+Keys: Enter starts it in full screen, F full screen, Q shows or hides the code, the arrow keys change the page, Backspace hides the newest word, N twice starts a new round (the wall empties; the words stay in the database), D shows sample words for checking the screen (never saved), L light or dark background, ? help.
+
+To empty the word store after a test (the words typed on the pages and the answers of Check the AI; LILIEMA's own words, the wordlist and the AI's words stay), run in the SQL Editor of the filming project: `select * from clear_film_words();`
+
+Arabic script: the pages and the session wall show words in Arabic script (Arabic, Ajami, Persian, Urdu) in Noto Sans Arabic (SIL Open Font License, `assets/fonts`), right to left, and the text fields follow the direction of what is typed. Other scripts show in the device's own fonts.
+
 ---
 
 # Applications LILIEMA : copie pour le tournage
@@ -19,3 +29,13 @@ Elle utilise son propre projet Supabase, distinct de celui du salon. Ses mots so
 Développement technique : Friederike Lüpke. Outils co-développés avec les participant·e·s des ateliers LILIEMA 2026 à Samine (Sénégal) et Sanyang (Gambie). Images : Unni Pohjonen pour LILIEMA, CC BY 4.0 (voir ../bookfair/pictures/README.md).
 
 La copie sert aussi à une démonstration en cours en novembre 2026. Ensuite, elle est remplacée par une page qui renvoie vers https://liliema.wordpress.com, et le projet Supabase est supprimé.
+
+## Mur de la séance (scène 4)
+
+`session.html` est un mur de mots en plein écran pour une séance. Il est vide au lancement (Entrée), puis affiche chaque mot ajouté avec Ajoutez un mot : le mot en grands caractères avec sa langue en dessous, et en deuxième ligne un mot que la même personne ajoute pour la même image dans une autre langue (colonne `word_group`, voir `film_session_wall.sql` dans liliema-ops). Jusqu'à 30 cases (26 tant que le code est affiché) sur une grille de 6 sur 5 ; `?cols=5&rows=4` donne une grille plus petite avec des mots plus grands. Adresse pour le tournage : https://liliema.github.io/film/session.html?lang=en
+
+Touches : Entrée lance le mur en plein écran, F plein écran, Q affiche ou masque le code, les flèches changent de page, Backspace masque le mot le plus récent, N deux fois commence un nouveau tour (le mur se vide ; les mots restent dans la base de données), D affiche des mots d'exemple pour vérifier l'écran (jamais enregistrés), L fond clair ou sombre, ? aide.
+
+Pour vider la base de mots après un test (les mots saisis sur les pages et les réponses de Vérifiez l'IA ; les mots de LILIEMA, la liste de mots et les mots de l'IA restent), exécutez dans le SQL Editor du projet de tournage : `select * from clear_film_words();`
+
+Écriture arabe : les pages et le mur de la séance affichent les mots en écriture arabe (arabe, ajami, persan, ourdou) en Noto Sans Arabic (licence SIL Open Font, `assets/fonts`), de droite à gauche, et les champs de saisie suivent le sens de ce qui est tapé. Les autres écritures s'affichent avec les polices de l'appareil.
