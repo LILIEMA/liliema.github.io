@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/fair.css">
 <script src="data/fair_data.js"></script>
 <script src="assets/fair.js"></script>
+<script src="assets/langs.js"></script>
 <script src="assets/db.js"></script>
 <script src="assets/checkai.js"></script>
 <style>
@@ -193,7 +194,9 @@ body.wall-page { height: 100vh; overflow: hidden; }
   var SLIDE_MS = 9000;          // time per picture ...
   var SLIDE_MS_PER_WORD = 350;  // ... plus a little more for each word ...
   var SLIDE_MS_MAX = 16000;     // ... up to this
-  var REFRESH_MS = 60 * 1000;   // new words and scores are fetched every minute
+  var WORDS_MS = 15 * 1000;     // new words are fetched every 15 seconds ...
+  var REFRESH_MS = 60 * 1000;   // ... and the scores of Check the AI every minute
+  var TIMEOUT_MS = 20 * 1000;   // a request that gets no answer is given up and tried again
   var NEW_MS = 30 * 60 * 1000;  // words approved in the last 30 minutes get a gold dot
   var EMPTY_EVERY = 3;          // after every third picture with words, one picture still waiting for words
   var PAGE_GROUPS = 18;         // languages per screen at most; a picture with more continues on the next screen
@@ -294,24 +297,44 @@ body.wall-page { height: 100vh; overflow: hidden; }
     } catch (e) { /* ignore */ }
   }
 
-  function refresh() {
-    return Promise.all([
-      window.FairDB.selectAll('entries', 'select=id,concept_slug,language_slug,language_label,headword,created_at,reviewed_at&status=eq.approved&order=id'),
-      S.fetch()
-    ]).then(function (r) {
-      entries = r[0]; scores = r[1];
-      lastOk = new Date(); online = true; loaded = true;
-      saveCache();
-      rebuild();
-      if (started && slides[pos] && slides[pos].entries.length !== shownCount) redraw();
-      renderScores();
-      renderStatus();
-    }, function (err) {
-      online = false; loaded = true;
-      renderStatus();
-      if (window.console) console.warn('[LILIEMA] word wall: could not fetch new data:', err && err.message);
+  // Words and scores are fetched separately, so that a failed or slow request for the scores never holds back new words.
+  function timeout(p) {
+    return new Promise(function (resolve, reject) {
+      var t = setTimeout(function () { reject(new Error('no answer')); }, TIMEOUT_MS);
+      p.then(function (v) { clearTimeout(t); resolve(v); }, function (e) { clearTimeout(t); reject(e); });
     });
   }
+  var fetchingWords = false, fetchingScores = false;
+  function refreshWords() {
+    if (fetchingWords) return Promise.resolve();
+    fetchingWords = true;
+    return timeout(window.FairDB.selectAll('entries', 'select=id,concept_slug,language_slug,language_label,headword,created_at,reviewed_at&status=eq.approved&order=id'))
+      .then(function (rows) {
+        entries = rows;
+        lastOk = new Date(); online = true; loaded = true;
+        saveCache();
+        rebuild();
+        // the picture on the screen again, with its new words: only if it is still the same picture
+        if (started && slides[pos] && slides[pos].concept.slug === currentSlug && slides[pos].entries.length !== shownCount) redraw();
+        renderStatus();
+      }, function (err) {
+        online = false; loaded = true;
+        renderStatus();
+        if (window.console) console.warn('[LILIEMA] word wall: could not fetch new words:', err && err.message);
+      }).then(function () { fetchingWords = false; });
+  }
+  function refreshScores() {
+    if (fetchingScores) return Promise.resolve();
+    fetchingScores = true;
+    return timeout(S.fetch()).then(function (r) {
+      scores = r;
+      if (lastOk) saveCache();
+      renderScores();
+    }, function (err) {
+      if (window.console) console.warn('[LILIEMA] word wall: could not fetch the scores:', err && err.message);
+    }).then(function () { fetchingScores = false; });
+  }
+  function refresh() { return Promise.all([refreshWords(), refreshScores()]); }
 
   // ------------------------------------------------------------ slides
   var slides = [], pos = -1, currentSlug = null, currentPage = 0, emptyTurn = 0, timer = null, paused = false;
@@ -363,11 +386,13 @@ body.wall-page { height: 100vh; overflow: hidden; }
     var map = {}, out = [];
     list.forEach(function (e) {
       var lang = e.language_slug ? langBySlug[e.language_slug] : null;
-      var key = lang ? 's:' + lang.slug : 'o:' + F.fold(e.language_label).trim();
+      if (!lang) { var o = window.FairLangs.of(null, e.language_label); if (o && o.kind === 'stall') lang = langBySlug[o.slug]; }
+      // a visitor's Gujaher is Baïnounk Gujaher (assets/langs.js); other names stay as the visitors wrote them
+      var key = lang ? 's:' + lang.slug : window.FairLangs.keyOf(null, e.language_label);
       var g = map[key];
-      if (!g) { g = map[key] = { name: lang ? lang.name : e.language_label, labels: [], labelSeen: {}, words: [], seen: {} }; out.push(g); }
+      if (!g) { g = map[key] = { name: lang ? lang.name : window.FairLangs.nameOf(null, e.language_label), labels: [], labelSeen: {}, words: [], seen: {} }; out.push(g); }
       var lk = F.fold(e.language_label).trim();
-      if (lang && lk && lk !== F.fold(lang.name).trim() && !g.labelSeen[lk]) { g.labelSeen[lk] = 1; g.labels.push(e.language_label); }
+      if (lk && lk !== F.fold(g.name).trim() && !g.labelSeen[lk]) { g.labelSeen[lk] = 1; g.labels.push(e.language_label); }
       var wk = String(e.headword).normalize('NFC').toLowerCase();
       var fresh = isNew(e);
       if (!g.seen[wk]) { g.seen[wk] = { text: e.headword, fresh: fresh }; g.words.push(g.seen[wk]); }
@@ -470,6 +495,9 @@ body.wall-page { height: 100vh; overflow: hidden; }
     scorePage++;
     showScorePage();
     var put = function () {
+      // words that arrived during the fade: the same picture as it is now (a picture that just got its first word shows it)
+      var now = slides[pos];
+      if (now && now.concept.slug === s.concept.slug && now.page === s.page) s = now;
       el.innerHTML = slideHtml(s);
       shownCount = s.entries.length;
       el.classList.remove('fading');
@@ -569,7 +597,8 @@ body.wall-page { height: 100vh; overflow: hidden; }
   renderCta(); renderScores(); renderStatus(); renderCredits();
   if (lastOk) show(0);                       // what this device saw last, while new data is fetched
   refresh().then(function () { if (!started || !slides[pos]) show(0); });
-  setInterval(refresh, REFRESH_MS);
+  setInterval(refreshWords, WORDS_MS);
+  setInterval(refreshScores, REFRESH_MS);
   window.addEventListener('resize', function () { showScorePage(); if (started) redraw(); });
 
   document.addEventListener('keydown', function (e) {

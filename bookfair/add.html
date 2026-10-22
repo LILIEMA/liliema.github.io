@@ -12,6 +12,7 @@
 <script src="assets/db.js"></script>
 <script src="assets/visit.js"></script>
 <script src="assets/keyboard.js"></script>
+<script src="assets/langs.js"></script>
 <style>
 .steps { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
 .steps li { padding: 8px 16px; border-radius: 20px; background: var(--white); border: 1.5px solid var(--border); color: var(--muted); font-weight: 600; font-size: 15px; }
@@ -150,6 +151,7 @@
     <input type="text" class="text-input" id="langInput" data-t-placeholder="add.lang.ph" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="60">
     <div class="suggest" id="langSuggest"></div>
     <div class="lang-grid" id="langGrid"></div>
+    <p class="lang-legend" id="langLegend" data-t="lang.legend" hidden></p>
   </section>
 
   <section class="step" id="step3" hidden>
@@ -355,7 +357,7 @@
   // consent is asked once per visit and shared with the other pages (visit.js); the language is kept for the next word
   var visitor = { langSlug: null, langLabel: '', used: {} };   // used: picture -> languages already sent
   var current = { concept: null };
-  function langKey(slug, labelText) { return slug ? 's:' + slug : 'o:' + F.fold(labelText).trim(); }
+  function langKey(slug, labelText) { return window.FairLangs.keyOf(slug, labelText); }   // Gujaher is Baïnounk Gujaher
 
   function showStep(n) {
     ['step1', 'step2', 'step3', 'done'].forEach(function (id, i) { $(id).hidden = (i + 1) !== n; });
@@ -403,9 +405,14 @@
   }
 
   // ------------------------------------------------------------ step 2: language
-  var langIndex = D.languages.map(function (l) {
-    return { lang: l, names: [l.name].concat(l.aliases).map(function (n) { return { text: n, f: F.fold(n).trim() }; }) };
-  });
+  // every language with words in the apps: the stall's, LILIEMA's and those visitors have added (assets/langs.js)
+  var L = window.FairLangs, langIndex = [];
+  function buildIndex() {
+    langIndex = L.all().map(function (l) {
+      return { lang: l, names: [l.name].concat(l.aliases).map(function (n) { return { text: n, f: F.fold(n).trim() }; }) };
+    });
+  }
+  buildIndex();
 
   function goLanguage() {
     chosenBox($('chosen2'), false);
@@ -417,17 +424,19 @@
   }
 
   function renderLanguages() {
-    var grid = $('langGrid');
+    var grid = $('langGrid'), tagged = false;
     grid.innerHTML = '';
-    D.languages.slice().sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); }).forEach(function (l) {
+    L.all().forEach(function (l) {
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'lang-chip';
-      var done = current.concept && (visitor.used[current.concept.slug] || {})[langKey(l.slug)];
-      b.innerHTML = F.esc(l.name) + (done ? ' ✓' : '') + '<small>' + F.esc(countryNames(l)) + '</small>';
+      var done = current.concept && (visitor.used[current.concept.slug] || {})[langKey(l.slug, l.name)];
+      b.innerHTML = '<span class="nm">' + F.esc(l.name) + L.badge(l) + (done ? ' ✓' : '') + '</span><small>' + F.esc(L.detail(l)) + '</small>';
       b.addEventListener('click', function () { setLanguage(l.slug, l.name); });
       grid.appendChild(b);
+      if (l.kind !== 'stall') tagged = true;
     });
+    $('langLegend').hidden = !tagged;
   }
 
   function renderSuggestions() {
@@ -448,7 +457,7 @@
     hits.slice(0, 6).forEach(function (h) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.textContent = h.name === h.lang.name ? h.lang.name : h.name + ' (' + h.lang.name + ')';
+      b.innerHTML = F.esc(h.name === h.lang.name ? h.lang.name : h.name + ' (' + h.lang.name + ')') + L.badge(h.lang);
       b.addEventListener('click', function () { setLanguage(h.lang.slug, h.name); });
       box.appendChild(b);
     });
@@ -479,7 +488,7 @@
 
   function goWord() {
     chosenBox($('chosen3'), true);
-    var l = D.languages.filter(function (x) { return x.slug === visitor.langSlug; })[0];
+    var l = L.of(visitor.langSlug, visitor.langLabel);   // LILIEMA's languages have their letters too
     keyboardLabels();
     kb.setLetters(l ? l.letters : []);
     $('wordInput').value = '';
@@ -596,6 +605,9 @@
     showPictureCredit();
   });
   F.apply();
+  // the visitors' languages from the database; the menu follows while the page is open
+  L.onChange(function () { buildIndex(); if (!$('step2').hidden) { renderLanguages(); renderSuggestions(); } });
+  L.load();
   renderPictures();
   showPictureCredit();
   updateQueue();

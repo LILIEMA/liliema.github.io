@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/fair.css">
 <script src="data/fair_data.js"></script>
 <script src="assets/fair.js"></script>
+<script src="assets/langs.js"></script>
 <script src="assets/keyboard.js"></script>
 <script src="assets/checkai.js"></script>
 <script src="assets/vendor/xlsx-0.18.5.full.min.js"></script>
@@ -218,7 +219,7 @@
       'apv.tab.ai': 'Tekoälyn sanat', 'apv.tab.export': 'Vienti', 'apv.tab.password': 'Vaihda salasana',
       'apv.rules': 'Hyväksytyt sanat näkyvät sanaseinällä. Hylkää nimet, henkilötiedot ja loukkaavat sanat.',
       'apv.none': 'Ei sanoja.',
-      'apv.filter.all': 'Kaikki kielet',
+      'apv.filter.all': 'Kaikki kielet', 'apv.filter.others': 'Muut kielet',
       'apv.updated': function (t) { return 'Päivitetty ' + t; },
       'apv.approve': 'Hyväksy', 'apv.edit': 'Korjaa', 'apv.reject': 'Hylkää', 'apv.tonew': 'Palauta uusiin',
       'apv.save': 'Tallenna ja hyväksy', 'apv.cancel': 'Peruuta',
@@ -263,7 +264,7 @@
       'apv.tab.ai': 'AI:ns ord', 'apv.tab.export': 'Export', 'apv.tab.password': 'Byt lösenord',
       'apv.rules': 'Godkända ord visas på ordväggen. Avvisa namn, personuppgifter och allt som är stötande.',
       'apv.none': 'Inga ord.',
-      'apv.filter.all': 'Alla språk',
+      'apv.filter.all': 'Alla språk', 'apv.filter.others': 'Andra språk',
       'apv.updated': function (t) { return 'Uppdaterad ' + t; },
       'apv.approve': 'Godkänn', 'apv.edit': 'Rätta', 'apv.reject': 'Avvisa', 'apv.tonew': 'Tillbaka till nya',
       'apv.save': 'Spara och godkänn', 'apv.cancel': 'Avbryt',
@@ -308,7 +309,7 @@
       'apv.tab.ai': 'AI words', 'apv.tab.export': 'Export', 'apv.tab.password': 'Change password',
       'apv.rules': 'Approved words appear on the word wall. Reject names, personal details and anything offensive.',
       'apv.none': 'No words.',
-      'apv.filter.all': 'All languages',
+      'apv.filter.all': 'All languages', 'apv.filter.others': 'Other languages',
       'apv.updated': function (t) { return 'Updated ' + t; },
       'apv.approve': 'Approve', 'apv.edit': 'Correct', 'apv.reject': 'Reject', 'apv.tonew': 'Back to new',
       'apv.save': 'Save and approve', 'apv.cancel': 'Cancel',
@@ -353,7 +354,7 @@
       'apv.tab.ai': 'Mots de l’IA', 'apv.tab.export': 'Export', 'apv.tab.password': 'Changer le mot de passe',
       'apv.rules': 'Les mots validés apparaissent sur le mur de mots. Refusez les noms, les données personnelles et tout ce qui est offensant.',
       'apv.none': 'Aucun mot.',
-      'apv.filter.all': 'Toutes les langues',
+      'apv.filter.all': 'Toutes les langues', 'apv.filter.others': 'Autres langues',
       'apv.updated': function (t) { return 'Mis à jour à ' + t; },
       'apv.approve': 'Valider', 'apv.edit': 'Corriger', 'apv.reject': 'Refuser', 'apv.tonew': 'Remettre en attente',
       'apv.save': 'Enregistrer et valider', 'apv.cancel': 'Annuler',
@@ -502,6 +503,7 @@
       // LILIEMA's own words under the pictures (source liliema_list) are the list, not visitors' words: not reviewed, not exported
       entries = r[0].filter(function (e) { return e.source !== 'liliema_list'; }); drafts = r[1]; checks = r[2]; lastLoad = new Date();
       $('appError').hidden = true;
+      filterOptions();
       render();
       return true;
     }, function (err) {
@@ -561,9 +563,32 @@
     sel.innerHTML = html;
   }
 
+  // the language filter: the stall's languages, then LILIEMA's and the visitors' languages that have words here
+  function filterOptions() {
+    var L = window.FairLangs, html = '<option value="">' + F.esc(F.t('apv.filter.all')) + '</option>', seen = {}, others = [];
+    D.languages.slice().sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); }).forEach(function (l) {
+      html += '<option value="s:' + l.slug + '"' + (langFilter === 's:' + l.slug ? ' selected' : '') + '>' + F.esc(l.name) + '</option>';
+    });
+    entries.forEach(function (e) {
+      var k = L.keyOf(e.language_slug, e.language_label), l = L.of(e.language_slug, e.language_label);
+      if (k.indexOf('s:') === 0 || seen[k]) return;
+      seen[k] = 1;
+      others.push({ key: k, name: L.nameOf(e.language_slug, e.language_label), tag: F.t(l && l.kind === 'liliema' ? 'lang.tag.liliema' : 'lang.tag.visitors') });
+    });
+    others.sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); });
+    if (others.length) {
+      html += '<optgroup label="' + F.esc(F.t('apv.filter.others')) + '">' + others.map(function (o) {
+        return '<option value="' + F.esc(o.key) + '"' + (langFilter === o.key ? ' selected' : '') + '>' + F.esc(o.name + ' (' + o.tag + ')') + '</option>';
+      }).join('') + '</optgroup>';
+    }
+    if (langFilter && html.indexOf('value="' + F.esc(langFilter) + '"') < 0) langFilter = '';   // that language has no words here now
+    if (html !== lastFilterHtml) { lastFilterHtml = html; $('langFilter').innerHTML = html; }   // unchanged: an open list stays open
+  }
+  var lastFilterHtml = '';
+
   function renderEntries() {
     var status = tab === 'new' ? 'draft' : tab;
-    var list = entries.filter(function (e) { return e.status === status && (!langFilter || e.language_slug === langFilter); });
+    var list = entries.filter(function (e) { return e.status === status && (!langFilter || window.FairLangs.keyOf(e.language_slug, e.language_label) === langFilter); });
     if (status !== 'draft') list.reverse();   // newest first; new words oldest first
     $('rules').hidden = tab !== 'new';
     $('noEntries').hidden = list.length > 0;
@@ -853,7 +878,7 @@
     $('appBox').hidden = false;
     $('signinError').hidden = true;
     $('who').textContent = F.t('apv.signedin', session.email);
-    languageOptions($('langFilter'), langFilter, true);
+    filterOptions();
     tab = 'new';
     clearInterval(pollTimer);
     pollTimer = setInterval(function () { if (!editing && !rejecting) load(); }, POLL_MS);
@@ -872,7 +897,7 @@
   // ------------------------------------------------------------ start
   F.initHeader();
   F.onLang(function () {
-    if (session) { $('who').textContent = F.t('apv.signedin', session.email); languageOptions($('langFilter'), langFilter, true); render(); }
+    if (session) { $('who').textContent = F.t('apv.signedin', session.email); filterOptions(); render(); }
   });
   F.apply();
 

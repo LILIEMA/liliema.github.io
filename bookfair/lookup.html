@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/fair.css">
 <script src="data/fair_data.js"></script>
 <script src="assets/fair.js"></script>
+<script src="assets/langs.js"></script>
 <script src="assets/visit.js"></script>
 <script src="assets/db.js"></script>
 <script src="assets/keyboard.js"></script>
@@ -402,9 +403,11 @@ mark { background: #f6e08e; color: inherit; border-radius: 3px; padding: 0 1px; 
     }
     w.entries.forEach(function (e) {
       var lang = e.language_slug ? W.language(e.language_slug) : null;
-      var g = lang ? group('s:' + lang.slug, lang.name, lang.slug) : group('o:' + F.fold(e.language_label).trim(), e.language_label, null);
+      if (!lang) { var o = window.FairLangs.of(null, e.language_label); if (o && o.kind === 'stall') lang = W.language(o.slug); }
+      var g = lang ? group('s:' + lang.slug, lang.name, lang.slug) :   // a visitor's Gujaher is Baïnounk Gujaher (assets/langs.js)
+        group(window.FairLangs.keyOf(null, e.language_label), window.FairLangs.nameOf(null, e.language_label), null);
       var lk = F.fold(e.language_label).trim();
-      if (lang && lk && lk !== F.fold(lang.name).trim() && !g.seenLabel[lk]) { g.seenLabel[lk] = 1; g.labels.push(e.language_label); }
+      if (lk && lk !== F.fold(g.name).trim() && !g.seenLabel[lk]) { g.seenLabel[lk] = 1; g.labels.push(e.language_label); }
       var k = W.exact(e.headword);
       if (!g.seen[k]) { g.seen[k] = 1; g.entries.push(e); }
       if (isHit(r, e)) g.hit = true;
