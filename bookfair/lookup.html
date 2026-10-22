@@ -406,6 +406,7 @@ mark { background: #f6e08e; color: inherit; border-radius: 3px; padding: 0 1px; 
       if (!lang) { var o = window.FairLangs.of(null, e.language_label); if (o && o.kind === 'stall') lang = W.language(o.slug); }
       var g = lang ? group('s:' + lang.slug, lang.name, lang.slug) :   // a visitor's Gujaher is Baïnounk Gujaher (assets/langs.js)
         group(window.FairLangs.keyOf(null, e.language_label), window.FairLangs.nameOf(null, e.language_label), null);
+      if (!lang && g.linked === undefined) g.linked = window.FairLangs.isLinked(e.language_label);
       var lk = F.fold(e.language_label).trim();
       if (lk && lk !== F.fold(g.name).trim() && !g.seenLabel[lk]) { g.seenLabel[lk] = 1; g.labels.push(e.language_label); }
       var k = W.exact(e.headword);
@@ -418,6 +419,8 @@ mark { background: #f6e08e; color: inherit; border-radius: 3px; padding: 0 1px; 
       g.drafts.push(d);
       if (isHit(r, d)) g.hit = true;
     });
+    // names linked as one language stay side by side, as the visitors wrote them (Chichewa / nyanja)
+    list.forEach(function (g) { if (g.linked) { g.name = window.FairLangs.joinNames([g.name].concat(g.labels)); g.labels = []; } });
     list.sort(function (a, b) { return (b.hit ? 1 : 0) - (a.hit ? 1 : 0) || a.name.localeCompare(b.name, F.locale()); });
     return list;
   }

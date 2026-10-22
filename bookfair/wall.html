@@ -390,7 +390,11 @@ body.wall-page { height: 100vh; overflow: hidden; }
       // a visitor's Gujaher is Baïnounk Gujaher (assets/langs.js); other names stay as the visitors wrote them
       var key = lang ? 's:' + lang.slug : window.FairLangs.keyOf(null, e.language_label);
       var g = map[key];
-      if (!g) { g = map[key] = { name: lang ? lang.name : window.FairLangs.nameOf(null, e.language_label), labels: [], labelSeen: {}, words: [], seen: {} }; out.push(g); }
+      if (!g) {
+        g = map[key] = { name: lang ? lang.name : window.FairLangs.nameOf(null, e.language_label), linked: !lang && window.FairLangs.isLinked(e.language_label),
+          labels: [], labelSeen: {}, words: [], seen: {} };
+        out.push(g);
+      }
       var lk = F.fold(e.language_label).trim();
       if (lk && lk !== F.fold(g.name).trim() && !g.labelSeen[lk]) { g.labelSeen[lk] = 1; g.labels.push(e.language_label); }
       var wk = String(e.headword).normalize('NFC').toLowerCase();
@@ -398,6 +402,8 @@ body.wall-page { height: 100vh; overflow: hidden; }
       if (!g.seen[wk]) { g.seen[wk] = { text: e.headword, fresh: fresh }; g.words.push(g.seen[wk]); }
       else if (fresh) g.seen[wk].fresh = true;
     });
+    // names linked as one language stay side by side, as the visitors wrote them (Chichewa / nyanja)
+    out.forEach(function (g) { if (g.linked) { g.name = window.FairLangs.joinNames([g.name].concat(g.labels)); g.labels = []; } });
     out.sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); });
     return out;
   }

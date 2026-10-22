@@ -571,10 +571,13 @@
     });
     entries.forEach(function (e) {
       var k = L.keyOf(e.language_slug, e.language_label), l = L.of(e.language_slug, e.language_label);
-      if (k.indexOf('s:') === 0 || seen[k]) return;
-      seen[k] = 1;
-      others.push({ key: k, name: L.nameOf(e.language_slug, e.language_label), tag: F.t(l && l.kind === 'liliema' ? 'lang.tag.liliema' : 'lang.tag.visitors') });
+      if (k.indexOf('s:') === 0) return;
+      if (seen[k]) { seen[k].labels.push(e.language_label); return; }
+      seen[k] = { key: k, name: L.nameOf(e.language_slug, e.language_label), labels: [e.language_label], linked: !e.language_slug && L.isLinked(e.language_label),
+        tag: F.t(l && l.kind === 'liliema' ? 'lang.tag.liliema' : 'lang.tag.visitors') };
+      others.push(seen[k]);
     });
+    others.forEach(function (o) { if (o.linked) o.name = L.joinNames(o.labels); });   // linked names side by side: Chichewa / nyanja
     others.sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); });
     if (others.length) {
       html += '<optgroup label="' + F.esc(F.t('apv.filter.others')) + '">' + others.map(function (o) {

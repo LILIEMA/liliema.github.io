@@ -6,6 +6,8 @@
    - Languages added by visitors: the names visitors gave to languages that are not in the menus, from approved
      words only (the stall team has seen them). Tagged as added by visitors, like the AI's words are tagged AI.
    A visitor's name for a language in the menus counts as that language (Gujaher is Baïnounk Gujaher).
+   Names linked as one language (LINKED) each stay as the visitors wrote them, in the menus and on the screens, and
+   their words are shown together under all the names used (Chichewa / nyanja).
    The visitors' languages are read from the database and kept on this device for the next visit. */
 (function () {
   'use strict';
@@ -42,22 +44,27 @@
     fi: { 'lang.tag.liliema': 'LILIEMA', 'lang.tag.visitors': 'kävijät',
       'lang.words': function (n) { return n === 1 ? '1 sana' : n + ' sanaa'; },
       'lang.legend': 'LILIEMA: LILIEMAn omien sanojen kieli · kävijät: kävijöiden lisäämä kieli',
-      'lang.notgame': 'ei vielä pelissä' },
+      'lang.notgame': 'ei vielä pelissä',
+      'lang.also': function (n) { return 'myös: ' + n; } },
     sv: { 'lang.tag.liliema': 'LILIEMA', 'lang.tag.visitors': 'besökare',
       'lang.words': function (n) { return n === 1 ? '1 ord' : n + ' ord'; },
       'lang.legend': 'LILIEMA: språk i LILIEMAs egna ord · besökare: språk som besökare har lagt till',
-      'lang.notgame': 'inte med i spelet ännu' },
+      'lang.notgame': 'inte med i spelet ännu',
+      'lang.also': function (n) { return 'även: ' + n; } },
     en: { 'lang.tag.liliema': 'LILIEMA', 'lang.tag.visitors': 'visitors',
       'lang.words': function (n) { return n === 1 ? '1 word' : n + ' words'; },
       'lang.legend': 'LILIEMA: a language of LILIEMA’s own words · visitors: a language added by visitors',
-      'lang.notgame': 'not in the game yet' },
+      'lang.notgame': 'not in the game yet',
+      'lang.also': function (n) { return 'also: ' + n; } },
     fr: { 'lang.tag.liliema': 'LILIEMA', 'lang.tag.visitors': 'visiteurs',
       'lang.words': function (n) { return n === 1 ? '1 mot' : n + ' mots'; },
       'lang.legend': 'LILIEMA : langue des mots de LILIEMA · visiteurs : langue ajoutée par des visiteurs',
-      'lang.notgame': 'pas encore dans le jeu' }
+      'lang.notgame': 'pas encore dans le jeu',
+      'lang.also': function (n) { return 'aussi : ' + n; } }
   });
 
   function fold(s) { return F.fold(String(s == null ? '' : s).normalize('NFC')).trim().replace(/\s+/g, ' '); }
+  function cmp(a, b) { return a.localeCompare(b, F.locale()); }
 
   // the stall's languages and LILIEMA's, by every name (folded); a LILIEMA language the stall already lists is the stall's
   var stall = (D.languages || []).map(function (l) {
@@ -74,6 +81,18 @@
     names.forEach(function (n) { if (!byName[fold(n)]) byName[fold(n)] = l; });
   });
 
+  // Names visitors give to one language, linked (22 October 2026): each name keeps its own place in the menus and is
+  // stored as the visitor wrote it; the words under any of them count as one language. Matched like every name here,
+  // so capitals, accents and spaces do not matter (Chicheŵa is Chichewa). More sets can be added as further lines.
+  var LINKED = [
+    ['Chichewa', 'Nyanja', 'Chewa', 'Chinyanja', 'Cinyanja']
+  ];
+  var linkOf = {};   // folded name -> the first name of its set, folded; the stall's and LILIEMA's names are not linked
+  LINKED.forEach(function (set) {
+    set.forEach(function (n) { var k = fold(n); if (k && !byName[k] && !linkOf[k]) linkOf[k] = fold(set[0]); });
+  });
+  function linkKey(label) { var k = linkOf[fold(label)]; return k ? 'o:' + k : null; }
+
   // the visitors' languages: approved words in languages that are not in the menus, by their folded name
   var visitors = [], listeners = [], loading = null;
   function fromRows(rows) {
@@ -83,7 +102,7 @@
       var k = fold(r.language_label);
       if (!k || byName[k]) return;
       var v = by[k];
-      if (!v) { v = by[k] = { kind: 'visitor', slug: null, name: null, aliases: [], letters: [], countries: [], count: 0, spellings: {} }; out.push(v); }
+      if (!v) { v = by[k] = { kind: 'visitor', slug: null, name: null, aliases: [], letters: [], countries: [], count: 0, also: [], key: k, spellings: {} }; out.push(v); }
       v.count++;
       var sp = String(r.language_label).normalize('NFC').trim().replace(/\s+/g, ' ');
       v.spellings[sp] = (v.spellings[sp] || 0) + 1;
@@ -93,6 +112,18 @@
       v.aliases = Object.keys(v.spellings).filter(function (s) { return s !== v.name; });
       delete v.spellings;
     });
+    // linked names: each keeps its own place, with the words of all of them and the other names in use
+    var sets = {};
+    out.forEach(function (v) { var lk = linkOf[v.key]; if (lk) (sets[lk] = sets[lk] || []).push(v); });
+    Object.keys(sets).forEach(function (lk) {
+      var vs = sets[lk], total = 0;
+      vs.forEach(function (v) { total += v.count; });
+      vs.forEach(function (v) {
+        v.count = total;
+        v.also = vs.filter(function (o) { return o !== v; }).map(function (o) { return o.name; }).sort(cmp);
+      });
+    });
+    out.forEach(function (v) { delete v.key; });
     return out;
   }
   function useRows(rows) {
@@ -119,7 +150,7 @@
     return loading;
   }
 
-  function sortByName(list) { return list.slice().sort(function (a, b) { return a.name.localeCompare(b.name, F.locale()); }); }
+  function sortByName(list) { return list.slice().sort(function (a, b) { return cmp(a.name, b.name); }); }
   function find(name) { var k = fold(name); return byName[k] || visitors.filter(function (v) { return fold(v.name) === k || v.aliases.some(function (a) { return fold(a) === k; }); })[0] || null; }
 
   window.FairLangs = {
@@ -136,7 +167,18 @@
       var l = this.of(slug, label);
       if (l && l.kind === 'stall') return 's:' + l.slug;
       if (l && l.kind === 'liliema') return 'l:' + fold(l.name);
-      return 'o:' + fold(label);
+      return linkKey(label) || 'o:' + fold(label);   // linked names share one key
+    },
+    /* whether a name is linked with others as one language (then its words are shown under all the names used) */
+    isLinked: function (label) { return !!linkKey(label); },
+    /* names linked as one language, side by side as the visitors wrote them: Chichewa / nyanja */
+    joinNames: function (labels) {
+      var seen = {}, out = [];
+      (labels || []).forEach(function (n) {
+        var k = fold(n);
+        if (k && !seen[k]) { seen[k] = 1; out.push(String(n).normalize('NFC').trim().replace(/\s+/g, ' ')); }
+      });
+      return out.sort(cmp).join(' / ');
     },
     nameOf: function (slug, label) {
       var l = this.of(slug, label);
@@ -153,8 +195,12 @@
         return c ? (c[F.lang] || c.en) : k;
       }).join(', ');
     },
-    /* the line under a name in a menu: its countries, or for a visitors' language how many words it has */
-    detail: function (l) { return l.kind === 'visitor' ? F.t('lang.words', l.count) : this.countryNames(l); },
+    /* the line under a name in a menu: its countries, or for a visitors' language how many words it has and the
+       names linked with it */
+    detail: function (l) {
+      if (l.kind !== 'visitor') return this.countryNames(l);
+      return F.t('lang.words', l.count) + (l.also && l.also.length ? ' · ' + F.t('lang.also', l.also.join(', ')) : '');
+    },
     load: load,
     onChange: function (f) { listeners.push(f); },
     /* for tests */
