@@ -12,7 +12,6 @@
 <script src="assets/db.js"></script>
 <script src="assets/visit.js"></script>
 <script src="assets/keyboard.js"></script>
-<script src="assets/langs.js"></script>
 <script src="assets/checkai.js"></script>
 <style>
 .step h2 { font-family: var(--font-display); color: var(--teal-dark); font-size: 24px; margin: 4px 0 14px; }
@@ -175,7 +174,6 @@ a.link-btn { display: inline-flex; align-items: center; }
         <a class="link-btn" href="add.html" data-t="chk.addlink"></a>
       </div>
       <div class="lang-grid" id="langGrid"></div>
-      <p class="lang-legend" id="langLegend" data-t="lang.legend" hidden></p>
     </div>
   </section>
 
@@ -544,25 +542,6 @@ a.link-btn { display: inline-flex; align-items: center; }
         b.addEventListener('click', function () { startLanguage(l.slug, l.name); });
         grid.appendChild(b);
       });
-    // LILIEMA's languages and those visitors have added: the AI wrote no words in them; Add a word takes their words
-    var tagged = false;
-    window.FairLangs.all().forEach(function (l) {
-      if (l.slug && byLang[l.slug]) return;
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'lang-chip';
-      b.innerHTML = '<span class="nm">' + F.esc(l.name) + window.FairLangs.badge(l) + '</span><small>' + F.esc(window.FairLangs.detail(l)) + ' · ' + F.esc(F.t('lang.notgame')) + '</small>';
-      b.addEventListener('click', function () { notInGame(l.name); });
-      grid.appendChild(b);
-      if (l.kind !== 'stall') tagged = true;
-    });
-    $('langLegend').hidden = !tagged;
-  }
-
-  function notInGame(name) {
-    $('notInText').textContent = F.t('chk.lang.notin', name);
-    $('notIn').hidden = false;
-    $('notIn').scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   function renderSuggestions() {
@@ -845,9 +824,6 @@ a.link-btn { display: inline-flex; align-items: center; }
 
   // ------------------------------------------------------------ start
   F.initHeader();
-  // LILIEMA's and the visitors' languages in the menu, read from the database; the menu follows while the page is open
-  window.FairLangs.onChange(function () { if (!$('stepLang').hidden) renderLanguages(); });
-  window.FairLangs.load();
   F.onLang(function () {
     var ticked = $('consentCheck').checked;   // a box ticked before switching the language stays ticked
     renderCredits();
