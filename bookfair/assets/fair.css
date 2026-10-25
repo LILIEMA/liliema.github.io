@@ -110,3 +110,15 @@ button, input, select { font: inherit; }
 .o-badge.v { color: var(--gold-dark); background: var(--gold-light); }
 .lang-legend { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
 .lang-chip .nm { display: block; }   /* the name and its tag on one line */
+
+/* After the fair: the notice on the visitor pages and no more invitations to add words (fair.js, CLOSED) */
+.closed-notice { margin: 0 0 18px; padding: 12px 16px; border-left: 4px solid var(--teal); background: var(--teal-light);
+  border-radius: 6px; color: var(--teal-dark); font-weight: 600; line-height: 1.45; }
+.closed-notice p { margin: 0; }
+.closed-notice .closed-links { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 0 18px; }
+.closed-notice a { color: var(--teal-dark); font-weight: 700; text-decoration: underline; display: inline-flex; align-items: center; min-height: 40px; }
+body.closed-add main.app > :not(.closed-notice) { display: none !important; }
+body.fair-closed .tile[href="add.html"],
+body.fair-closed .variation a[href="add.html"],
+body.fair-closed #emptyLink { display: none !important; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }

@@ -19,6 +19,13 @@
   var strings = { fi: {}, sv: {}, en: {}, fr: {} };
   var listeners = [];
 
+  // After the fair (25 October 2026) the pages are a read-only record: the database takes no new words, answers or
+  // visit counts (liliema-ops sql/bookfair_close.sql). Texts with a key ending in @closed replace their open version,
+  // Add a word shows a notice instead of the form, and Check the AI shows the results instead of the game. Set CLOSED
+  // to false only after reopening the database with the lines in that script's header. (Tests of the open pages set
+  // window.FAIR_TEST_OPEN before this file loads.)
+  var CLOSED = window.FAIR_TEST_OPEN !== true;
+
   // Letters that do not decompose under NFD, folded for searching
   var FOLD = {
     'ŋ': 'ng', 'ɓ': 'b', 'ɗ': 'd', 'ƴ': 'y', 'ɲ': 'ny',
@@ -38,6 +45,7 @@
   var Fair = {
     LANGS: LANGS,
     get lang() { return lang; },
+    closed: CLOSED,
     strings: strings,   // read-only use: lets the checking workbook list every text
 
     /* Register strings: Fair.add({ fi: {...}, sv: {...}, en: {...}, fr: {...} }) */
@@ -51,10 +59,17 @@
     /* Translate a key; a string value or a function of the extra arguments */
     t: function (key) {
       var args = Array.prototype.slice.call(arguments, 1);
+      if (CLOSED && (strings[lang][key + '@closed'] !== undefined || strings.en[key + '@closed'] !== undefined)) key += '@closed';
       var v = strings[lang][key];
       if (v === undefined) v = strings.en[key];
       if (v === undefined) return key;
       return typeof v === 'function' ? v.apply(null, args) : v;
+    },
+
+    /* A text in a given interface language (for lines shown in all four at once), with the same @closed rule as t */
+    str: function (l, key) {
+      var s = strings[l] || {};
+      return CLOSED && s[key + '@closed'] !== undefined ? s[key + '@closed'] : s[key];
     },
 
     setLang: function (l) {
@@ -201,6 +216,64 @@
       'kb.space': 'espace', 'kb.all': 'toutes', 'kb.lang': 'langue', 'kb.shift': 'majuscules', 'kb.backspace': 'effacer'
     }
   });
+
+  // After the fair (see CLOSED above): the notice, and the texts that no longer invite visitors to add words or answers
+  Fair.add({
+    fi: {
+      'closed.notice': 'Helsingin kirjamessut 2026 ovat päättyneet: kiitos sanoistasi ja vastauksistasi! Sovelluksiin ei voi enää lisätä sanoja eikä vastauksia, mutta voit yhä etsiä sanoja, katsoa sanaseinää ja pelata Kielietsivää.',
+      'closed.lookup': 'Etsi sana', 'closed.start': 'Etusivulle',
+      'var.note@closed': 'Omat sanasi voivat olla erilaisia kuin tässä näkyvät.',
+      'chk.tile@closed': 'Mitä puhujat vastasivat sanoista, jotka tekoäly kirjoitti afrikkalaisilla kielillä.',
+      'wall.cta@closed': 'Etsi näitä sanoja puhelimellasi', 'wall.nowords@closed': 'Tälle kuvalle ei ole sanoja.',
+      'ai.text@closed': 'Nämä sanat on kirjoittanut tekoäly (Anthropicin Claude). Messuilla puhujat kertoivat meille, ovatko ne oikein.',
+      'lu.none.sub@closed': 'Kokeile toista kirjoitusasua.'
+    },
+    sv: {
+      'closed.notice': 'Helsingfors bokmässa 2026 är över: tack för dina ord och svar! Det går inte längre att lägga till ord eller svar i apparna, men du kan fortfarande slå upp ord, titta på ordväggen och spela Språkdetektiven.',
+      'closed.lookup': 'Slå upp ett ord', 'closed.start': 'Till startsidan',
+      'var.note@closed': 'Dina ord kan vara annorlunda än de som visas här.',
+      'chk.tile@closed': 'Vad talarna svarade om orden som en AI skrev på afrikanska språk.',
+      'wall.cta@closed': 'Slå upp orden i din telefon', 'wall.nowords@closed': 'Inga ord för den här bilden.',
+      'ai.text@closed': 'De här orden har skrivits av en AI (Claude, från Anthropic). På mässan berättade talare för oss om de stämmer.',
+      'lu.none.sub@closed': 'Pröva en annan stavning.'
+    },
+    en: {
+      'closed.notice': 'The Helsinki Book Fair 2026 is over: thank you for your words and answers! The apps no longer take new words or answers, but you can still look up words, watch the word wall and play the Language Detective.',
+      'closed.lookup': 'Look up a word', 'closed.start': 'To the start page',
+      'var.note@closed': 'Your words may be different from the ones shown here.',
+      'chk.tile@closed': 'What speakers answered about the words an AI wrote in African languages.',
+      'wall.cta@closed': 'Look up these words on your phone', 'wall.nowords@closed': 'No words for this picture.',
+      'ai.text@closed': 'These words were written by an AI (Claude, made by Anthropic). At the fair, speakers told us whether they are right.',
+      'lu.none.sub@closed': 'Try another spelling.'
+    },
+    fr: {
+      'closed.notice': 'Le Salon du livre d’Helsinki 2026 est terminé : merci pour vos mots et vos réponses ! Les applications n’acceptent plus de nouveaux mots ni de nouvelles réponses, mais vous pouvez toujours chercher des mots, regarder le mur de mots et jouer au Détective des langues.',
+      'closed.lookup': 'Cherchez un mot', 'closed.start': 'Vers la page d’accueil',
+      'var.note@closed': 'Vos mots peuvent être différents de ceux affichés ici.',
+      'chk.tile@closed': 'Ce que les locuteurs ont répondu sur les mots qu’une IA a écrits dans des langues africaines.',
+      'wall.cta@closed': 'Cherchez ces mots sur votre téléphone', 'wall.nowords@closed': 'Pas de mots pour cette image.',
+      'ai.text@closed': 'Ces mots ont été écrits par une IA (Claude, créée par Anthropic). Au salon, des locuteurs nous ont dit s’ils sont justes.',
+      'lu.none.sub@closed': 'Essayez une autre orthographe.'
+    }
+  });
+
+  // the notice at the top of every visitor page (not the word wall or the approval page); on Add a word only the notice
+  function closedPage() {
+    var page = window.location.pathname.split('/').pop() || 'index.html';
+    if (!CLOSED || page === 'approve.html' || page === 'wall.html' || !document.body) return;
+    document.body.classList.add('fair-closed');
+    var main = document.querySelector('main.app');
+    if (!main || main.querySelector('.closed-notice')) return;
+    var box = document.createElement('div');
+    box.className = 'closed-notice';
+    box.setAttribute('role', 'status');
+    box.innerHTML = '<p data-t="closed.notice"></p>' + (page === 'add.html'
+      ? '<p class="closed-links"><a class="link-btn" href="lookup.html" data-t="closed.lookup"></a> <a class="link-btn" href="index.html" data-t="closed.start"></a></p>' : '');
+    main.insertBefore(box, main.firstChild);
+    if (page === 'add.html') document.body.classList.add('closed-add');
+    Fair.apply(box);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', closedPage); else closedPage();
 
   window.Fair = Fair;
 })();

@@ -47,6 +47,9 @@
       'ai.text': 'Nämä sanat on kirjoittanut tekoäly (Anthropicin Claude). Kaltaisesi puhujat kertovat meille, ovatko ne oikein.',
       'credit.ai': function (model, date) {
         return 'Tekoälyn sanat: Claude (Anthropic, malli ' + model + '), ' + date + ', mallin omasta tietämyksestä ilman sanakirjoja. Niitä ei ole tarkistettu ennen messuja: messuvieraat tarkistavat ne.';
+      },
+      'credit.ai@closed': function (model, date) {   // after the fair (fair.js, CLOSED)
+        return 'Tekoälyn sanat: Claude (Anthropic, malli ' + model + '), ' + date + ', mallin omasta tietämyksestä ilman sanakirjoja. Niitä ei tarkistettu ennen messuja: messuvieraat tarkistivat ne.';
       }
     },
     sv: {
@@ -54,6 +57,9 @@
       'ai.text': 'De här orden har skrivits av en AI (Claude, från Anthropic). Talare som du berättar för oss om de stämmer.',
       'credit.ai': function (model, date) {
         return 'AI:ns ord: Claude (Anthropic, modell ' + model + '), ' + date + ', ur modellens egen kunskap utan ordböcker. De har inte granskats före mässan: mässans besökare granskar dem.';
+      },
+      'credit.ai@closed': function (model, date) {
+        return 'AI:ns ord: Claude (Anthropic, modell ' + model + '), ' + date + ', ur modellens egen kunskap utan ordböcker. De granskades inte före mässan: mässans besökare granskade dem.';
       }
     },
     en: {
@@ -61,6 +67,9 @@
       'ai.text': 'These words were written by an AI (Claude, made by Anthropic). Speakers like you tell us whether they are right.',
       'credit.ai': function (model, date) {
         return 'The AI’s words: Claude (Anthropic, model ' + model + '), ' + date + ', from the model’s own knowledge without dictionaries. They were not checked before the fair: the visitors check them.';
+      },
+      'credit.ai@closed': function (model, date) {
+        return 'The AI’s words: Claude (Anthropic, model ' + model + '), ' + date + ', from the model’s own knowledge without dictionaries. They were not checked before the fair: the visitors checked them.';
       }
     },
     fr: {
@@ -68,6 +77,9 @@
       'ai.text': 'Ces mots ont été écrits par une IA (Claude, créée par Anthropic). Des locuteurs comme vous nous disent s’ils sont justes.',
       'credit.ai': function (model, date) {
         return 'Les mots de l’IA : Claude (Anthropic, modèle ' + model + '), ' + date + ', d’après les connaissances propres du modèle, sans dictionnaire. Ils n’ont pas été vérifiés avant le salon : ce sont les visiteurs qui les vérifient.';
+      },
+      'credit.ai@closed': function (model, date) {
+        return 'Les mots de l’IA : Claude (Anthropic, modèle ' + model + '), ' + date + ', d’après les connaissances propres du modèle, sans dictionnaire. Ils n’ont pas été vérifiés avant le salon : ce sont les visiteurs qui les ont vérifiés.';
       }
     }
   });

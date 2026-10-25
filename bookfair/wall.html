@@ -574,7 +574,7 @@ body.wall-page { height: 100vh; overflow: hidden; }
   function renderCta() {
     var order = [F.lang].concat(F.LANGS.filter(function (l) { return l !== F.lang; }));
     $('cta').innerHTML = order.map(function (l) {
-      return '<li lang="' + l + '">' + F.esc(F.strings[l]['wall.cta']) + '</li>';
+      return '<li lang="' + l + '">' + F.esc(F.str(l, 'wall.cta')) + '</li>';
     }).join('');
   }
 

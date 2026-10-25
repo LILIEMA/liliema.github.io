@@ -132,6 +132,14 @@ a.link-btn { display: inline-flex; align-items: center; }
   .answer { min-height: 56px; }
   .game-pic img { width: min(100%, 260px); }
 }
+/* After the fair (fair.js, CLOSED): the results instead of the game */
+.results-card { overflow-x: auto; margin-top: 4px; }
+table.results { width: 100%; border-collapse: collapse; font-size: 15px; }
+table.results th, table.results td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.results th:first-child { text-align: left; white-space: normal; }
+table.results thead th { color: var(--teal-dark); font-size: 13px; vertical-align: bottom; }
+table.results tfoot th, table.results tfoot td { font-weight: 700; border-bottom: none; }
+.results-note { color: var(--muted); font-size: 14px; margin: 12px 0 4px; }
 </style>
 </head>
 <body data-title="ai.name">
@@ -151,6 +159,9 @@ a.link-btn { display: inline-flex; align-items: center; }
     <h1 class="page-title" data-t="ai.name"></h1>
     <p class="page-intro" data-t="chk.intro"></p>
   </section>
+
+  <!-- after the fair: the results -->
+  <section class="step" id="stepResults" hidden></section>
 
   <!-- 1 language -->
   <section class="step" id="stepLang">
@@ -300,6 +311,12 @@ a.link-btn { display: inline-flex; align-items: center; }
   F.add({
     fi: {
       'chk.intro': 'Tekoäly (Anthropicin Claude) on kirjoittanut näille kuville sanat afrikkalaisilla kielillä. Valitse jokin kielistäsi ja kerro, ovatko ne oikein. Muut kielesi voit tarkistaa sen jälkeen.',
+      'chk.intro@closed': 'Messujen aikana kävijät tarkistivat sanat, jotka tekoäly (Anthropicin Claude) kirjoitti näille kuville kuudellatoista afrikkalaisella kielellä. Tässä ovat heidän vastauksensa.',
+      'chkr.lang': 'Kieli', 'chkr.answers': 'Vastauksia', 'chkr.right': 'Oikein', 'chkr.wrong': 'Väärin', 'chkr.open': 'Ratkaisematta', 'chkr.total': 'Kaikki kielet',
+      'chkr.cap': 'Tekoälyn sanat kielittäin: vastausten määrä ja sanat, jotka useimmat puhujat pitivät oikeina tai vääriä, sekä sanat, joista ei ole ratkaisua.',
+      'chkr.rule': function (n) { return 'Sana katsotaan oikeaksi tai vääräksi, kun vähintään ' + n + ' puhujaa on vastannut ja useimmat heistä ovat samaa mieltä.'; },
+      'chkr.lookup': 'Etsi sana, niin näet jokaisen kuvan kohdalla tekoälyn sanan ja kävijöiden sanat',
+      'chkr.error': 'Tuloksia ei voitu ladata. Yritä myöhemmin uudelleen.',
       'chk.loading': 'Haetaan sanoja…',
       'chk.soon': 'Peli avautuu pian. Sillä välin voit lisätä sanoja omilla kielilläsi.',
       'chk.addlink': 'Siirry sivulle Lisää sana',
@@ -336,6 +353,12 @@ a.link-btn { display: inline-flex; align-items: center; }
     },
     sv: {
       'chk.intro': 'En AI (Claude, från Anthropic) har skrivit ord för de här bilderna på afrikanska språk. Välj ett av dina språk och berätta om de stämmer. Dina andra språk kan du granska efteråt.',
+      'chk.intro@closed': 'Under mässan granskade besökarna orden som en AI (Claude, från Anthropic) skrev för de här bilderna på sexton afrikanska språk. Här är deras svar.',
+      'chkr.lang': 'Språk', 'chkr.answers': 'Svar', 'chkr.right': 'Rätt', 'chkr.wrong': 'Fel', 'chkr.open': 'Oavgjort', 'chkr.total': 'Alla språk',
+      'chkr.cap': 'AI:ns ord per språk: antalet svar, orden som de flesta talare ansåg rätt eller fel, och orden som ännu inte är avgjorda.',
+      'chkr.rule': function (n) { return 'Ett ord räknas som rätt eller fel när minst ' + n + ' talare har svarat och de flesta av dem är överens.'; },
+      'chkr.lookup': 'Slå upp ett ord för att se AI:ns ord och besökarnas ord för varje bild',
+      'chkr.error': 'Resultaten kunde inte laddas. Försök igen senare.',
       'chk.loading': 'Hämtar ord…',
       'chk.soon': 'Spelet öppnar snart. Under tiden kan du lägga till ord på dina språk.',
       'chk.addlink': 'Gå till Lägg till ett ord',
@@ -372,6 +395,12 @@ a.link-btn { display: inline-flex; align-items: center; }
     },
     en: {
       'chk.intro': 'An AI (Claude, made by Anthropic) has written words for these pictures in African languages. Choose one of your languages and tell us whether they are right. You can check your other languages afterwards.',
+      'chk.intro@closed': 'During the fair, visitors checked the words that an AI (Claude, made by Anthropic) wrote for these pictures in sixteen African languages. Here is what they answered.',
+      'chkr.lang': 'Language', 'chkr.answers': 'Answers', 'chkr.right': 'Right', 'chkr.wrong': 'Wrong', 'chkr.open': 'Undecided', 'chkr.total': 'All languages',
+      'chkr.cap': 'The AI’s words by language: the number of answers, the words most speakers judged right or wrong, and the words not decided.',
+      'chkr.rule': function (n) { return 'A word counts as right or wrong once at least ' + n + ' speakers have answered and most of them agree.'; },
+      'chkr.lookup': 'Look up a word to see the AI’s word and the visitors’ words for each picture',
+      'chkr.error': 'The results could not be loaded. Please try again later.',
       'chk.loading': 'Fetching words…',
       'chk.soon': 'The game opens soon. Meanwhile, you can add words in your languages.',
       'chk.addlink': 'Go to Add a word',
@@ -408,6 +437,12 @@ a.link-btn { display: inline-flex; align-items: center; }
     },
     fr: {
       'chk.intro': 'Une IA (Claude, créée par Anthropic) a écrit des mots pour ces images dans des langues africaines. Choisissez l’une de vos langues et dites-nous s’ils sont justes. Vous pourrez vérifier vos autres langues ensuite.',
+      'chk.intro@closed': 'Pendant le salon, les visiteurs ont vérifié les mots qu’une IA (Claude, créée par Anthropic) a écrits pour ces images dans seize langues africaines. Voici leurs réponses.',
+      'chkr.lang': 'Langue', 'chkr.answers': 'Réponses', 'chkr.right': 'Juste', 'chkr.wrong': 'Faux', 'chkr.open': 'Non tranché', 'chkr.total': 'Toutes les langues',
+      'chkr.cap': 'Les mots de l’IA par langue : le nombre de réponses, les mots jugés justes ou faux par la plupart des locuteurs et les mots non tranchés.',
+      'chkr.rule': function (n) { return 'Un mot compte comme juste ou faux dès qu’au moins ' + n + ' locuteurs ont répondu et que la plupart sont d’accord.'; },
+      'chkr.lookup': 'Cherchez un mot pour voir le mot de l’IA et les mots des visiteurs pour chaque image',
+      'chkr.error': 'Les résultats n’ont pas pu être chargés. Réessayez plus tard.',
       'chk.loading': 'Chargement des mots…',
       'chk.soon': 'Le jeu ouvre bientôt. En attendant, vous pouvez ajouter des mots dans vos langues.',
       'chk.addlink': 'Aller à Ajoutez un mot',
@@ -788,6 +823,7 @@ a.link-btn { display: inline-flex; align-items: center; }
 
   // the page starts again for the next visitor; also when the visit ends elsewhere ("No, I'm new here", another tab)
   function resetPage() {
+    if (F.closed) return;   // after the fair the page shows only the results
     newVisitor();
     goLanguage();
   }
@@ -822,6 +858,43 @@ a.link-btn { display: inline-flex; align-items: center; }
   });
   // a box ticked but never used is unticked after 45 seconds without use, so the next person does not find it ticked
   V.onPause(function () { if (V.consent() === null) $('consentCheck').checked = false; });
+
+  // ------------------------------------------------------------ after the fair: the results instead of the game
+  var results = null, resultsError = false;
+  function renderResults() {
+    var box = $('stepResults');
+    box.hidden = false;
+    if (!results) { box.innerHTML = '<p class="notice">' + F.esc(F.t(resultsError ? 'chkr.error' : 'chk.loading')) + '</p>'; return; }
+    var by = S.byLanguage(results);
+    var rows = D.languages.map(function (l) { return { l: l, o: by[l.slug] }; }).filter(function (r) { return r.o && r.o.words > 0; })
+      .sort(function (a, b) { return b.o.judgements - a.o.judgements || a.l.name.localeCompare(b.l.name, F.locale()); });
+    var tot = { judgements: 0, right: 0, wrong: 0, open: 0 };
+    var cells = function (o) {
+      var open = (o.open || 0) + (o.partly || 0);
+      return '<td>' + F.number(o.judgements) + '</td><td>' + F.number(o.right) + '</td><td>' + F.number(o.wrong) + '</td><td>' + F.number(open) + '</td>';
+    };
+    var body = rows.map(function (r) {
+      tot.judgements += r.o.judgements; tot.right += r.o.right; tot.wrong += r.o.wrong; tot.open += (r.o.open || 0) + (r.o.partly || 0);
+      return '<tr><th scope="row">' + F.esc(r.l.name) + '</th>' + cells(r.o) + '</tr>';
+    }).join('');
+    box.innerHTML = '<div class="card results-card"><table class="results"><caption class="visually-hidden">' + F.esc(F.t('chkr.cap')) + '</caption>' +
+      '<thead><tr><th scope="col">' + F.esc(F.t('chkr.lang')) + '</th><th scope="col">' + F.esc(F.t('chkr.answers')) + '</th><th scope="col">' +
+      F.esc(F.t('chkr.right')) + '</th><th scope="col">' + F.esc(F.t('chkr.wrong')) + '</th><th scope="col">' + F.esc(F.t('chkr.open')) + '</th></tr></thead>' +
+      '<tbody>' + body + '</tbody><tfoot><tr><th scope="row">' + F.esc(F.t('chkr.total')) + '</th>' + cells(tot) + '</tr></tfoot></table></div>' +
+      '<p class="results-note">' + F.esc(F.t('chkr.cap')) + ' ' + F.esc(F.t('chkr.rule', S.MIN)) + '</p>' +
+      '<p><a class="link-btn" href="lookup.html">' + F.esc(F.t('chkr.lookup')) + '</a></p>';
+  }
+  if (F.closed) {
+    F.initHeader();
+    ['stepLang', 'stepWord', 'stepResult', 'stepEnd'].forEach(function (id) { $(id).hidden = true; });
+    F.onLang(function () { renderCredits(); renderResults(); });
+    F.apply();
+    renderCredits();
+    renderResults();
+    S.fetch().then(function (rows) { results = rows || []; renderResults(); },
+      function (err) { resultsError = true; renderResults(); if (window.console) console.warn('[LILIEMA] Check the AI: no results:', err && err.message); });
+    return;
+  }
 
   // ------------------------------------------------------------ start
   F.initHeader();

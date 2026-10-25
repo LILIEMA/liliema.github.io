@@ -15,7 +15,7 @@
     'detective.html': 'detective', 'liliema.html': 'liliema' };
   var IDLE_MS = 2 * 60 * 1000;   // as visit.js: two minutes without use end a visit
   var page = PAGES[location.pathname.split('/').pop()];
-  if (!F || !page || !cfg.url || !cfg.key) return;
+  if (!F || F.closed || !page || !cfg.url || !cfg.key) return;   // after the fair (fair.js, CLOSED): nothing is counted
 
   function device() {
     var coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
