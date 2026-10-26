@@ -580,7 +580,7 @@
   function resetPage() {
     visitor = { langSlug: null, langLabel: '', used: {}, groups: {} };
     current = { concept: null };
-    showStep(1);
+    startPage();
   }
   function resetVisitor() { V.end(); resetPage(); }
   V.onEnd(resetPage);
@@ -647,7 +647,15 @@
   $('sameLangBtn').addEventListener('click', function () { goWord(); });   // words vary: another version, same picture and language
   $('anotherBtn').addEventListener('click', function () { current.concept = null; showStep(1); });
   $('nextBtn').addEventListener('click', function () { V.done(); resetPage(); });
-  showStep(1);
+  // filming copy: ?pic=cat opens the page on that picture (the session wall's code while the wall shows it)
+  var startPic = (function () {
+    var slug = new URLSearchParams(window.location.search).get('pic');
+    return concepts.filter(function (c) { return c.slug === slug; })[0] || null;
+  })();
+  function startPage() {
+    if (startPic) { current.concept = startPic; goLanguage(); } else showStep(1);
+  }
+  startPage();
   resetIdle();
   V.guard();
 })();
