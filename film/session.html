@@ -44,6 +44,12 @@ body.running, body.running * { cursor: none !important; }
 }
 .intro .start:focus-visible { outline: 4px solid var(--text); outline-offset: 4px; }
 .intro .small { font-size: clamp(14px, 2vh, 24px); color: var(--muted); }
+/* with pictures in the address: the first one on the start screen, so that it is clear before the start that it is set */
+.intro-pic { margin: 0 0 3vh; display: flex; flex-direction: column; align-items: center; gap: 1.8vh; }
+.intro-pic[hidden] { display: none; }
+.intro-pic img { flex: none; width: clamp(90px, 17vh, 210px); height: clamp(90px, 17vh, 210px); box-sizing: border-box; padding: 1.4vh; object-fit: contain;
+  background: #ffffff; border-radius: 1.4vh; box-shadow: 0 0 0 max(2px, .3vh) var(--gold); }
+.intro-pic figcaption { text-align: center; font-size: clamp(16px, 2.6vh, 30px); line-height: 1.45; font-weight: 600; color: var(--text); }
 
 /* the wall: a band with the title, then a fixed grid of tiles */
 .wall { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 1.4vh; padding: 1.8vh 1.4vw; }
@@ -105,7 +111,7 @@ body.running, body.running * { cursor: none !important; }
 }
 .qr-panel.small .qr-inner { grid-template-columns: 1fr; justify-items: center; padding: 5cqh; }
 
-/* the picture everyone answers (?pic=cat): a block of tiles in the top left corner, white like the code */
+/* the picture everyone answers (?pic=cat): a block of tiles in the middle of the wall, white like the code */
 .pic-panel {
   position: relative; z-index: 2; min-width: 0; min-height: 0; container-type: size;
   background: #ffffff; color: #0d2626; border-radius: 1.4vh; box-shadow: 0 0 0 max(2px, .3vh) var(--gold);
@@ -149,6 +155,7 @@ body.running, body.running * { cursor: none !important; }
     <p class="brand">LILIEMA</p>
     <h1 data-t="sw.title"></h1>
     <p data-t="sw.intro.text"></p>
+    <figure class="intro-pic" id="introPic" hidden><img id="introPicImg" src="" alt=""><figcaption id="introPicText"></figcaption></figure>
     <button type="button" class="start" id="startBtn" data-t="sw.start"></button>
     <p class="small" data-t="sw.intro.keys"></p>
     <p class="small" id="introWait" data-t="sw.wait" hidden></p>
@@ -202,7 +209,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.db': 'Tietokannan voi tyhjentää testin jälkeen ajamalla kuvausprojektin SQL Editorissa:',
       'sw.help.status': function (time, n) { return 'Päivitetty viimeksi ' + time + ' · sanoja seinällä: ' + n; },
       'sw.help.offline': 'Ei yhteyttä: yritetään uudelleen', 'sw.help.never': 'Ei vielä päivitetty',
-      'sw.pic.call': 'Mikä tämä on kielilläsi?', 'sw.k.p': 'seuraava kuva (koodi vie suoraan siihen)', 'sw.k.pp': 'edellinen kuva'
+      'sw.pic.call': 'Mikä tämä on kielilläsi?', 'sw.k.p': 'seuraava kuva (koodi vie suoraan siihen)', 'sw.k.pp': 'edellinen kuva',
+      'sw.intro.pic': function (name, n) { return (n > 1 ? 'Kuvia ' + n + ', ensimmäisenä ' + name : 'Ensimmäinen kuva: ' + name) + '. P\u00a0vaihtaa seuraavaan kuvaan.'; }
     },
     sv: {
       'sw.title': 'Ordvägg för passet', 'sw.heading': 'Ord på våra språk',
@@ -219,7 +227,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.db': 'Töm databasen efter ett test genom att köra detta i filmprojektets SQL Editor:',
       'sw.help.status': function (time, n) { return 'Senast uppdaterad ' + time + ' · ord på väggen: ' + n; },
       'sw.help.offline': 'Ingen anslutning: försöker igen', 'sw.help.never': 'Inte uppdaterad ännu',
-      'sw.pic.call': 'Vad heter det här på dina språk?', 'sw.k.p': 'nästa bild (koden leder direkt till den)', 'sw.k.pp': 'föregående bild'
+      'sw.pic.call': 'Vad heter det här på dina språk?', 'sw.k.p': 'nästa bild (koden leder direkt till den)', 'sw.k.pp': 'föregående bild',
+      'sw.intro.pic': function (name, n) { return (n > 1 ? 'Första av ' + n + ' bilder: ' + name : 'Första bilden: ' + name) + '. P\u00a0går vidare till nästa bild.'; }
     },
     en: {
       'sw.title': 'Session wall', 'sw.heading': 'Words in our languages',
@@ -236,7 +245,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.db': 'To empty the database after a test, run this in the SQL Editor of the filming project:',
       'sw.help.status': function (time, n) { return 'Last update ' + time + ' · words on the wall: ' + n; },
       'sw.help.offline': 'No connection: retrying', 'sw.help.never': 'Not updated yet',
-      'sw.pic.call': 'What is this called in your languages?', 'sw.k.p': 'next picture (the code leads straight to it)', 'sw.k.pp': 'previous picture'
+      'sw.pic.call': 'What is this called in your languages?', 'sw.k.p': 'next picture (the code leads straight to it)', 'sw.k.pp': 'previous picture',
+      'sw.intro.pic': function (name, n) { return (n > 1 ? 'First of ' + n + ' pictures: ' + name : 'First picture: ' + name) + '. P\u00a0moves on to the next picture.'; }
     },
     fr: {
       'sw.title': 'Mur de mots de la séance', 'sw.heading': 'Des mots dans nos langues',
@@ -253,7 +263,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.db': 'Pour vider la base de données après un test, exécutez ceci dans le SQL Editor du projet de tournage :',
       'sw.help.status': function (time, n) { return 'Dernière mise à jour ' + time + ' · mots sur le mur : ' + n; },
       'sw.help.offline': 'Pas de connexion : nouvelle tentative', 'sw.help.never': 'Pas encore mis à jour',
-      'sw.pic.call': 'Comment cela s’appelle-t-il dans vos langues ?', 'sw.k.p': 'image suivante (le code y mène directement)', 'sw.k.pp': 'image précédente'
+      'sw.pic.call': 'Comment cela s’appelle-t-il dans vos langues\u00a0?', 'sw.k.p': 'image suivante (le code y mène directement)', 'sw.k.pp': 'image précédente',
+      'sw.intro.pic': function (name, n) { return (n > 1 ? 'Première de ' + n + ' images\u00a0: ' + name : 'Première image\u00a0: ' + name) + '. P\u00a0passe à l’image suivante.'; }
     }
   });
 
@@ -277,8 +288,24 @@ body.running, body.running * { cursor: none !important; }
   }
   var PIC_ASK = (params.get('pic') || '').split(/[,;]+/).map(findPic).filter(Boolean);
   var PICS = PIC_ASK.length === 1 ? PICTURED.slice(PICTURED.indexOf(PIC_ASK[0])).concat(PICTURED.slice(0, PICTURED.indexOf(PIC_ASK[0]))) : PIC_ASK;
-  var PICS_KEY = PIC_ASK.map(function (c) { return c.slug; }).join(','), PIC_CELLS = [];
-  if (PICS.length) for (var pr = 0; pr < QS; pr++) for (var pc = 0; pc < QS; pc++) PIC_CELLS.push(pr * COLS + pc);
+  var PICS_KEY = PIC_ASK.map(function (c) { return c.slug; }).join(',');
+  // the picture's place: a block in the middle of the grid, clear of the code's corner. On the 6 x 5 grid 2 tiles wide
+  // and 3 high, so that it sits exactly in the middle; on grids with an even number of rows 2 x 2
+  function middleBox() {
+    var w0 = COLS >= 4 ? 2 : 1, h0 = ROWS >= 3 ? 2 : 1, w1 = COLS % 2 && COLS >= 5 ? 3 : w0, h1 = ROWS % 2 && ROWS >= 5 ? 3 : h0;
+    var sizes = [[w1, h1], [w0, h1], [w1, h0], [w0, h0]], best = null;
+    sizes.forEach(function (sz, i) {
+      for (var r = 0; r + sz[1] <= ROWS; r++) for (var c = 0; c + sz[0] <= COLS; c++) {
+        var cells = [], clash = false;
+        for (var y = r; y < r + sz[1]; y++) for (var x = c; x < c + sz[0]; x++) { if (QR_CELLS.indexOf(y * COLS + x) >= 0) clash = true; cells.push(y * COLS + x); }
+        var d = Math.abs(r + sz[1] / 2 - ROWS / 2) + Math.abs(c + sz[0] / 2 - COLS / 2);
+        if (!clash && (!best || d < best.d - 1e-9)) best = { r: r, c: c, w: sz[0], h: sz[1], cells: cells, d: d };
+      }
+    });
+    return best;
+  }
+  var PIC_BOX = PICS.length ? middleBox() : null, PIC_CELLS = PIC_BOX ? PIC_BOX.cells : [];
+  if (!PIC_BOX) PICS = [];
   function picOf(st) { return PICS.length && st ? PICS[(st.pi || 0) % PICS.length] : null; }
   var POLL_MS = 2000, TIMEOUT_MS = 8000, LIMIT = 1000;
   var STATE_KEY = 'liliema-film-session', THEME_KEY = 'liliema-film-session-theme', MAX_AGE_MS = 8 * 3600 * 1000;
@@ -754,10 +781,14 @@ body.running, body.running * { cursor: none !important; }
     if ($('qrImg').getAttribute('src') !== plain) $('qrImg').setAttribute('src', plain);
   });
   if (PICS.length) {
-    var pp = $('picPanel');
-    pp.style.gridColumn = '1 / span ' + QS;
-    pp.style.gridRow = '1 / span ' + QS;
-    pp.classList.toggle('small', QS === 1);
+    var pp = $('picPanel'), first = PICS[0], firstName = first[F.lang] || first.en;
+    pp.style.gridColumn = (PIC_BOX.c + 1) + ' / span ' + PIC_BOX.w;
+    pp.style.gridRow = (PIC_BOX.r + 1) + ' / span ' + PIC_BOX.h;
+    pp.classList.toggle('small', PIC_BOX.w === 1 || PIC_BOX.h === 1);
+    $('introPicImg').src = first.picture;
+    $('introPicImg').alt = firstName;
+    $('introPicText').textContent = F.t('sw.intro.pic', firstName, PIC_ASK.length > 1 ? PICS.length : 1);
+    $('introPic').hidden = false;
   }
   F.apply();
   keepScreenOn();
