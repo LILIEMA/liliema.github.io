@@ -18,6 +18,8 @@ Keys: Enter starts it in full screen, F full screen, Q shows or hides the code, 
 
 To empty the word store after a test (the words typed on the pages and the answers of Check the AI; LILIEMA's own words, the wordlist and the AI's words stay), run in the SQL Editor of the filming project: `select * from clear_film_words();`
 
+Scene 4, until 31 October 2026: Look up, Language Detective and LILIEMA words show no Baïnounk Gujaher word for the cat or the sheep, whoever wrote it (LILIEMA's list, the AI or anyone during a take), so that in the film Max works out the spelling of the word for the cat from the other languages and writes the word for the sheep himself. The words stay in the database, and the session wall shows the words added during a take. The setting is `hide` in `data/film_data.js` (from `make_film_pages.py`); from 1 November 2026 the pages show these words again by themselves.
+
 Arabic script: the pages and the session wall show words in Arabic script (Arabic, Ajami, Persian, Urdu) in Noto Sans Arabic (SIL Open Font License, `assets/fonts`), right to left, and the text fields follow the direction of what is typed. Other scripts show in the device's own fonts.
 
 ---
@@ -41,5 +43,7 @@ Avec `&pic=cat`, le mur affiche le chat au milieu dès le départ (et déjà sur
 Touches : Entrée lance le mur en plein écran, F plein écran, Q affiche ou masque le code, les flèches changent de page, Backspace masque le mot le plus récent, N deux fois commence un nouveau tour (le mur se vide ; les mots restent dans la base de données), D affiche des mots d'exemple pour vérifier l'écran (jamais enregistrés), L fond clair ou sombre, ? aide.
 
 Pour vider la base de mots après un test (les mots saisis sur les pages et les réponses de Vérifiez l'IA ; les mots de LILIEMA, la liste de mots et les mots de l'IA restent), exécutez dans le SQL Editor du projet de tournage : `select * from clear_film_words();`
+
+Scène 4, jusqu'au 31 octobre 2026 : Cherchez un mot, Détective des langues et Mots LILIEMA n'affichent aucun mot en baïnounk gujaher pour le chat ni pour le mouton, quel qu'en soit l'auteur (la liste de LILIEMA, l'IA ou une personne pendant une prise), afin que, dans le film, Max déduise des autres langues l'orthographe du mot pour le chat et écrive lui-même celui du mouton. Les mots restent dans la base de données, et le mur de la séance affiche les mots ajoutés pendant une prise. Le réglage est `hide` dans `data/film_data.js` (produit par `make_film_pages.py`) ; à partir du 1er novembre 2026, les pages affichent de nouveau ces mots d'elles-mêmes.
 
 Écriture arabe : les pages et le mur de la séance affichent les mots en écriture arabe (arabe, ajami, persan, ourdou) en Noto Sans Arabic (licence SIL Open Font, `assets/fonts`), de droite à gauche, et les champs de saisie suivent le sens de ce qui est tapé. Les autres écritures s'affichent avec les polices de l'appareil.

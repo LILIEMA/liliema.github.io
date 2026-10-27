@@ -621,12 +621,34 @@ mark { background: var(--gold-light); color: var(--gold-dark); border-radius: 3p
       return w;
     });
   }
+  // FILMING COPY, scene 4: until FAIR_DATA.hide.until, the words of a hidden language whose English or French meaning
+  // is a hidden picture are left out (the Baïnounk Gujaher words for the cat and the sheep), as on Look up.
+  var HIDE_WORDS = (function () {
+    var D = window.FAIR_DATA || {}, out = {};
+    if (!D.hide || !(Date.now() < Date.parse(D.hide.until))) return out;
+    Object.keys(D.hide.languages).forEach(function (slug) {
+      var l = (D.languages || []).filter(function (x) { return x.slug === slug; })[0], m = {};
+      if (!l) return;
+      D.hide.languages[slug].forEach(function (k) {
+        var c = (D.concepts || []).filter(function (x) { return x.slug === k; })[0];
+        if (c) { m[c.en.toLowerCase()] = true; m[c.fr.toLowerCase()] = true; }
+      });
+      out[l.name.normalize('NFC')] = m;
+    });
+    return out;
+  })();
+  function shownWord(r) {
+    var m = HIDE_WORDS[String(r.language || '').normalize('NFC')];
+    var meaning = function (s) { return String(s || '').normalize('NFC').trim().toLowerCase(); };
+    return !(m && (m[meaning(r.english)] || m[meaning(r.french)]));
+  }
+
   function loadWords() {
     window.FairDB.selectAll('words', 'select=headword,language,domain,english,french,finnish,fi_ok,swedish,sv_ok,unit,pos,example&order=id')
       .then(function (rows) {
         if (fromFile) return;   // the full file was opened meanwhile
         if (!rows.length) throw new Error('no words');
-        words = fromRows(rows);
+        words = fromRows(rows.filter(shownWord));   // filming copy, scene 4: see shownWord
         fileName = '';
         dbFailed = false;
         noGloss = words.filter(function (w) { return !w.finnish || !w.swedish; }).length;

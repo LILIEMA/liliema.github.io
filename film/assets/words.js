@@ -173,9 +173,25 @@
     });
   }
 
+  // FILMING COPY, scene 4: until FAIR_DATA.hide.until, the words of a hidden language for a hidden picture are left out
+  // (the Baïnounk Gujaher words for the cat and the sheep), whoever wrote them; they stay in the database.
+  var HIDE = {}, HIDE_NAMES = {};
+  if (D.hide && Date.now() < Date.parse(D.hide.until)) {
+    HIDE = D.hide.languages;
+    Object.keys(HIDE).forEach(function (slug) {
+      var l = langBySlug[slug];
+      if (l) [l.name].concat(l.aliases || []).forEach(function (a) { HIDE_NAMES[a.normalize('NFC').toLowerCase()] = slug; });
+    });
+  }
+  function shown(r) {
+    var slug = r.language_slug || HIDE_NAMES[String(r.language_label || '').normalize('NFC').trim().toLowerCase()];
+    var h = HIDE[slug];
+    return !(h && h.indexOf(r.concept_slug) >= 0);
+  }
+
   function use(entries, drafts, scores) {
-    W.entries = entries || [];
-    W.drafts = drafts || [];
+    W.entries = (entries || []).filter(shown);
+    W.drafts = (drafts || []).filter(shown);
     scoresList = scores || [];
     W.scores = {};
     scoresList.forEach(function (r) { W.scores[r.draft_id] = r; });

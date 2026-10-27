@@ -1465,5 +1465,14 @@ window.FAIR_DATA = {
  "picture_credit": {
   "name": "Unni Pohjonen",
   "licence": "CC BY 4.0"
+ },
+ "hide": {
+  "until": "2026-11-01T00:00:00+02:00",
+  "languages": {
+   "gujaher": [
+    "cat",
+    "sheep"
+   ]
+  }
  }
 };
