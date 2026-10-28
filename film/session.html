@@ -216,7 +216,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.k.back': 'piilota uusin sana', 'sw.k.n': 'uusi kierros: seinä alkaa taas tyhjänä (sanat jäävät tietokantaan)',
       'sw.k.d': 'mallisanoja näytön tarkistamiseen (ei tallenneta)',
       'sw.k.w': 'näyttö täyttyy nopeasti eläinten nimistä monilla kielillä (kuvausta varten, ei tallenneta; W uudelleen pysäyttää)',
-      'sw.k.ww': 'poistaa ne (huoneessa kirjoitetut sanat jäävät)', 'sw.k.l': 'vaalea tai tumma tausta', 'sw.k.help': 'tämä ohje',
+      'sw.k.ww': 'poistaa ne (huoneessa kirjoitetut sanat jäävät)',
+      'sw.k.speed': 'W:n sanat nopeammin tai hitaammin', 'sw.k.l': 'vaalea tai tumma tausta', 'sw.k.help': 'tämä ohje',
       'sw.help.db': 'Tietokannan voi tyhjentää testin jälkeen ajamalla kuvausprojektin SQL Editorissa:',
       'sw.help.status': function (time, n) { return 'Päivitetty viimeksi ' + time + ' · sanoja seinällä: ' + n; },
       'sw.help.offline': 'Ei yhteyttä: yritetään uudelleen', 'sw.help.never': 'Ei vielä päivitetty',
@@ -236,7 +237,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.k.back': 'dölj det senaste ordet', 'sw.k.n': 'ny omgång: väggen börjar tom igen (orden finns kvar i databasen)',
       'sw.k.d': 'exempelord för att kontrollera skärmen (sparas inte)',
       'sw.k.w': 'skärmen fylls snabbt av djurens namn på många språk (för filmning, sparas inte; W igen pausar)',
-      'sw.k.ww': 'tar bort dem (orden som skrivits i rummet finns kvar)', 'sw.k.l': 'ljus eller mörk bakgrund', 'sw.k.help': 'den här hjälpen',
+      'sw.k.ww': 'tar bort dem (orden som skrivits i rummet finns kvar)',
+      'sw.k.speed': 'W-orden snabbare eller långsammare', 'sw.k.l': 'ljus eller mörk bakgrund', 'sw.k.help': 'den här hjälpen',
       'sw.help.db': 'Töm databasen efter ett test genom att köra detta i filmprojektets SQL Editor:',
       'sw.help.status': function (time, n) { return 'Senast uppdaterad ' + time + ' · ord på väggen: ' + n; },
       'sw.help.offline': 'Ingen anslutning: försöker igen', 'sw.help.never': 'Inte uppdaterad ännu',
@@ -256,7 +258,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.k.back': 'hide the newest word', 'sw.k.n': 'new round: the wall starts empty again (the words stay in the database)',
       'sw.k.d': 'sample words to check the screen (not saved)',
       'sw.k.w': 'the screen overflows with the animals\u2019 names in many languages (for filming, not saved; W again pauses)',
-      'sw.k.ww': 'clears them (the words typed in the room stay)', 'sw.k.l': 'light or dark background', 'sw.k.help': 'this help',
+      'sw.k.ww': 'clears them (the words typed in the room stay)',
+      'sw.k.speed': 'the W words faster or slower', 'sw.k.l': 'light or dark background', 'sw.k.help': 'this help',
       'sw.help.db': 'To empty the database after a test, run this in the SQL Editor of the filming project:',
       'sw.help.status': function (time, n) { return 'Last update ' + time + ' · words on the wall: ' + n; },
       'sw.help.offline': 'No connection: retrying', 'sw.help.never': 'Not updated yet',
@@ -276,7 +279,8 @@ body.running, body.running * { cursor: none !important; }
       'sw.k.back': 'masquer le mot le plus récent', 'sw.k.n': 'nouveau tour : le mur repart à vide (les mots restent dans la base de données)',
       'sw.k.d': 'mots d’exemple pour vérifier l’écran (non enregistrés)',
       'sw.k.w': 'l\u2019\u00e9cran d\u00e9borde de noms d\u2019animaux dans de nombreuses langues (pour le tournage, non enregistr\u00e9s\u00a0; W \u00e0 nouveau pour une pause)',
-      'sw.k.ww': 'les efface (les mots tap\u00e9s dans la salle restent)', 'sw.k.l': 'fond clair ou sombre', 'sw.k.help': 'cette aide',
+      'sw.k.ww': 'les efface (les mots tap\u00e9s dans la salle restent)',
+      'sw.k.speed': 'les mots de W plus vite ou plus lentement', 'sw.k.l': 'fond clair ou sombre', 'sw.k.help': 'cette aide',
       'sw.help.db': 'Pour vider la base de données après un test, exécutez ceci dans le SQL Editor du projet de tournage :',
       'sw.help.status': function (time, n) { return 'Dernière mise à jour ' + time + ' · mots sur le mur : ' + n; },
       'sw.help.offline': 'Pas de connexion : nouvelle tentative', 'sw.help.never': 'Pas encore mis à jour',
@@ -717,7 +721,7 @@ body.running, body.running * { cursor: none !important; }
   // picture and the code, until the screen is full, and then keep changing. On this screen only: never sent or saved.
   // W pauses and goes on, Shift W clears them; a new round (N N) and a change of the window's size clear them too.
   var FILL = {"cat":[["daali","Baïnounk Gujaher"],["siibo","Baïnounk Gujaher"],["agyinamoa","Akan"],["dadi","Ewe"],["kyanwa","Hausa"],["ológbò","Yoruba"],["paka","Swahili"],["mbaka","Gĩkũyũ"],["bisad","Somali"],["muus","Wolof"],["ullundu","Pulaar"],["gatu","Kriolu"],["Katze","Deutsch"],["gato","español"],["gato","português"],["gatto","italiano"],["kat","Nederlands"],["kot","polski"],["kedi","Türkçe"],["kass","eesti"],["macska","magyar"],["قطة","العربية"],["گربه","فارسی"],["кошка","русский"],["bussá","davvisámegiella"]],"dog":[["jihi","Baïnounk Gujaher"],["kraman","Akan"],["avu","Ewe"],["kare","Hausa"],["ajá","Yoruba"],["nkịta","Igbo"],["mbwa","Swahili"],["ngui","Gĩkũyũ"],["guok","Dholuo"],["eey","Somali"],["mbwa","Lingala"],["xaj","Wolof"],["wuloo","Mandinka"],["rawaandu","Pulaar"],["katchur","Kriolu"],["Hund","Deutsch"],["perro","español"],["cão","português"],["cane","italiano"],["hond","Nederlands"],["pies","polski"],["köpek","Türkçe"],["koer","eesti"],["kutya","magyar"],["كلب","العربية"],["سگ","فارسی"],["собака","русский"],["beana","davvisámegiella"]],"sheep":[["odwan","Akan"],["tunkiya","Hausa"],["àgùntàn","Yoruba"],["atụrụ","Igbo"],["kondoo","Swahili"],["ngʼondu","Gĩkũyũ"],["rombo","Dholuo"],["mpate","Lingala"],["xar","Wolof"],["mbaalu","Pulaar"],["Schaf","Deutsch"],["oveja","español"],["ovelha","português"],["pecora","italiano"],["schaap","Nederlands"],["owca","polski"],["koyun","Türkçe"],["lammas","eesti"],["juh","magyar"],["خروف","العربية"],["گوسفند","فارسی"],["овца","русский"]],"goat":[["fëbi","Baïnounk Gujaher"],["abirekyie","Akan"],["akuya","Hausa"],["ewúrẹ́","Yoruba"],["ewu","Igbo"],["mbuzi","Swahili"],["mbũri","Gĩkũyũ"],["diel","Dholuo"],["ri","Somali"],["ntaba","Lingala"],["bëy","Wolof"],["baa","Mandinka"],["mbeewa","Pulaar"],["kabra","Kriolu"],["Ziege","Deutsch"],["cabra","español"],["cabra","português"],["capra","italiano"],["geit","Nederlands"],["koza","polski"],["keçi","Türkçe"],["kits","eesti"],["kecske","magyar"],["ماعز","العربية"],["بز","فارسی"],["коза","русский"]],"cow":[["ahai","Baïnounk Gujaher"],["nantwi","Akan"],["nyi","Ewe"],["saniya","Hausa"],["màlúù","Yoruba"],["ehi","Igbo"],["ngʼombe","Swahili"],["ngʼombe","Gĩkũyũ"],["ngʼombe","Kamba"],["dhiangʼ","Dholuo"],["sac","Somali"],["ngɔmbɛ","Lingala"],["nag","Wolof"],["ninsoo","Mandinka"],["nagge","Pulaar"],["baka","Kriolu"],["Kuh","Deutsch"],["vaca","español"],["vaca","português"],["mucca","italiano"],["koe","Nederlands"],["krowa","polski"],["inek","Türkçe"],["lehm","eesti"],["tehén","magyar"],["بقرة","العربية"],["گاو","فارسی"],["корова","русский"]],"chicken":[["bëkër bayon","Baïnounk Gujaher"],["bëkër","Baïnounk Gujaher"],["elolai","Joola"],["bëker","Baïnounk Gubëeher"],["akokɔ","Akan"],["koklo","Ewe"],["kaza","Hausa"],["adìyẹ","Yoruba"],["ọkụkọ","Igbo"],["fowl","Nigerian Pidgin"],["kuku","Swahili"],["ngũkũ","Gĩkũyũ"],["gweno","Dholuo"],["digaag","Somali"],["nsoso","Lingala"],["ganaar","Wolof"],["suusee","Mandinka"],["gertogal","Pulaar"],["galiña","Kriolu"],["Huhn","Deutsch"],["gallina","español"],["galinha","português"],["gallina","italiano"],["kip","Nederlands"],["kura","polski"],["tavuk","Türkçe"],["kana","eesti"],["tyúk","magyar"],["دجاجة","العربية"],["مرغ","فارسی"],["курица","русский"]],"fish":[["kamaafi","Baïnounk Gujaher"],["jaxaat","Baïnounk Gubëeher"],["nsuomnam","Akan"],["kifi","Hausa"],["ẹja","Yoruba"],["azụ","Igbo"],["samaki","Swahili"],["thamaki","Gĩkũyũ"],["rech","Dholuo"],["kalluun","Somali"],["mbisi","Lingala"],["jën","Wolof"],["liingu","Pulaar"],["pis","Kriolu"],["Fisch","Deutsch"],["pez","español"],["peixe","português"],["pesce","italiano"],["vis","Nederlands"],["ryba","polski"],["balık","Türkçe"],["kala","eesti"],["hal","magyar"],["سمكة","العربية"],["ماهی","فارسی"],["рыба","русский"],["guolli","davvisámegiella"]],"donkey":[["fali","Baïnounk Gujaher"],["jaki","Hausa"],["kẹ́tẹ́kẹ́tẹ́","Yoruba"],["punda","Swahili"],["ndigiri","Gĩkũyũ"],["dameer","Somali"],["mbaam","Wolof"],["mbabba","Pulaar"],["Esel","Deutsch"],["burro","español"],["burro","português"],["asino","italiano"],["ezel","Nederlands"],["osioł","polski"],["eşek","Türkçe"],["eesel","eesti"],["szamár","magyar"],["حمار","العربية"],["الاغ","فارسی"],["осёл","русский"]],"bird":[["tino","Baïnounk Gujaher"],["katino","Baïnounk Gujaher"],["jaréém","Baïnounk Gujaher"],["anomaa","Akan"],["xevi","Ewe"],["tsuntsu","Hausa"],["ẹyẹ","Yoruba"],["nnụnụ","Igbo"],["ndege","Swahili"],["nyoni","Gĩkũyũ"],["winyo","Dholuo"],["shimbir","Somali"],["ndɛkɛ","Lingala"],["picc","Wolof"],["pastru","Kriolu"],["Vogel","Deutsch"],["pájaro","español"],["pássaro","português"],["uccello","italiano"],["vogel","Nederlands"],["ptak","polski"],["kuş","Türkçe"],["lind","eesti"],["madár","magyar"],["طائر","العربية"],["پرنده","فارسی"],["птица","русский"],["loddi","davvisámegiella"]],"snake":[["ono","Baïnounk Gujaher"],["ɔwɔ","Akan"],["da","Ewe"],["maciji","Hausa"],["ejò","Yoruba"],["agwọ","Igbo"],["nyoka","Swahili"],["nyoka","Gĩkũyũ"],["thuol","Dholuo"],["mas","Somali"],["nyoka","Lingala"],["jaan","Wolof"],["mboddi","Pulaar"],["kobra","Kriolu"],["Schlange","Deutsch"],["serpiente","español"],["cobra","português"],["serpente","italiano"],["slang","Nederlands"],["wąż","polski"],["yılan","Türkçe"],["madu","eesti"],["kígyó","magyar"],["أفعى","العربية"],["مار","فارسی"],["змея","русский"]],"camel":[["raƙumi","Hausa"],["ràkúnmí","Yoruba"],["ngamia","Swahili"],["geel","Somali"],["giléem","Wolof"],["ngelooba","Pulaar"],["Kamel","Deutsch"],["camello","español"],["camelo","português"],["cammello","italiano"],["kameel","Nederlands"],["wielbłąd","polski"],["deve","Türkçe"],["kaamel","eesti"],["teve","magyar"],["جمل","العربية"],["شتر","فارسی"],["верблюд","русский"]]};
-  var CLOUD_MS = Math.max(20, parseInt(params.get('fill'), 10) || 150);
+  var CLOUD_MS = Math.max(20, parseInt(params.get('fill'), 10) || 250);   // a bit slower at her request (28 October); + and - change it
   var cloud = { on: false, timer: null, boxes: [], pool: [], n: 0, size: 0, full: false };
   function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function cloudPool() {
@@ -806,7 +810,7 @@ body.running, body.running * { cursor: none !important; }
       else if (++cloudMisses >= 6) cloud.full = true;
     } else cloudSwap();
     cloud.n++;
-    cloud.timer = setTimeout(cloudStep, cloud.full ? Math.max(90, CLOUD_MS) : Math.max(25, CLOUD_MS * Math.pow(0.95, cloud.n)));
+    cloud.timer = setTimeout(cloudStep, cloud.full ? Math.max(90, CLOUD_MS) : Math.max(0.25 * CLOUD_MS, CLOUD_MS * Math.pow(0.95, cloud.n)));
   }
   function startCloud() {
     if (!cur || cloud.on) return;
@@ -832,7 +836,7 @@ body.running, body.running * { cursor: none !important; }
 
   function renderHelp() {
     var keys = [['Enter', 'sw.k.enter'], ['F', 'sw.k.f'], ['Q', 'sw.k.q']].concat(PICS.length ? [['P', 'sw.k.p'], ['Shift P', 'sw.k.pp']] : [], [['← →', 'sw.k.arrows'],
-      ['Backspace', 'sw.k.back'], ['N N', 'sw.k.n'], ['D', 'sw.k.d'], ['W', 'sw.k.w'], ['Shift W', 'sw.k.ww'], ['L', 'sw.k.l'], ['?', 'sw.k.help']]);
+      ['Backspace', 'sw.k.back'], ['N N', 'sw.k.n'], ['D', 'sw.k.d'], ['W', 'sw.k.w'], ['Shift W', 'sw.k.ww'], ['+ \u2212', 'sw.k.speed'], ['L', 'sw.k.l'], ['?', 'sw.k.help']]);
     var c = $('helpCard'), h = document.createElement('h2'), dl = document.createElement('dl');
     c.innerHTML = '';
     h.textContent = F.t('sw.help.title');
@@ -878,6 +882,8 @@ body.running, body.running * { cursor: none !important; }
     else if (k === 'ArrowLeft' || k === 'PageUp') go(-1);
     else if (k === 'Backspace' || k === 'Delete') { e.preventDefault(); hideNewest(); }
     else if (k === 'w' || k === 'W') { if (e.shiftKey) clearCloud(); else if (cloud.on) pauseCloud(); else startCloud(); }
+    else if (k === '+' || k === '=') CLOUD_MS = Math.max(20, CLOUD_MS * 0.8);    // W: the words come faster
+    else if (k === '-' || k === '_') CLOUD_MS = Math.min(1500, CLOUD_MS * 1.25);   // W: slower
     else if (k === 'n' || k === 'N') {
       if (Date.now() - nAt < 4000) {
         nAt = 0;
