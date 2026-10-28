@@ -63,6 +63,14 @@ body.running, body.running * { cursor: none !important; }
   flex: 1 1 auto; min-height: 0; display: grid; gap: 1.3vh .9vw;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
 }
+/* W: the screen overflows with words for the animals (for a camera shot), behind the tiles, the picture and the code */
+.grid { position: relative; }
+.cloud { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.cloud span { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; white-space: nowrap;
+  font-weight: 700; color: var(--text); animation: cloud-in .8s ease-out both; }
+.cloud span b { font-weight: 700; line-height: 1.12; }
+.cloud span i { font-style: normal; font-weight: 600; color: var(--lang); line-height: 1.2; }
+@keyframes cloud-in { 0% { opacity: 0; transform: scale(.8); color: var(--gold); } 40% { opacity: 1; color: var(--gold); } 100% { opacity: 1; transform: none; color: var(--text); } }
 .tile {
   position: relative; min-width: 0; min-height: 0; container-type: size; overflow: hidden;
   background: var(--tile); border: max(2px, .3vh) solid var(--line); border-radius: 1.4vh;
@@ -165,6 +173,7 @@ body.running, body.running * { cursor: none !important; }
 <div id="wall" class="wall" hidden>
   <header class="band"><span class="brand">LILIEMA</span><h1 data-t="sw.heading"></h1><span class="dots" id="dots"></span></header>
   <div class="grid" id="grid">
+    <div class="cloud" id="cloud" aria-hidden="true"></div>
     <aside class="pic-panel" id="picPanel" hidden>
       <div class="pic-inner">
         <img id="picImg" src="" alt="">
@@ -205,7 +214,9 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.title': 'Näppäimet', 'sw.k.enter': 'käynnistä seinä koko näytön tilassa', 'sw.k.f': 'koko näyttö päälle tai pois',
       'sw.k.q': 'näytä tai piilota koodi', 'sw.k.arrows': 'edellinen tai seuraava sivu (kun seinä on täynnä)',
       'sw.k.back': 'piilota uusin sana', 'sw.k.n': 'uusi kierros: seinä alkaa taas tyhjänä (sanat jäävät tietokantaan)',
-      'sw.k.d': 'mallisanoja näytön tarkistamiseen (ei tallenneta)', 'sw.k.l': 'vaalea tai tumma tausta', 'sw.k.help': 'tämä ohje',
+      'sw.k.d': 'mallisanoja näytön tarkistamiseen (ei tallenneta)',
+      'sw.k.w': 'näyttö täyttyy nopeasti eläinten nimistä monilla kielillä (kuvausta varten, ei tallenneta; W uudelleen pysäyttää)',
+      'sw.k.ww': 'poistaa ne (huoneessa kirjoitetut sanat jäävät)', 'sw.k.l': 'vaalea tai tumma tausta', 'sw.k.help': 'tämä ohje',
       'sw.help.db': 'Tietokannan voi tyhjentää testin jälkeen ajamalla kuvausprojektin SQL Editorissa:',
       'sw.help.status': function (time, n) { return 'Päivitetty viimeksi ' + time + ' · sanoja seinällä: ' + n; },
       'sw.help.offline': 'Ei yhteyttä: yritetään uudelleen', 'sw.help.never': 'Ei vielä päivitetty',
@@ -223,7 +234,9 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.title': 'Tangenter', 'sw.k.enter': 'starta väggen i helskärm', 'sw.k.f': 'helskärm på eller av',
       'sw.k.q': 'visa eller dölj koden', 'sw.k.arrows': 'föregående eller nästa sida (när väggen är full)',
       'sw.k.back': 'dölj det senaste ordet', 'sw.k.n': 'ny omgång: väggen börjar tom igen (orden finns kvar i databasen)',
-      'sw.k.d': 'exempelord för att kontrollera skärmen (sparas inte)', 'sw.k.l': 'ljus eller mörk bakgrund', 'sw.k.help': 'den här hjälpen',
+      'sw.k.d': 'exempelord för att kontrollera skärmen (sparas inte)',
+      'sw.k.w': 'skärmen fylls snabbt av djurens namn på många språk (för filmning, sparas inte; W igen pausar)',
+      'sw.k.ww': 'tar bort dem (orden som skrivits i rummet finns kvar)', 'sw.k.l': 'ljus eller mörk bakgrund', 'sw.k.help': 'den här hjälpen',
       'sw.help.db': 'Töm databasen efter ett test genom att köra detta i filmprojektets SQL Editor:',
       'sw.help.status': function (time, n) { return 'Senast uppdaterad ' + time + ' · ord på väggen: ' + n; },
       'sw.help.offline': 'Ingen anslutning: försöker igen', 'sw.help.never': 'Inte uppdaterad ännu',
@@ -241,7 +254,9 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.title': 'Keys', 'sw.k.enter': 'start the wall in full screen', 'sw.k.f': 'full screen on or off',
       'sw.k.q': 'show or hide the code', 'sw.k.arrows': 'earlier or later page (when the wall is full)',
       'sw.k.back': 'hide the newest word', 'sw.k.n': 'new round: the wall starts empty again (the words stay in the database)',
-      'sw.k.d': 'sample words to check the screen (not saved)', 'sw.k.l': 'light or dark background', 'sw.k.help': 'this help',
+      'sw.k.d': 'sample words to check the screen (not saved)',
+      'sw.k.w': 'the screen overflows with the animals\u2019 names in many languages (for filming, not saved; W again pauses)',
+      'sw.k.ww': 'clears them (the words typed in the room stay)', 'sw.k.l': 'light or dark background', 'sw.k.help': 'this help',
       'sw.help.db': 'To empty the database after a test, run this in the SQL Editor of the filming project:',
       'sw.help.status': function (time, n) { return 'Last update ' + time + ' · words on the wall: ' + n; },
       'sw.help.offline': 'No connection: retrying', 'sw.help.never': 'Not updated yet',
@@ -259,7 +274,9 @@ body.running, body.running * { cursor: none !important; }
       'sw.help.title': 'Touches', 'sw.k.enter': 'lancer le mur en plein écran', 'sw.k.f': 'plein écran ou non',
       'sw.k.q': 'afficher ou masquer le code', 'sw.k.arrows': 'page précédente ou suivante (quand le mur est plein)',
       'sw.k.back': 'masquer le mot le plus récent', 'sw.k.n': 'nouveau tour : le mur repart à vide (les mots restent dans la base de données)',
-      'sw.k.d': 'mots d’exemple pour vérifier l’écran (non enregistrés)', 'sw.k.l': 'fond clair ou sombre', 'sw.k.help': 'cette aide',
+      'sw.k.d': 'mots d’exemple pour vérifier l’écran (non enregistrés)',
+      'sw.k.w': 'l\u2019\u00e9cran d\u00e9borde de noms d\u2019animaux dans de nombreuses langues (pour le tournage, non enregistr\u00e9s\u00a0; W \u00e0 nouveau pour une pause)',
+      'sw.k.ww': 'les efface (les mots tap\u00e9s dans la salle restent)', 'sw.k.l': 'fond clair ou sombre', 'sw.k.help': 'cette aide',
       'sw.help.db': 'Pour vider la base de données après un test, exécutez ceci dans le SQL Editor du projet de tournage :',
       'sw.help.status': function (time, n) { return 'Dernière mise à jour ' + time + ' · mots sur le mur : ' + n; },
       'sw.help.offline': 'Pas de connexion : nouvelle tentative', 'sw.help.never': 'Pas encore mis à jour',
@@ -693,9 +710,135 @@ body.running, body.running * { cursor: none !important; }
     else if (busy) { cur = newState(0); render(); }
     else { cur = null; showIntro(); }
   }
+  // ------------------------------------------------------------ W: the screen overflows with words (for a camera shot)
+  // Words for the animals of the pictures, those for the picture shown first: LILIEMA's own words, the words the AI was
+  // sure of (high confidence), the names in English, Finnish, Swedish and French, and names in more languages (Claude,
+  // 28 October 2026). They come ever faster, large at first and then smaller, in the free space behind the tiles, the
+  // picture and the code, until the screen is full, and then keep changing. On this screen only: never sent or saved.
+  // W pauses and goes on, Shift W clears them; a new round (N N) and a change of the window's size clear them too.
+  var FILL = {"cat":[["daali","Baïnounk Gujaher"],["siibo","Baïnounk Gujaher"],["agyinamoa","Akan"],["dadi","Ewe"],["kyanwa","Hausa"],["ológbò","Yoruba"],["paka","Swahili"],["mbaka","Gĩkũyũ"],["bisad","Somali"],["muus","Wolof"],["ullundu","Pulaar"],["gatu","Kriolu"],["Katze","Deutsch"],["gato","español"],["gato","português"],["gatto","italiano"],["kat","Nederlands"],["kot","polski"],["kedi","Türkçe"],["kass","eesti"],["macska","magyar"],["قطة","العربية"],["گربه","فارسی"],["кошка","русский"],["bussá","davvisámegiella"]],"dog":[["jihi","Baïnounk Gujaher"],["kraman","Akan"],["avu","Ewe"],["kare","Hausa"],["ajá","Yoruba"],["nkịta","Igbo"],["mbwa","Swahili"],["ngui","Gĩkũyũ"],["guok","Dholuo"],["eey","Somali"],["mbwa","Lingala"],["xaj","Wolof"],["wuloo","Mandinka"],["rawaandu","Pulaar"],["katchur","Kriolu"],["Hund","Deutsch"],["perro","español"],["cão","português"],["cane","italiano"],["hond","Nederlands"],["pies","polski"],["köpek","Türkçe"],["koer","eesti"],["kutya","magyar"],["كلب","العربية"],["سگ","فارسی"],["собака","русский"],["beana","davvisámegiella"]],"sheep":[["odwan","Akan"],["tunkiya","Hausa"],["àgùntàn","Yoruba"],["atụrụ","Igbo"],["kondoo","Swahili"],["ngʼondu","Gĩkũyũ"],["rombo","Dholuo"],["mpate","Lingala"],["xar","Wolof"],["mbaalu","Pulaar"],["Schaf","Deutsch"],["oveja","español"],["ovelha","português"],["pecora","italiano"],["schaap","Nederlands"],["owca","polski"],["koyun","Türkçe"],["lammas","eesti"],["juh","magyar"],["خروف","العربية"],["گوسفند","فارسی"],["овца","русский"]],"goat":[["fëbi","Baïnounk Gujaher"],["abirekyie","Akan"],["akuya","Hausa"],["ewúrẹ́","Yoruba"],["ewu","Igbo"],["mbuzi","Swahili"],["mbũri","Gĩkũyũ"],["diel","Dholuo"],["ri","Somali"],["ntaba","Lingala"],["bëy","Wolof"],["baa","Mandinka"],["mbeewa","Pulaar"],["kabra","Kriolu"],["Ziege","Deutsch"],["cabra","español"],["cabra","português"],["capra","italiano"],["geit","Nederlands"],["koza","polski"],["keçi","Türkçe"],["kits","eesti"],["kecske","magyar"],["ماعز","العربية"],["بز","فارسی"],["коза","русский"]],"cow":[["ahai","Baïnounk Gujaher"],["nantwi","Akan"],["nyi","Ewe"],["saniya","Hausa"],["màlúù","Yoruba"],["ehi","Igbo"],["ngʼombe","Swahili"],["ngʼombe","Gĩkũyũ"],["ngʼombe","Kamba"],["dhiangʼ","Dholuo"],["sac","Somali"],["ngɔmbɛ","Lingala"],["nag","Wolof"],["ninsoo","Mandinka"],["nagge","Pulaar"],["baka","Kriolu"],["Kuh","Deutsch"],["vaca","español"],["vaca","português"],["mucca","italiano"],["koe","Nederlands"],["krowa","polski"],["inek","Türkçe"],["lehm","eesti"],["tehén","magyar"],["بقرة","العربية"],["گاو","فارسی"],["корова","русский"]],"chicken":[["bëkër bayon","Baïnounk Gujaher"],["bëkër","Baïnounk Gujaher"],["elolai","Joola"],["bëker","Baïnounk Gubëeher"],["akokɔ","Akan"],["koklo","Ewe"],["kaza","Hausa"],["adìyẹ","Yoruba"],["ọkụkọ","Igbo"],["fowl","Nigerian Pidgin"],["kuku","Swahili"],["ngũkũ","Gĩkũyũ"],["gweno","Dholuo"],["digaag","Somali"],["nsoso","Lingala"],["ganaar","Wolof"],["suusee","Mandinka"],["gertogal","Pulaar"],["galiña","Kriolu"],["Huhn","Deutsch"],["gallina","español"],["galinha","português"],["gallina","italiano"],["kip","Nederlands"],["kura","polski"],["tavuk","Türkçe"],["kana","eesti"],["tyúk","magyar"],["دجاجة","العربية"],["مرغ","فارسی"],["курица","русский"]],"fish":[["kamaafi","Baïnounk Gujaher"],["jaxaat","Baïnounk Gubëeher"],["nsuomnam","Akan"],["kifi","Hausa"],["ẹja","Yoruba"],["azụ","Igbo"],["samaki","Swahili"],["thamaki","Gĩkũyũ"],["rech","Dholuo"],["kalluun","Somali"],["mbisi","Lingala"],["jën","Wolof"],["liingu","Pulaar"],["pis","Kriolu"],["Fisch","Deutsch"],["pez","español"],["peixe","português"],["pesce","italiano"],["vis","Nederlands"],["ryba","polski"],["balık","Türkçe"],["kala","eesti"],["hal","magyar"],["سمكة","العربية"],["ماهی","فارسی"],["рыба","русский"],["guolli","davvisámegiella"]],"donkey":[["fali","Baïnounk Gujaher"],["jaki","Hausa"],["kẹ́tẹ́kẹ́tẹ́","Yoruba"],["punda","Swahili"],["ndigiri","Gĩkũyũ"],["dameer","Somali"],["mbaam","Wolof"],["mbabba","Pulaar"],["Esel","Deutsch"],["burro","español"],["burro","português"],["asino","italiano"],["ezel","Nederlands"],["osioł","polski"],["eşek","Türkçe"],["eesel","eesti"],["szamár","magyar"],["حمار","العربية"],["الاغ","فارسی"],["осёл","русский"]],"bird":[["tino","Baïnounk Gujaher"],["katino","Baïnounk Gujaher"],["jaréém","Baïnounk Gujaher"],["anomaa","Akan"],["xevi","Ewe"],["tsuntsu","Hausa"],["ẹyẹ","Yoruba"],["nnụnụ","Igbo"],["ndege","Swahili"],["nyoni","Gĩkũyũ"],["winyo","Dholuo"],["shimbir","Somali"],["ndɛkɛ","Lingala"],["picc","Wolof"],["pastru","Kriolu"],["Vogel","Deutsch"],["pájaro","español"],["pássaro","português"],["uccello","italiano"],["vogel","Nederlands"],["ptak","polski"],["kuş","Türkçe"],["lind","eesti"],["madár","magyar"],["طائر","العربية"],["پرنده","فارسی"],["птица","русский"],["loddi","davvisámegiella"]],"snake":[["ono","Baïnounk Gujaher"],["ɔwɔ","Akan"],["da","Ewe"],["maciji","Hausa"],["ejò","Yoruba"],["agwọ","Igbo"],["nyoka","Swahili"],["nyoka","Gĩkũyũ"],["thuol","Dholuo"],["mas","Somali"],["nyoka","Lingala"],["jaan","Wolof"],["mboddi","Pulaar"],["kobra","Kriolu"],["Schlange","Deutsch"],["serpiente","español"],["cobra","português"],["serpente","italiano"],["slang","Nederlands"],["wąż","polski"],["yılan","Türkçe"],["madu","eesti"],["kígyó","magyar"],["أفعى","العربية"],["مار","فارسی"],["змея","русский"]],"camel":[["raƙumi","Hausa"],["ràkúnmí","Yoruba"],["ngamia","Swahili"],["geel","Somali"],["giléem","Wolof"],["ngelooba","Pulaar"],["Kamel","Deutsch"],["camello","español"],["camelo","português"],["cammello","italiano"],["kameel","Nederlands"],["wielbłąd","polski"],["deve","Türkçe"],["kaamel","eesti"],["teve","magyar"],["جمل","العربية"],["شتر","فارسی"],["верблюд","русский"]]};
+  var CLOUD_MS = Math.max(20, parseInt(params.get('fill'), 10) || 150);
+  var cloud = { on: false, timer: null, boxes: [], pool: [], n: 0, size: 0, full: false };
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  // scene 4 (until FAIR_DATA.hide.until): no word of a hidden language for a hidden picture (no Baïnounk Gujaher word for
+  // the cat or the sheep), as on Look up, Language Detective and LILIEMA words
+  var CLOUD_HIDE = {};
+  if (D.hide && Date.now() < Date.parse(D.hide.until)) Object.keys(D.hide.languages).forEach(function (slug) {
+    var n = langName(slug);
+    if (n) D.hide.languages[slug].forEach(function (k) { CLOUD_HIDE[k + '|' + n.normalize('NFC')] = true; });
+  });
+  function cloudPool() {
+    var p = picOf(cur), first = [], rest = [];
+    PICTURED.forEach(function (c) {
+      var mine = !!(p && p.slug === c.slug), list = (FILL[c.slug] || []).slice();
+      if (!list.length && !mine) return;
+      [[c.en, 'English'], [c.fi, 'suomi'], [c.sv, 'svenska'], [c.fr, 'français']].forEach(function (w) { if (w[0]) list.push(w); });
+      list.forEach(function (w) {
+        var word = [String(w[0]).normalize('NFC'), String(w[1]).normalize('NFC')];
+        if (!CLOUD_HIDE[c.slug + '|' + word[1]]) (mine ? first : rest).push(word);
+      });
+    });
+    return shuffle(first).concat(shuffle(rest));
+  }
+  function cloudObstacles(g) {
+    var out = [], pad = 0.008 * g.height;
+    Array.prototype.forEach.call($('grid').querySelectorAll('.tile, .pic-panel, .qr-panel'), function (el) {
+      if (el.hidden || !el.offsetWidth) return;
+      var r = el.getBoundingClientRect();
+      out.push({ x: r.left - g.left - pad, y: r.top - g.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad });
+    });
+    return out;
+  }
+  function overlaps(a, list) {
+    for (var i = 0; i < list.length; i++) { var b = list[i]; if (a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) return true; }
+    return false;
+  }
+  function cloudBox(w, s, H) {   // a word at size s (px), with its language underneath while it is large enough
+    var label = s >= 0.032 * H, ls = s * 0.34;
+    var bw = Math.max(perPx(w[0], 700) * s, label ? perPx(w[1], 600) * ls : 0), bh = s * 1.15 + (label ? ls * 1.3 : 0);
+    return { w: bw + 0.32 * s, h: bh + 0.14 * s, label: label, ls: ls };
+  }
+  function cloudFill(el, w, s, b) {
+    el.innerHTML = '';
+    var t = document.createElement('b');
+    t.textContent = w[0]; t.dir = 'auto'; t.style.fontSize = s.toFixed(1) + 'px';
+    el.appendChild(t);
+    if (b.label) { var l = document.createElement('i'); l.textContent = w[1]; l.dir = 'auto'; l.style.fontSize = b.ls.toFixed(1) + 'px'; el.appendChild(l); }
+    el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  }
+  function cloudPlace() {
+    var gEl = $('grid'), g = gEl.getBoundingClientRect(), W = gEl.clientWidth, H = gEl.clientHeight;
+    if (!cloud.pool.length) cloud.pool = cloudPool();
+    if (!cloud.pool.length) return false;
+    var w = cloud.pool[0], obst = cloudObstacles(g).concat(cloud.boxes);
+    for (var s = cloud.size; s >= 0.016 * H; s *= 0.92) {
+      var b = cloudBox(w, s, H);
+      if (b.w > W || b.h > H) continue;
+      for (var k = 0; k < 45; k++) {
+        var r = { x: Math.random() * (W - b.w), y: Math.random() * (H - b.h), w: b.w, h: b.h };
+        if (overlaps(r, obst)) continue;
+        cloud.pool.shift();
+        cloud.size = s;
+        cloud.boxes.push(r);
+        var el = document.createElement('span');
+        el.style.left = r.x.toFixed(1) + 'px'; el.style.top = r.y.toFixed(1) + 'px';
+        el.style.width = r.w.toFixed(1) + 'px'; el.style.height = r.h.toFixed(1) + 'px';
+        el.setAttribute('data-s', s.toFixed(2));
+        cloudFill(el, w, s, b);
+        $('cloud').appendChild(el);
+        return true;
+      }
+    }
+    cloud.pool.push(cloud.pool.shift());   // this word does not fit any more: the next one may
+    return false;
+  }
+  function cloudSwap() {   // the screen is full: a word changes for another that fits in its place
+    var els = $('cloud').children, H = $('grid').clientHeight;
+    if (!els.length) return;
+    var el = els[Math.floor(Math.random() * els.length)], s = parseFloat(el.getAttribute('data-s')), bw = parseFloat(el.style.width);
+    for (var k = 0; k < 15; k++) {
+      if (!cloud.pool.length) cloud.pool = cloudPool();
+      var w = cloud.pool.shift(), b = cloudBox(w, s, H);
+      if (b.w <= bw + 0.5) { cloudFill(el, w, s, b); return; }
+      cloud.pool.push(w);
+    }
+  }
+  var cloudMisses = 0;
+  function cloudStep() {
+    if (!cloud.on) return;
+    if (!running() || !cur) { cloud.on = false; return; }
+    if (!cloud.full) {
+      if (cloudPlace()) cloudMisses = 0;
+      else if (++cloudMisses >= 6) cloud.full = true;
+    } else cloudSwap();
+    cloud.n++;
+    cloud.timer = setTimeout(cloudStep, cloud.full ? Math.max(90, CLOUD_MS) : Math.max(25, CLOUD_MS * Math.pow(0.95, cloud.n)));
+  }
+  function startCloud() {
+    if (!cur || cloud.on) return;
+    cloud.on = true;
+    if (!$('cloud').children.length) {
+      cloud.boxes = []; cloud.n = 0; cloud.full = false; cloudMisses = 0;
+      cloud.size = 0.095 * $('grid').clientHeight;
+      cloud.pool = cloudPool();
+    }
+    fontsFor(cloud.pool.map(function (w) { return w[0] + ' ' + w[1]; }).join(' ')).then(function () { clearTimeout(cloud.timer); cloudStep(); });
+  }
+  function pauseCloud() { cloud.on = false; clearTimeout(cloud.timer); }
+  function clearCloud() { pauseCloud(); $('cloud').innerHTML = ''; cloud.boxes = []; cloud.full = false; cloud.n = 0; }
+  var cloudW = 0, cloudH = 0;
+  window.addEventListener('resize', function () {   // the places no longer fit: start again from an empty screen
+    var gEl = $('grid');
+    if (!$('cloud').children.length || (gEl.clientWidth === cloudW && gEl.clientHeight === cloudH)) return;
+    var was = cloud.on;
+    clearCloud();
+    if (was) setTimeout(startCloud, 300);
+  });
+  setInterval(function () { var gEl = $('grid'); cloudW = gEl.clientWidth; cloudH = gEl.clientHeight; }, 1000);
+
   function renderHelp() {
     var keys = [['Enter', 'sw.k.enter'], ['F', 'sw.k.f'], ['Q', 'sw.k.q']].concat(PICS.length ? [['P', 'sw.k.p'], ['Shift P', 'sw.k.pp']] : [], [['← →', 'sw.k.arrows'],
-      ['Backspace', 'sw.k.back'], ['N N', 'sw.k.n'], ['D', 'sw.k.d'], ['L', 'sw.k.l'], ['?', 'sw.k.help']]);
+      ['Backspace', 'sw.k.back'], ['N N', 'sw.k.n'], ['D', 'sw.k.d'], ['W', 'sw.k.w'], ['Shift W', 'sw.k.ww'], ['L', 'sw.k.l'], ['?', 'sw.k.help']]);
     var c = $('helpCard'), h = document.createElement('h2'), dl = document.createElement('dl');
     c.innerHTML = '';
     h.textContent = F.t('sw.help.title');
@@ -740,10 +883,12 @@ body.running, body.running * { cursor: none !important; }
     else if (k === 'ArrowRight' || k === 'PageDown') go(1);
     else if (k === 'ArrowLeft' || k === 'PageUp') go(-1);
     else if (k === 'Backspace' || k === 'Delete') { e.preventDefault(); hideNewest(); }
+    else if (k === 'w' || k === 'W') { if (e.shiftKey) clearCloud(); else if (cloud.on) pauseCloud(); else startCloud(); }
     else if (k === 'n' || k === 'N') {
       if (Date.now() - nAt < 4000) {
         nAt = 0;
         if (demo) { clearTimeout(demoTimer); demo = null; }
+        clearCloud();
         toast(F.t('sw.new'));
         startSession();
       } else { nAt = Date.now(); toast(F.t('sw.n.again')); }
